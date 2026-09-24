@@ -28,6 +28,11 @@ TYPOGRAPHY = str.maketrans(
         "œ": "oe",
         "Œ": "OE",
         "€": "EUR",
+        "\u2010": "-",
+        "\u3010": "[",
+        "\u3011": "]",
+        "\u300c": '"',
+        "\u300d": '"',
     }
 )
 MARGIN = 25
@@ -37,9 +42,17 @@ SIZES = ((11, 5.5), (10.5, 5.2), (10, 4.9))
 
 def to_latin1(text: str) -> tuple[str, list[str]]:
     """Latin-1 text for the core PDF font, and the characters dropped."""
-    text = unicodedata.normalize("NFC", text).translate(TYPOGRAPHY)
+    # NFKC turns fullwidth forms (／, ＡＩ) into ASCII; anything left outside
+    # Latin-1 becomes a space so that the words around it stay apart.
+    text = unicodedata.normalize("NFKC", text).translate(TYPOGRAPHY)
     dropped = sorted({c for c in text if ord(c) > 255})
-    return "".join(c for c in text if ord(c) <= 255), dropped
+    kept = "".join(c if ord(c) <= 255 else " " for c in text)
+    return re.sub(r" {2,}", " ", kept), dropped
+
+
+def _fold(text: str) -> str:
+    ascii_text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore")
+    return ascii_text.decode().strip().lower()
 
 
 def _slug(text: str) -> str:
@@ -96,6 +109,13 @@ def _render(
     for paragraph in letter.paragraphs:
         write(paragraph, gap=3)
     pdf.ln(2)
-    write(letter.closing)
+    # The LLM sometimes signs the closing itself; the signature is added here.
+    closing = [
+        line
+        for line in letter.closing.splitlines()
+        if line.strip() and _fold(line) != _fold(contact.name)
+    ]
+    for line in closing or ["Sincerely,"]:
+        write(line)
     write(contact.name)
     return bytes(pdf.output()), sorted(dropped), pdf.page_no()

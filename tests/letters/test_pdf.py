@@ -83,3 +83,16 @@ def test_letters_too_long_for_one_page_report_their_page_count():
     letter = Letter("en", "Dear Team,", (paragraph, "b", "c"), "Best,")
     _, _, pages = render(letter, make_job(), CONTACT, date(2026, 9, 24))
     assert pages == 2
+
+
+def test_fullwidth_and_unknown_characters_never_glue_words_together():
+    text, dropped = to_latin1("【Class of 2029／Internship】Applied Scientists")
+    assert text == "[Class of 2029/Internship]Applied Scientists"
+    assert dropped == []
+    assert to_latin1("AI ⟶ ML") == ("AI ML", ["⟶"])
+
+
+def test_signature_is_not_duplicated_when_the_closing_contains_the_name():
+    letter = Letter("en", "Dear Team,", ("a", "b", "c"), "Sincerely,\nRayan Mouahid")
+    data, _, _ = render(letter, make_job(), CONTACT, date(2026, 9, 24))
+    assert text_of(data).count("Mouahid") == 2  # header + one signature

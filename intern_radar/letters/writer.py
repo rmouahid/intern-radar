@@ -86,7 +86,8 @@ Rules:
   is not in the CV.
 - No filler, no cliches, no em dashes.
 Return the greeting (e.g. "Dear Hiring Team,"), the 3 paragraphs, the
-closing (e.g. "Sincerely,") and the language as an ISO code."""
+closing (e.g. "Sincerely,") without the candidate's name, and the language
+as an ISO code."""
 
 KEYWORDS = """List the 10 to 15 most important keywords (skills, tools,
 technologies, concepts) an applicant tracking system would look for in this

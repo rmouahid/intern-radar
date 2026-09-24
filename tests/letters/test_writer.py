@@ -156,3 +156,9 @@ def test_ats_step_is_skipped_without_description():
     _, report = make_writer(backend).write(make_job(description=""))
     assert report.ats_skipped is True
     assert [schema for _, schema in backend.calls] == [LETTER_SCHEMA, REWRITE_SCHEMA]
+
+
+def test_draft_prompt_asks_for_a_closing_without_the_name():
+    backend = ScriptedBackend(draft(CLEAN), keywords(), rewrite(CLEAN, 0))
+    make_writer(backend).write(make_job())
+    assert "without the candidate's name" in backend.calls[0][0]
