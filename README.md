@@ -11,6 +11,10 @@ abroad at the most prestigious company possible.
 
 ## How it works
 
+Full technical reference (reliability, failure modes, limits, measured
+LLM token usage and cost, operations): [`docs/pipeline.md`](docs/pipeline.md).
+
+
 1. **Sources** — one plugin per job feed: public ATS APIs (Greenhouse, Lever,
    Ashby, Workable, SmartRecruiters, Workday), the Amazon and Microsoft
    career portals, and [Adzuna](https://developer.adzuna.com) as a catch-all
