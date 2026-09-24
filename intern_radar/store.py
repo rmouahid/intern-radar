@@ -102,6 +102,17 @@ class Store:
         row = self._db.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
         return _row_to_job(row) if row else None
 
+    def job_ref(self, job_id: str) -> int | None:
+        """Short numeric reference, for buttons limited to 64 bytes."""
+        row = self._db.execute(
+            "SELECT rowid FROM jobs WHERE id = ?", (job_id,)
+        ).fetchone()
+        return row["rowid"] if row else None
+
+    def job_by_ref(self, ref: int) -> Job | None:
+        row = self._db.execute("SELECT * FROM jobs WHERE rowid = ?", (ref,)).fetchone()
+        return _row_to_job(row) if row else None
+
     def has_similar(self, company: str, title: str) -> bool:
         row = self._db.execute(
             "SELECT 1 FROM jobs WHERE company = ? AND lower(title) = lower(?)"

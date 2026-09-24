@@ -150,3 +150,13 @@ def test_meta_values(store):
     store.set_meta("k", "v1")
     store.set_meta("k", "v2")
     assert store.get_meta("k") == "v2"
+
+
+def test_job_refs_are_short_and_reversible(store):
+    long_id = "workday:nvidia:/job/US-CA-Santa-Clara/" + "x" * 80
+    store.add(make_job(id=long_id), "pending", NOW)
+    ref = store.job_ref(long_id)
+    assert isinstance(ref, int) and len(f"L:{ref}") <= 64
+    assert store.job_by_ref(ref).id == long_id
+    assert store.job_ref("missing") is None
+    assert store.job_by_ref(999999) is None
