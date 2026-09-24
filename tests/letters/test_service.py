@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from intern_radar.config import Contact
 from intern_radar.letters.cv import CvError
 from intern_radar.letters.delivery import DeliveryError
-from intern_radar.letters.service import LetterService, format_letter_card
+from intern_radar.letters.service import LetterService, format_letter_caption
 from intern_radar.letters.writer import Letter, LetterReport
 from intern_radar.store import Store
 from tests.factories import make_job
@@ -12,6 +12,7 @@ NOW = datetime(2026, 9, 24, 12, tzinfo=UTC)
 CONTACT = Contact("Rayân Mouahid", "Paris", "+33", "me@example.com", "li", "gh")
 LETTER = Letter("en", "Dear Hiring Team,", ("One.", "Two.", "Three."), "Sincerely,")
 REPORT = LetterReport(("Python",), ("PyTorch",), ("Kubernetes",), 4, (), ("40%",))
+SEP = "━" * 16
 
 
 class FakeWriter:
@@ -28,6 +29,8 @@ class FakeWriter:
 
 
 class Recorder:
+    """Records documents, notifications (one argument) and mails (keywords)."""
+
     def __init__(self, fail=False):
         self.sent = []
         self.fail = fail
@@ -35,7 +38,10 @@ class Recorder:
     def send(self, *args, **kwargs):
         if self.fail:
             raise DeliveryError("e-mail: SMTPAuthenticationError")
-        self.sent.append(args or kwargs)
+        self.sent.append(args[0] if len(args) == 1 else args or kwargs)
+
+    def send_document(self, *args):
+        self.sent.append(args)
 
 
 def build(tmp_path, writer=None, mail=None, max_per_day=10, jobs=None):
@@ -43,49 +49,51 @@ def build(tmp_path, writer=None, mail=None, max_per_day=10, jobs=None):
     for job in jobs or [make_job(id="j1", company="Acme", title="ML Intern")]:
         store.add(job, "pending", NOW)
     FakeWriter.calls = 0
-    attachments, notifier = Recorder(), Recorder()
+    documents, notifier = Recorder(), Recorder()
     service = LetterService(
         store,
         lambda: writer or FakeWriter(),
         CONTACT,
         tmp_path / "letters",
-        attachments,
+        documents,
         mail,
         notifier,
         max_per_day,
         clock=lambda: NOW,
     )
-    return service, store, attachments, notifier
+    return service, store, documents, notifier
 
 
 def test_generates_stores_and_delivers(tmp_path):
     mail = Recorder()
-    service, store, attachments, notifier = build(tmp_path, mail=mail)
+    service, store, documents, notifier = build(tmp_path, mail=mail)
     path = service.handle("j1\n")
     assert path.name == "Mouahid_CoverLetter_Acme_ML-Intern.pdf"
     assert path.read_bytes().startswith(b"%PDF")
     stored_path, report = store.letter("j1")
     assert stored_path == str(path) and report["ai_changes"] == 4
-    pdf, filename, title, card = attachments.sent[0]
-    assert (filename, title) == (path.name, "✍️ Lettre prête · Acme")
-    assert "🎯  ATS : 1/2 mots-clés" in card
-    assert "📧  Envoyée par e-mail" in card
+    pdf, filename, caption = documents.sent[0]
+    assert filename == path.name and pdf.startswith(b"%PDF")
+    assert caption.startswith("✍️ <b>Lettre prête · Acme</b>\n<b>ML Intern</b>")
+    assert "🎯  <b>ATS</b> : 1/2 mots-clés" in caption
+    assert "📧  Envoyée par e-mail" in caption
     assert mail.sent[0]["subject"] == "Lettre — Acme · ML Intern"
+    assert "<b>" not in mail.sent[0]["body"] and "One." in mail.sent[0]["body"]
     assert notifier.sent == []
 
 
 def test_second_request_redelivers_without_llm(tmp_path):
-    service, _, attachments, _ = build(tmp_path)
+    service, _, documents, _ = build(tmp_path)
     first = service.handle("j1")
     second = service.handle("j1")
     assert first == second and FakeWriter.calls == 1
-    assert len(attachments.sent) == 2
+    assert len(documents.sent) == 2
 
 
 def test_unknown_job_is_ignored(tmp_path):
-    service, _, attachments, notifier = build(tmp_path)
+    service, _, documents, notifier = build(tmp_path)
     assert service.handle("nope") is None
-    assert attachments.sent == [] and notifier.sent == []
+    assert documents.sent == [] and notifier.sent == []
 
 
 def test_daily_cap_sends_one_notice(tmp_path):
@@ -94,7 +102,9 @@ def test_daily_cap_sends_one_notice(tmp_path):
     service.handle("j0")
     assert service.handle("j1") is None
     assert service.handle("j2") is None
-    assert [m.title for (m,) in notifier.sent] == ["Limite de lettres atteinte"]
+    assert [m.html.split("\n")[0] for m in notifier.sent] == [
+        "⚠️ <b>Limite de lettres atteinte</b>"
+    ]
 
 
 def test_writer_failure_sends_a_failure_notification(tmp_path):
@@ -102,43 +112,10 @@ def test_writer_failure_sends_a_failure_notification(tmp_path):
         tmp_path, writer=FakeWriter(CvError("CV unavailable: ConnectError"))
     )
     assert service.handle("j1") is None
-    [(message,)] = notifier.sent
-    assert message.title == "❌ Lettre non générée · Acme"
-    assert "CV unavailable" in message.body
+    [message] = notifier.sent
+    assert message.html.startswith("❌ <b>Lettre non générée · Acme</b>")
+    assert "CV unavailable" in message.html
     assert store.letter("j1") is None
-
-
-def test_email_failure_is_reported_in_the_card(tmp_path):
-    service, _, attachments, _ = build(tmp_path, mail=Recorder(fail=True))
-    service.handle("j1")
-    card = attachments.sent[0][3]
-    assert "📧  E-mail en échec : e-mail: SMTPAuthenticationError" in card
-
-
-def test_letter_for_a_job_without_description(tmp_path):
-    job = make_job(id="j1", company="Acme", title="ML Intern", description="")
-    service, _, _, _ = build(tmp_path, jobs=[job])
-    assert service.handle("j1") is not None
-
-
-def test_format_letter_card_lists_every_check():
-    report = {
-        "keywords_present": ["Python"],
-        "keywords_missing": ["Go"],
-        "keywords_not_in_cv": ["Rust"],
-        "ai_changes": 2,
-        "unverified": ["40%"],
-        "blacklist_left": [],
-        "dropped": [],
-    }
-    card = format_letter_card(
-        make_job(title="ML Intern"), report, "f.pdf", "📧  Envoyée par e-mail"
-    )
-    assert card == (
-        "ML Intern\n━━━━━━━━━━━━━━━━\n🎯  ATS : 1/2 mots-clés\n"
-        "🚫  Absents de ton CV : Rust\n🧹  Anti-IA : 2 tournures corrigées\n"
-        "⚠️  À vérifier : 40%\n📧  Envoyée par e-mail\n━━━━━━━━━━━━━━━━\n📎 f.pdf"
-    )
 
 
 def test_unexpected_error_still_sends_a_failure_notification(tmp_path):
@@ -146,9 +123,21 @@ def test_unexpected_error_still_sends_a_failure_notification(tmp_path):
         tmp_path, writer=FakeWriter(RuntimeError("fpdf exploded"))
     )
     assert service.handle("j1") is None
-    [(message,)] = notifier.sent
-    assert message.title == "❌ Lettre non générée · Acme"
-    assert "RuntimeError" in message.body
+    [message] = notifier.sent
+    assert "RuntimeError" in message.html
+
+
+def test_email_failure_is_reported_in_the_caption(tmp_path):
+    service, _, documents, _ = build(tmp_path, mail=Recorder(fail=True))
+    service.handle("j1")
+    caption = documents.sent[0][2]
+    assert "📧  E-mail en échec : e-mail: SMTPAuthenticationError" in caption
+
+
+def test_letter_for_a_job_without_description(tmp_path):
+    job = make_job(id="j1", company="Acme", title="ML Intern", description="")
+    service, _, _, _ = build(tmp_path, jobs=[job])
+    assert service.handle("j1") is not None
 
 
 def test_same_company_and_title_do_not_share_a_file(tmp_path):
@@ -162,23 +151,45 @@ def test_same_company_and_title_do_not_share_a_file(tmp_path):
     assert first.name == second.name == "Mouahid_CoverLetter_Acme_ML-Intern.pdf"
 
 
-def test_card_reports_dropped_characters_and_inferred_keywords():
+def test_caption_matches_the_approved_layout():
     report = {
         "keywords_present": ["Python"],
-        "keywords_missing": [],
+        "keywords_missing": ["Go"],
+        "keywords_not_in_cv": ["Rust"],
         "keywords_inferred": ["Information Retrieval"],
-        "ai_changes": 0,
+        "ai_changes": 2,
+        "unverified": ["40%"],
+        "blacklist_left": [],
         "dropped": ["🚀"],
+        "pages": 2,
     }
-    card = format_letter_card(make_job(title="T"), report, "f.pdf", "📧  x")
-    assert "🔎  Déduits de ton CV (à vérifier) : Information Retrieval" in card
-    assert "⚠️  Caractères retirés du PDF : 🚀" in card
-    report["pages"] = 2
-    card = format_letter_card(make_job(title="T"), report, "f.pdf", "📧  x")
-    assert "⚠️  2 pages : à raccourcir" in card
+    caption = format_letter_caption(
+        make_job(company="Acme", title="ML Intern"), report, "📧  Envoyée par e-mail"
+    )
+    assert caption == (
+        f"✍️ <b>Lettre prête · Acme</b>\n<b>ML Intern</b>\n{SEP}\n\n"
+        "🎯  <b>ATS</b> : 1/2 mots-clés\n\n"
+        "🚫  <b>Absents de ton CV</b> :\nRust\n\n"
+        "🔎  <b>Déduits de ton CV (à vérifier)</b> :\nInformation Retrieval\n\n"
+        "🧹  <b>Anti-IA</b> : 2 tournures corrigées\n\n"
+        "⚠️  <b>À vérifier</b> : 40%\n"
+        "⚠️  <b>Caractères retirés du PDF</b> : 🚀\n"
+        "⚠️  <b>2 pages</b> : à raccourcir\n\n"
+        f"📧  Envoyée par e-mail\n\n{SEP}"
+    )
 
 
-def test_card_without_description_says_ats_skipped():
-    report = {"ats_skipped": True, "ai_changes": 1}
-    card = format_letter_card(make_job(title="T"), report, "f.pdf", "📧  x")
-    assert "🎯  ATS : description de l'offre absente" in card
+def test_caption_without_description_says_ats_skipped():
+    caption = format_letter_caption(make_job(), {"ats_skipped": True}, "📧  x")
+    assert "🎯  <b>ATS</b> : description de l'offre absente" in caption
+
+
+def test_caption_stays_under_the_telegram_limit():
+    words = [f"Keyword number {i} with a long name" for i in range(40)]
+    report = {
+        "keywords_not_in_cv": words,
+        "keywords_inferred": words,
+        "unverified": words,
+    }
+    job = make_job(company="C" * 200, title="T" * 500)
+    assert len(format_letter_caption(job, report, "📧  x")) <= 1024

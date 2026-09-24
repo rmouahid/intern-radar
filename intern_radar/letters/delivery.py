@@ -1,10 +1,8 @@
-"""Deliver a letter PDF through an ntfy attachment and Gmail."""
+"""Deliver a letter PDF by Gmail."""
 
 import smtplib
 from collections.abc import Callable
 from email.message import EmailMessage
-
-import httpx
 
 SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = 465
@@ -12,26 +10,6 @@ SMTP_PORT = 465
 
 class DeliveryError(Exception):
     """A letter could not be delivered."""
-
-
-class NtfyAttachmentSender:
-    def __init__(self, server: str, topic: str, client: httpx.Client) -> None:
-        self._url = f"{server.rstrip('/')}/{topic}"
-        self._client = client
-
-    def send(self, pdf: bytes, filename: str, title: str, message: str) -> None:
-        # Metadata goes in the query string: HTTP headers cannot carry UTF-8.
-        params = {
-            "filename": filename,
-            "title": title,
-            "message": message,
-            "tags": "memo",
-        }
-        try:
-            response = self._client.put(self._url, content=pdf, params=params)
-            response.raise_for_status()
-        except httpx.HTTPError as exc:
-            raise DeliveryError(f"ntfy: {type(exc).__name__}") from exc
 
 
 class GmailSender:
