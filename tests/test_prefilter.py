@@ -63,3 +63,21 @@ def test_passes_combines_title_and_location():
     assert passes(make_job(title="AI Intern", location="London, UK"))
     assert not passes(make_job(title="AI Intern", location="Paris, France"))
     assert not passes(make_job(title="AI Engineer", location="London, UK"))
+
+
+@pytest.mark.parametrize(
+    "location",
+    [
+        "Paris, London",
+        "Paris, France and London, UK",
+        "Paris & London",
+        "Remote, EU (excluding France)",
+    ],
+)
+def test_locations_mixing_france_with_other_places_pass(location):
+    assert not is_france_only(location)
+
+
+def test_french_city_with_region_or_remote_is_still_france_only():
+    assert is_france_only("Paris, Île-de-France, France")
+    assert is_france_only("Remote, France")
