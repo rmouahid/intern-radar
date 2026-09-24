@@ -4,6 +4,7 @@ import httpx
 
 from intern_radar.config import Profile
 from intern_radar.models import Company
+from intern_radar.sources.adzuna import AdzunaSource, company_lookup
 from intern_radar.sources.amazon import AmazonSource
 from intern_radar.sources.ashby import AshbySource
 from intern_radar.sources.base import Source
@@ -24,6 +25,7 @@ SOURCE_NAMES = frozenset(
         "workday",
         "amazon",
         "microsoft",
+        "adzuna",
         "none",
     }
 )
@@ -41,4 +43,10 @@ def build_sources(
         "workday": WorkdaySource(client),
         "amazon": AmazonSource(client),
         "microsoft": MicrosoftSource(client),
+        "adzuna": AdzunaSource(
+            client,
+            profile.adzuna_app_id,
+            profile.adzuna_app_key,
+            company_lookup(companies),
+        ),
     }
