@@ -87,6 +87,10 @@ def format_letter_caption(job: Job, report: dict[str, Any], email_status: str) -
         warnings.append(f"⚠️  <b>Caractères retirés du PDF</b> : {dropped}")
     if report.get("pages", 1) > 1:
         warnings.append(f"⚠️  <b>{report['pages']} pages</b> : à raccourcir")
+    if report.get("edits_failed"):
+        warnings.append(
+            f"⚠️  <b>Correctifs non appliqués</b> : {report['edits_failed']}"
+        )
     if warnings:
         optional["warnings"] = "\n".join(warnings)
 

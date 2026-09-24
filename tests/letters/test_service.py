@@ -263,3 +263,8 @@ def test_undeliverable_letter_sends_a_failure_notification(tmp_path):
     service.handle("j1")
     [message] = notifier.sent
     assert message.html.startswith("❌ <b>Lettre non envoyée · Acme</b>")
+
+
+def test_caption_reports_edits_that_could_not_be_applied():
+    caption = format_letter_caption(make_job(), {"edits_failed": 2}, "📧  x")
+    assert "⚠️  <b>Correctifs non appliqués</b> : 2" in caption
