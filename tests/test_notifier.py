@@ -21,20 +21,30 @@ def scored(job_id="j1", score=9.7, **job_overrides):
     return ScoredJob(make_job(id=job_id, **job_overrides), make_assessment(), score)
 
 
-def test_format_immediate():
+def test_format_immediate_uses_the_card_layout():
     message = format_immediate(
         scored(company="Google DeepMind", tier="S", title="Research Engineer Intern")
     )
-    assert message.title == "[S] Google DeepMind — Research Engineer Intern"
+    assert message.title == "Google DeepMind · niveau S"
     assert message.body == (
-        "📍 London, UK · score 9.7\n"
-        "📅 dates OK · 🛂 UK: GAE scheme via a sponsor\n"
+        "Research Engineer Intern\n"
+        "━━━━━━━━━━━━━━━━\n"
+        "📍  London, UK\n"
+        "⭐  9.7 / 10\n"
+        "📅  Dates compatibles\n"
+        "🛂  UK: GAE scheme via a sponsor\n"
+        "━━━━━━━━━━━━━━━━\n"
         "Applied ML on LLM agents."
     )
     assert message.priority == 4
     assert message.tags == ("fire",)
     assert message.click == "https://example.com/jobs/1"
-    assert message.actions == (("View offer", "https://example.com/jobs/1"),)
+    assert message.actions == (("Voir l'offre", "https://example.com/jobs/1"),)
+
+
+def test_format_immediate_without_location():
+    message = format_immediate(scored(location=""))
+    assert "📍  Lieu non précisé" in message.body
 
 
 def test_format_digest_lists_offers():
@@ -42,7 +52,7 @@ def test_format_digest_lists_offers():
         "a", 7.1, company="Databricks", title="ML Intern", location="Amsterdam"
     )
     message = format_digest([offer])
-    assert message.title == "Digest — 1 offer"
+    assert message.title == "Récap du soir — 1 offre"
     assert message.body == "• [A] Databricks — ML Intern · Amsterdam · 7.1"
     assert message.priority == 3
 
@@ -53,14 +63,14 @@ def test_digest_is_truncated_after_20_lines():
     ]
     message = format_digest(jobs)
     lines = message.body.split("\n")
-    assert message.title == "Digest — 45 offers"
+    assert message.title == "Récap du soir — 45 offres"
     assert len(lines) == 21
-    assert lines[-1] == "… and 25 more (intern-radar list)"
+    assert lines[-1] == "… et 25 autres (intern-radar list)"
     assert len(message.body.encode()) < 4096
 
 
 def test_alert_messages():
-    assert format_source_alert("Acme", "HTTP 500").title == "Source broken: Acme"
+    assert format_source_alert("Acme", "HTTP 500").title == "Source en panne : Acme"
     assert "HTTP 500" in format_source_alert("Acme", "HTTP 500").body
     assert format_llm_alert().priority == 2
 

@@ -93,7 +93,7 @@ def test_run_collects_filters_scores_and_notifies():
     assert (report.fetched, report.new, report.candidates) == (3, 3, 1)
     assert (report.scored, report.notified, report.errors) == (1, 1, [])
     assert scorer.batches == [["good"]]
-    assert [m.title for m in notifier.sent] == ["[S] Acme — ML Intern"]
+    assert [m.title for m in notifier.sent] == ["Acme · niveau S"]
     assert store.known_ids() == {"good", "paris", "eng"}
 
 
@@ -208,7 +208,7 @@ def test_source_alert_after_three_days():
     clock.now = NOW + timedelta(days=3)
     pipeline.run()
     pipeline.run()
-    assert [m.title for m in notifier.sent] == ["Source broken: Acme"]
+    assert [m.title for m in notifier.sent] == ["Source en panne : Acme"]
 
 
 def test_llm_alert_after_a_day():
@@ -221,7 +221,7 @@ def test_llm_alert_after_a_day():
     pipeline.run()
     clock.now = NOW + timedelta(days=1)
     pipeline.run()
-    assert [m.title for m in notifier.sent] == ["LLM scoring unavailable"]
+    assert [m.title for m in notifier.sent] == ["Notation LLM indisponible"]
 
 
 def test_digest_sends_middle_band_once():
@@ -235,7 +235,7 @@ def test_digest_sends_middle_band_once():
     pipeline.run()
     notifier.sent.clear()
     assert pipeline.digest() == 1
-    assert notifier.sent[0].title == "Digest — 1 offer"
+    assert notifier.sent[0].title == "Récap du soir — 1 offre"
     assert pipeline.digest() == 0
     assert len(notifier.sent) == 1
 
