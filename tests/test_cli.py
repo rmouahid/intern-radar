@@ -98,3 +98,11 @@ def test_run_dry_run_uses_console_notifier_and_memory_db(config_dir, monkeypatch
     assert built["notifier"] == "ConsoleNotifier"
     assert "fetched=3 new=2 candidates=1 scored=1 notified=1 errors=0" in result.output
     assert not (config_dir.parent / "data" / "intern-radar.db").exists()
+
+
+def test_logging_setup_silences_httpx_request_urls(config_dir):
+    import logging
+
+    logging.getLogger("httpx").setLevel(logging.NOTSET)
+    cli._setup_logging()
+    assert logging.getLogger("httpx").level == logging.WARNING
