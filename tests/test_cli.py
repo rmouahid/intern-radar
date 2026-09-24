@@ -122,11 +122,18 @@ def test_letter_requires_cv_url_and_contact(config_dir):
     assert "cv_url" in result.output and "contact" in result.output
 
 
-def test_listen_requires_a_requests_topic(config_dir):
+def test_listen_wires_the_telegram_listener(config_dir, monkeypatch):
     (config_dir / "profile.yaml").write_text(LETTER_PROFILE)
+    seen = {}
+
+    def fake_listener(updates, on_callback, store):
+        seen["updates"] = type(updates).__name__
+        seen["on_callback"] = type(on_callback).__name__
+
+    monkeypatch.setattr(cli, "run_listener", fake_listener)
     result = runner.invoke(cli.app, ["listen"])
-    assert result.exit_code == 2
-    assert "requests_topic" in result.output
+    assert result.exit_code == 0
+    assert seen == {"updates": "TelegramUpdates", "on_callback": "LetterRequests"}
 
 
 def test_letter_command_prints_the_pdf_path(config_dir, monkeypatch):

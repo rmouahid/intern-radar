@@ -6,7 +6,7 @@
 Watches the career pages of ~70 top AI/tech companies (and large groups with
 strong AI teams) for internship offers, scores each new offer against a
 candidate profile with an LLM, and pushes the relevant ones to your phone
-through [ntfy](https://ntfy.sh). Built to find a 4–6 month AI internship
+through a Telegram bot. Built to find a 4–6 month AI internship
 abroad at the most prestigious company possible.
 
 ## How it works
@@ -28,16 +28,17 @@ abroad at the most prestigious company possible.
    (tiers S=10, A=8, B=6, unlisted=4). PhD-only roles, incompatible dates,
    non-internships and offers with an AI relevance below 6/10 (finance,
    design… internships at top companies) are excluded.
-5. **Notifications** — score ≥ 7.5: immediate push with a "View offer"
-   button; 5.5–7.5: evening digest at 21:00; source broken for 3 days or LLM
-   unavailable for a day: low-priority alert.
+5. **Notifications** (Telegram) — score ≥ 7.5: immediate message with
+   "Voir l'offre" and "Lettre de motivation" buttons; 5.5–7.5: silent evening
+   digest at 21:00; source broken for 3 days or LLM unavailable for a day:
+   silent alert.
 
 ## Cover letters on demand
 
-Each offer notification carries a **✍️ Lettre de motivation** button. Tapping
-it makes the ntfy app post the offer id to a second secret topic; the
-`intern-radar-letters` service streams that topic (outbound connection only,
-no open port) and, for each request:
+Each offer notification carries a **✍️ Lettre de motivation** button. The
+`intern-radar-letters` service long-polls Telegram for button taps (outbound
+connection only, no open port), accepts them from your chat only, answers
+"⏳ Lettre en préparation…" and, for each request:
 
 1. reads the CV text from its PDF export (`cv_url`, cached 24 h);
 2. drafts a ~300-word, 3-paragraph letter with the LLM (`letter_model`,
@@ -48,13 +49,13 @@ no open port) and, for each request:
    a blacklist check triggers one more pass if needed;
 5. **fidelity check**: names and numbers found neither in the CV nor in the
    offer are flagged;
-6. renders a simple PDF and delivers it as an ntfy attachment and by e-mail
-   (Gmail app password), with the check results.
+6. renders a one-page PDF and sends it in the Telegram conversation with the
+   check results, and optionally by e-mail (Gmail app password).
 
 A second tap re-delivers the stored letter. At most `max_letters_per_day`
 new letters are written per 24 h.
 
-Profile keys: `requests_topic`, `cv_url`, `contact` (name, location, phone,
+Profile keys: `cv_url`, `contact` (name, location, phone,
 email, linkedin, github), `letters_email`, `smtp_app_password`,
 `letter_model`, `max_letters_per_day` (see `config/profile.example.yaml`).
 
@@ -66,7 +67,7 @@ poetry run intern-radar listen            # wait for button taps (service)
 ## Setup
 
 Requirements: Python ≥ 3.12, [Poetry](https://python-poetry.org), the
-`claude` CLI logged in (used for scoring), the ntfy app on your phone.
+`claude` CLI logged in (used for scoring), Telegram on your phone.
 
 ```bash
 poetry install
@@ -76,9 +77,11 @@ cp config/profile.example.yaml config/profile.yaml   # gitignored
 Edit `config/profile.yaml`:
 
 - `candidate_summary`, `window_start`, `window_end`, `min_months`;
-- `ntfy_topic`: a long random name (anyone who knows it can read it), e.g.
-  `python -c "import secrets; print('intern-radar-' + secrets.token_urlsafe(16))"`,
-  then subscribe to that topic in the ntfy app;
+- `telegram_token`: create a bot with [@BotFather](https://t.me/BotFather)
+  (`/newbot`) and copy its token;
+- `telegram_chat_id`: send `/start` to your bot, then read `chat.id` from
+  `https://api.telegram.org/bot<token>/getUpdates`. The bot only answers
+  this chat;
 - `adzuna_app_id` / `adzuna_app_key`: free keys from
   [developer.adzuna.com](https://developer.adzuna.com).
 
@@ -124,7 +127,8 @@ poetry run ruff check . && poetry run ruff format --check .
 ```
 
 Every source plugin is tested against payloads mirroring the real API
-responses; the LLM and ntfy are replaced by fakes, so the suite runs offline.
+responses; the LLM, Telegram and SMTP are replaced by fakes, so the suite
+runs offline.
 
 ## License
 

@@ -14,16 +14,17 @@ from intern_radar.config import (
 )
 from intern_radar.http import make_client
 from intern_radar.letters.cv import CvSource
-from intern_radar.letters.delivery import GmailSender, NtfyAttachmentSender
-from intern_radar.letters.inbox import RequestStream, run_listener
+from intern_radar.letters.delivery import GmailSender
+from intern_radar.letters.inbox import LetterRequests, TelegramUpdates, run_listener
 from intern_radar.letters.service import LetterService
 from intern_radar.letters.writer import LetterWriter
 from intern_radar.models import Company
-from intern_radar.notifier import ConsoleNotifier, NotifyError, NtfyNotifier
+from intern_radar.notifier import ConsoleNotifier, NotifyError, TelegramNotifier
 from intern_radar.pipeline import Pipeline
 from intern_radar.scorer import ClaudeCliBackend, Scorer
 from intern_radar.sources import SOURCE_NAMES, build_sources
 from intern_radar.store import Store
+from intern_radar.telegram import TelegramClient
 
 app = typer.Typer(
     help="Watch top AI/tech companies for internship offers.",
@@ -62,6 +63,10 @@ def _load(config_dir: Path) -> tuple[Profile, list[Company]]:
     return profile, companies
 
 
+def _telegram(profile: Profile, client: httpx.Client) -> TelegramClient:
+    return TelegramClient(client, profile.telegram_token, profile.telegram_chat_id)
+
+
 def _open_store(db: Path, dry_run: bool) -> Store:
     if dry_run:
         return Store(":memory:")
@@ -83,9 +88,7 @@ def _pipeline(
         profile.min_months,
     )
     notifier = (
-        ConsoleNotifier()
-        if dry_run
-        else NtfyNotifier(profile.ntfy_server, profile.ntfy_topic, client)
+        ConsoleNotifier() if dry_run else TelegramNotifier(_telegram(profile, client))
     )
     sources = build_sources(client, companies, profile)
     pipeline = Pipeline(companies, sources, store, scorer, notifier, profile)
@@ -200,24 +203,25 @@ def _letter_service(config_dir: Path, db: Path):
         if profile.letters_email and profile.smtp_app_password
         else None
     )
+    telegram = _telegram(profile, client)
     service = LetterService(
         store,
         make_writer,
         profile.contact,
         LETTERS_DIR,
-        NtfyAttachmentSender(profile.ntfy_server, profile.ntfy_topic, client),
+        telegram,
         mail,
-        NtfyNotifier(profile.ntfy_server, profile.ntfy_topic, client),
+        TelegramNotifier(telegram),
         profile.max_letters_per_day,
     )
-    return service, store, client, profile
+    return service, store, client, profile, telegram
 
 
 @app.command()
 def letter(job_id: str, config_dir: Path = CONFIG_DIR, db: Path = DB_PATH) -> None:
     """Write, render and deliver the cover letter for one stored offer."""
     _setup_logging()
-    service, store, client, _ = _letter_service(config_dir, db)
+    service, store, client, _, _ = _letter_service(config_dir, db)
     try:
         path = service.handle(job_id)
     finally:
@@ -231,17 +235,12 @@ def letter(job_id: str, config_dir: Path = CONFIG_DIR, db: Path = DB_PATH) -> No
 
 @app.command()
 def listen(config_dir: Path = CONFIG_DIR, db: Path = DB_PATH) -> None:
-    """Wait for letter requests from the notification button (runs forever)."""
+    """Wait for letter button taps on Telegram (runs forever)."""
     _setup_logging()
-    service, store, client, profile = _letter_service(config_dir, db)
+    service, store, client, profile, telegram = _letter_service(config_dir, db)
     try:
-        if not profile.requests_topic:
-            typer.echo(
-                "Configuration error: set requests_topic in profile.yaml", err=True
-            )
-            raise typer.Exit(2)
-        stream = RequestStream(client, profile.ntfy_server, profile.requests_topic)
-        run_listener(stream, service.handle, store)
+        requests = LetterRequests(telegram, store, service, profile.telegram_chat_id)
+        run_listener(TelegramUpdates(telegram), requests, store)
     finally:
         store.close()
         client.close()
