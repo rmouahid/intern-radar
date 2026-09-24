@@ -112,3 +112,18 @@ def test_llm_alert_after_a_day_of_failures(store):
     store.record_llm_result(True, NOW + timedelta(days=2))
     store.record_llm_result(False, NOW + timedelta(days=3))
     assert not store.llm_alert_due(NOW + timedelta(days=3), timedelta(days=1))
+
+
+def test_pending_scores_top_tiers_and_newest_offers_first(store):
+    store.add(make_job(id="adzuna:1", tier="unlisted"), "pending", NOW)
+    store.add(make_job(id="workday:old", tier="S"), "pending", NOW)
+    store.add(make_job(id="ashby:1", tier="B"), "pending", NOW)
+    store.add(make_job(id="workday:new", tier="S"), "pending", NOW + timedelta(hours=2))
+    store.add(make_job(id="greenhouse:1", tier="A"), "pending", NOW)
+    assert [job.id for job in store.pending()] == [
+        "workday:new",
+        "workday:old",
+        "greenhouse:1",
+        "ashby:1",
+        "adzuna:1",
+    ]

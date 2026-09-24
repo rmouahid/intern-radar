@@ -97,9 +97,12 @@ class Store:
         return row is not None
 
     def pending(self, limit: int | None = None) -> list[Job]:
+        # Top tiers first, newest first: the first run finds hundreds of offers
+        # and the LLM only scores a few batches per run.
         sql = (
             "SELECT * FROM jobs WHERE status = 'pending' AND attempts < ?"
-            " ORDER BY first_seen, id"
+            " ORDER BY CASE tier WHEN 'S' THEN 0 WHEN 'A' THEN 1 WHEN 'B' THEN 2"
+            " ELSE 3 END, first_seen DESC, id"
         )
         params: list[object] = [MAX_ATTEMPTS]
         if limit is not None:
