@@ -1,0 +1,12 @@
+- name: Anthropic
+  tier: S
+  source: greenhouse
+  board: anthropic
+- name: OpenAI
+  tier: S
+  source: ashby
+  org: openai
+- name: Palantir
+  tier: A
+  source: lever
+  site: palantir
