@@ -30,6 +30,16 @@ class Thresholds:
 
 
 @dataclass(frozen=True)
+class Contact:
+    name: str
+    location: str
+    phone: str
+    email: str
+    linkedin: str
+    github: str
+
+
+@dataclass(frozen=True)
 class Profile:
     candidate_summary: str
     window_start: date
@@ -44,6 +54,13 @@ class Profile:
     adzuna_app_key: str | None = None
     weights: Weights = field(default_factory=Weights)
     thresholds: Thresholds = field(default_factory=Thresholds)
+    requests_topic: str | None = None
+    cv_url: str | None = None
+    letters_email: str | None = None
+    smtp_app_password: str | None = None
+    letter_model: str = "sonnet"
+    max_letters_per_day: int = 10
+    contact: Contact | None = None
 
 
 REQUIRED_PROFILE_KEYS = (
@@ -121,4 +138,6 @@ def load_profile(path: Path) -> Profile:
     values = dict(data)
     values["weights"] = _build(Weights, data.get("weights", {}), "weights")
     values["thresholds"] = _build(Thresholds, data.get("thresholds", {}), "thresholds")
+    if "contact" in data:
+        values["contact"] = _build(Contact, data["contact"], "contact")
     return Profile(**values)

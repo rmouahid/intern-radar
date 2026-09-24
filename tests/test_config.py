@@ -5,6 +5,7 @@ import pytest
 
 from intern_radar.config import (
     ConfigError,
+    Contact,
     Thresholds,
     Weights,
     load_companies,
@@ -105,4 +106,43 @@ def test_load_profile_overrides_weights_and_thresholds(tmp_path):
 )
 def test_load_profile_rejects_invalid_content(tmp_path, content, message):
     with pytest.raises(ConfigError, match=message):
+        load_profile(write(tmp_path, "profile.yaml", content))
+
+
+CONTACT = """contact:
+  name: Rayân Mouahid
+  location: Paris, France
+  phone: "+33 7 00 00 00 00"
+  email: me@example.com
+  linkedin: linkedin.com/in/me
+  github: github.com/me
+"""
+
+
+def test_load_profile_reads_letter_settings(tmp_path):
+    content = PROFILE + CONTACT + "requests_topic: req-topic\ncv_url: https://cv\n"
+    profile = load_profile(write(tmp_path, "profile.yaml", content))
+    assert profile.contact == Contact(
+        "Rayân Mouahid",
+        "Paris, France",
+        "+33 7 00 00 00 00",
+        "me@example.com",
+        "linkedin.com/in/me",
+        "github.com/me",
+    )
+    assert profile.requests_topic == "req-topic"
+    assert profile.cv_url == "https://cv"
+    assert profile.letter_model == "sonnet"
+    assert profile.max_letters_per_day == 10
+
+
+def test_letter_settings_are_optional(tmp_path):
+    profile = load_profile(write(tmp_path, "profile.yaml", PROFILE))
+    assert profile.contact is None
+    assert profile.requests_topic is None
+
+
+def test_incomplete_contact_is_rejected(tmp_path):
+    content = PROFILE + "contact: {name: X}\n"
+    with pytest.raises(ConfigError, match="contact"):
         load_profile(write(tmp_path, "profile.yaml", content))
