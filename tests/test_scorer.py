@@ -56,12 +56,13 @@ def test_prompt_contains_profile_window_and_truncated_jobs():
     assert "RAG and LLM student." in prompt
     assert "2027-03-08 to 2027-08-31" in prompt
     assert "at least 4 months" in prompt
-    assert "job_id: j1" in prompt
+    assert "job_id: 1\n" in prompt
+    assert "j1" not in prompt
     assert "x" * 3000 in prompt and "x" * 3001 not in prompt
 
 
 def test_assess_maps_answers_by_job_id():
-    backend = FakeBackend({"assessments": [item("j2", ai_relevance=3), item("j1")]})
+    backend = FakeBackend({"assessments": [item("2", ai_relevance=3), item("1")]})
     result = make_scorer(backend).assess([make_job(id="j1"), make_job(id="j2")])
     assert result == {
         "j1": make_assessment(),
@@ -73,11 +74,11 @@ def test_invalid_items_are_skipped():
     backend = FakeBackend(
         {
             "assessments": [
-                item("j1", dates_fit="maybe"),
-                item("j2", is_internship="yes"),
-                item("j3", ai_relevance=14),
-                item("unknown-job"),
-                {"job_id": "j4"},
+                item("1", dates_fit="maybe"),
+                item("2", is_internship="yes"),
+                item("3", ai_relevance=14),
+                item("99"),
+                {"job_id": "4"},
             ]
         }
     )
@@ -147,3 +148,11 @@ def test_cli_backend_builds_the_command_and_reads_structured_output():
 def test_cli_backend_failures_raise_llm_error(runner, message):
     with pytest.raises(LLMError, match=message):
         ClaudeCliBackend(runner=runner).complete("P", {})
+
+
+def test_long_job_ids_are_replaced_by_batch_numbers():
+    backend = FakeBackend({"assessments": [item("1")]})
+    job = make_job(id="workday:nvidia:/job/US-CA-Santa-Clara/Deep-Learning_JR1")
+    result = make_scorer(backend).assess([job])
+    assert "workday:nvidia" not in backend.prompts[0]
+    assert result == {job.id: make_assessment()}
