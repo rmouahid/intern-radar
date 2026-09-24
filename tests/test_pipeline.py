@@ -286,3 +286,32 @@ def test_notifications_carry_the_letter_button_when_letters_are_enabled():
     pipeline.run()
     button = notifier.sent[0].buttons[0][1]
     assert button.callback == f"L:{store.job_ref('good')}"
+
+
+class SelectiveNotifier(FakeNotifier):
+    """Rejects one offer permanently, like a Telegram HTTP 400."""
+
+    def __init__(self, bad_title):
+        super().__init__()
+        self.bad_title = bad_title
+
+    def send(self, message):
+        if self.bad_title in message.html:
+            raise NotifyError("telegram: sendMessage: HTTP 400", permanent=True)
+        self.sent.append(message)
+
+
+def test_a_permanently_rejected_offer_does_not_block_the_others():
+    jobs = [
+        make_job(id="bad", tier="S", title="Broken Intern"),
+        make_job(id="good", tier="A", title="ML Intern"),
+    ]
+    answers = {job.id: make_assessment(ai_relevance=9) for job in jobs}
+    notifier = SelectiveNotifier("Broken Intern")
+    pipeline, store, _ = build(
+        {"fake": FakeSource(jobs)}, FakeScorer(answers), notifier
+    )
+    report = pipeline.run()
+    assert [first_line(m) for m in notifier.sent] == ["🔥 <b>Acme · niveau A</b>"]
+    assert report.notified == 1
+    assert store.due_immediate(7.5, limit=10) == []

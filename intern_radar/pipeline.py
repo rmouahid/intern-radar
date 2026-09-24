@@ -26,6 +26,7 @@ log = logging.getLogger(__name__)
 BATCH_SIZE = 10
 SOURCE_ALERT_AFTER = timedelta(days=3)
 LLM_ALERT_AFTER = timedelta(days=1)
+SENT, REJECTED, FAILED = "sent", "rejected", "failed"
 
 
 def utcnow() -> datetime:
@@ -151,27 +152,30 @@ class Pipeline:
         for scored in due:
             ref = self._store.job_ref(scored.job.id) if letters else None
             callback = f"L:{ref}" if ref is not None else None
-            if not self._send(format_immediate(scored, callback), report):
+            outcome = self._send(format_immediate(scored, callback), report)
+            if outcome == FAILED:
                 return False
+            # A rejected offer is marked too: it would block every later run.
             self._store.mark_notified(scored.job.id, now)
-            report.notified += 1
+            report.notified += outcome == SENT
         return True
 
     def _alert(self, report: RunReport) -> None:
         now = self._clock()
         for company, error in self._store.sources_to_alert(now, SOURCE_ALERT_AFTER):
-            if not self._send(format_source_alert(company, error), report):
+            if self._send(format_source_alert(company, error), report) == FAILED:
                 return
             self._store.mark_source_alerted(company)
         if self._store.llm_alert_due(now, LLM_ALERT_AFTER):
-            if self._send(format_llm_alert(), report):
+            if self._send(format_llm_alert(), report) != FAILED:
                 self._store.mark_llm_alerted()
 
-    def _send(self, message: Message, report: RunReport) -> bool:
+    def _send(self, message: Message, report: RunReport) -> str:
+        """SENT, REJECTED (Telegram refuses this message for good) or FAILED."""
         try:
             self._notifier.send(message)
         except NotifyError as exc:
             log.warning("%s", exc)
             report.errors.append(str(exc))
-            return False
-        return True
+            return REJECTED if exc.permanent else FAILED
+        return SENT
