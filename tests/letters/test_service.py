@@ -193,3 +193,73 @@ def test_caption_stays_under_the_telegram_limit():
     }
     job = make_job(company="C" * 200, title="T" * 500)
     assert len(format_letter_caption(job, report, "📧  x")) <= 1024
+
+
+def _balanced(html):
+    import re
+
+    tags = re.findall(r"</?([a-z]+)[^>]*>", html)
+    stack = []
+    for tag, closing in zip(tags, re.findall(r"<(/?)[a-z]+", html), strict=True):
+        if closing:
+            if not stack or stack.pop() != tag:
+                return False
+        else:
+            stack.append(tag)
+    return not stack
+
+
+def test_oversized_captions_drop_sections_and_stay_valid_html():
+    import html as html_lib
+    import re
+
+    words = [f"R&D keyword <{i}> with a long name" for i in range(8)]
+    report = {
+        "keywords_not_in_cv": words,
+        "keywords_inferred": words,
+        "unverified": words,
+        "dropped": ["x"],
+        "pages": 2,
+    }
+    for repeat in range(0, 60, 3):
+        for title in ("T&", "T&" * 60):
+            job = make_job(company="AT&T Labs", title=title)
+            status = "📧  E-mail en échec : R&D " * repeat
+            caption = format_letter_caption(job, report, status)
+            visible = html_lib.unescape(re.sub(r"<[^>]+>", "", caption))
+            assert len(visible) <= 1024
+            assert _balanced(caption), caption[-80:]
+            assert not re.search(r"&(?!amp;|lt;|gt;|quot;|#x27;)", caption)
+            assert caption.startswith("✍️ <b>Lettre prête · AT&amp;T Labs</b>")
+            assert caption.endswith(SEP)  # sections are dropped, never cut
+
+
+class RejectingDocuments:
+    def __init__(self, fail_times):
+        self.fail_times = fail_times
+        self.calls = []
+
+    def send_document(self, content, filename, caption, html=True):
+        from intern_radar.telegram import TelegramError
+
+        self.calls.append((caption, html))
+        if len(self.calls) <= self.fail_times:
+            raise TelegramError("sendDocument: HTTP 400 can't parse entities")
+
+
+def test_rejected_caption_is_resent_as_plain_text(tmp_path):
+    service, _, _, notifier = build(tmp_path)
+    documents = RejectingDocuments(fail_times=1)
+    service._documents = documents
+    service.handle("j1")
+    assert [html for _, html in documents.calls] == [True, False]
+    assert "<b>" not in documents.calls[1][0]
+    assert notifier.sent == []
+
+
+def test_undeliverable_letter_sends_a_failure_notification(tmp_path):
+    service, _, _, notifier = build(tmp_path)
+    service._documents = RejectingDocuments(fail_times=2)
+    service.handle("j1")
+    [message] = notifier.sent
+    assert message.html.startswith("❌ <b>Lettre non envoyée · Acme</b>")
