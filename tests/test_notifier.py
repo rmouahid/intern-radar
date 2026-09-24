@@ -5,6 +5,7 @@ import pytest
 
 from intern_radar.models import ScoredJob
 from intern_radar.notifier import (
+    Action,
     ConsoleNotifier,
     Message,
     NotifyError,
@@ -39,7 +40,7 @@ def test_format_immediate_uses_the_card_layout():
     assert message.priority == 4
     assert message.tags == ("fire",)
     assert message.click == "https://example.com/jobs/1"
-    assert message.actions == (("Voir l'offre", "https://example.com/jobs/1"),)
+    assert message.actions == (Action("Voir l'offre", "https://example.com/jobs/1"),)
 
 
 def test_format_immediate_without_location():
@@ -84,7 +85,15 @@ def test_ntfy_notifier_posts_json_to_the_server_root():
 
     client = mock_client({"POST https://ntfy.sh/": handler})
     message = Message(
-        "T", "B", 4, ("fire",), "https://u", (("View offer", "https://u"),)
+        "T",
+        "B",
+        4,
+        ("fire",),
+        "https://u",
+        (
+            Action("Voir l'offre", "https://u"),
+            Action("Lettre", "https://ntfy.sh/req", method="POST", body="job-1"),
+        ),
     )
     NtfyNotifier("https://ntfy.sh/", "topic-1", client).send(message)
     assert seen["body"] == {
@@ -94,8 +103,24 @@ def test_ntfy_notifier_posts_json_to_the_server_root():
         "priority": 4,
         "tags": ["fire"],
         "click": "https://u",
-        "actions": [{"action": "view", "label": "View offer", "url": "https://u"}],
+        "actions": [
+            {"action": "view", "label": "Voir l'offre", "url": "https://u"},
+            {
+                "action": "http",
+                "label": "Lettre",
+                "url": "https://ntfy.sh/req",
+                "method": "POST",
+                "body": "job-1",
+            },
+        ],
     }
+
+
+def test_format_immediate_adds_the_letter_button():
+    message = format_immediate(scored(), "https://ntfy.sh/req")
+    assert message.actions[1] == Action(
+        "✍️ Lettre de motivation", "https://ntfy.sh/req", method="POST", body="j1"
+    )
 
 
 def test_ntfy_notifier_raises_on_http_error():

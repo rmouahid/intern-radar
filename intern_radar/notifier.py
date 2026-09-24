@@ -23,13 +23,23 @@ class NotifyError(Exception):
 
 
 @dataclass(frozen=True)
+class Action:
+    """A notification button: opens `url`, or sends an HTTP request if `method`."""
+
+    label: str
+    url: str
+    method: str | None = None
+    body: str | None = None
+
+
+@dataclass(frozen=True)
 class Message:
     title: str
     body: str
     priority: int = 3
     tags: tuple[str, ...] = ()
     click: str | None = None
-    actions: tuple[tuple[str, str], ...] = ()
+    actions: tuple[Action, ...] = ()
 
 
 class Notifier(Protocol):
@@ -53,15 +63,24 @@ class NtfyNotifier:
         if message.click:
             payload["click"] = message.click
         if message.actions:
-            payload["actions"] = [
-                {"action": "view", "label": label, "url": url}
-                for label, url in message.actions
-            ]
+            payload["actions"] = [_action_payload(a) for a in message.actions]
         try:
             response = self._client.post(self._server, json=payload)
             response.raise_for_status()
         except httpx.HTTPError as exc:
             raise NotifyError(f"ntfy: {exc}") from exc
+
+
+def _action_payload(action: Action) -> dict[str, str]:
+    if action.method is None:
+        return {"action": "view", "label": action.label, "url": action.url}
+    return {
+        "action": "http",
+        "label": action.label,
+        "url": action.url,
+        "method": action.method,
+        "body": action.body or "",
+    }
 
 
 class ConsoleNotifier:
@@ -74,7 +93,9 @@ class ConsoleNotifier:
         self._write(f"[priority {message.priority}] {message.title}\n{message.body}\n")
 
 
-def format_immediate(scored: ScoredJob) -> Message:
+def format_immediate(
+    scored: ScoredJob, letter_request_url: str | None = None
+) -> Message:
     job, assessment = scored.job, scored.assessment
     body = "\n".join(
         [
@@ -88,13 +109,23 @@ def format_immediate(scored: ScoredJob) -> Message:
             assessment.summary,
         ]
     )
+    actions = [Action("Voir l'offre", job.url)]
+    if letter_request_url:
+        actions.append(
+            Action(
+                "✍️ Lettre de motivation",
+                letter_request_url,
+                method="POST",
+                body=job.id,
+            )
+        )
     return Message(
         title=f"{job.company} · niveau {job.tier}",
         body=body,
         priority=4,
         tags=("fire",),
         click=job.url,
-        actions=(("Voir l'offre", job.url),),
+        actions=tuple(actions),
     )
 
 
