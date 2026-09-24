@@ -1,9 +1,13 @@
 """Builders for test objects with sensible defaults."""
 
+from collections.abc import Callable
 from datetime import date
 from typing import Any
 
+import httpx
+
 from intern_radar.config import Profile
+from intern_radar.http import Throttle, make_client
 from intern_radar.models import Assessment, Job
 
 
@@ -47,3 +51,25 @@ def make_profile(**overrides: Any) -> Profile:
     }
     values.update(overrides)
     return Profile(**values)
+
+
+def mock_client(routes: dict[str, Any]) -> httpx.Client:
+    """HTTP client answering from `routes`.
+
+    Keys are "METHOD https://host/path" (query string ignored). Values are a
+    JSON-serialisable body (200), an int status code, or a callable taking the
+    request and returning an httpx.Response. Unknown routes answer 404.
+    """
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        key = f"{request.method} {request.url.copy_with(query=None)}"
+        value = routes.get(key)
+        if value is None:
+            return httpx.Response(404, json={"error": "not mocked", "key": key})
+        if isinstance(value, int):
+            return httpx.Response(value)
+        if isinstance(value, Callable):
+            return value(request)
+        return httpx.Response(200, json=value)
+
+    return make_client(Throttle(interval=0), httpx.MockTransport(handler))
