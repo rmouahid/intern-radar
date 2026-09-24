@@ -79,3 +79,36 @@ def test_fetch_pages_with_first_page_total_and_reads_details():
             posted_at="2026-09-16",
         )
     ]
+
+
+def test_multi_location_postings_keep_every_office():
+    detail = {
+        "jobPostingInfo": {
+            **DETAIL["jobPostingInfo"],
+            "location": "France, Paris",
+            "additionalLocations": ["UK, Reading", "Germany, Munich"],
+        }
+    }
+    client = mock_client(
+        {
+            f"POST {BASE}/jobs": search,
+            f"GET {BASE}/job/UK-Reading/DL-Intern_JR1": detail,
+        }
+    )
+    [job] = WorkdaySource(client).fetch(
+        COMPANY, known_ids={"workday:nvidia:/job/x/known"}
+    )
+    assert job.location == "France, Paris; UK, Reading; Germany, Munich"
+
+
+def test_a_failing_detail_request_skips_only_that_posting():
+    client = mock_client({f"POST {BASE}/jobs": search})  # detail answers 404
+    assert WorkdaySource(client).fetch(COMPANY, known_ids=set()) == []
+    client = mock_client(
+        {
+            f"POST {BASE}/jobs": search,
+            f"GET {BASE}/job/UK-Reading/DL-Intern_JR1": DETAIL,
+        }
+    )
+    jobs = WorkdaySource(client).fetch(COMPANY, known_ids=set())
+    assert [job.title for job in jobs] == ["Deep Learning Intern - 2027"]

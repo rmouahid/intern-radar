@@ -46,3 +46,10 @@ def test_fetch_maps_lever_postings():
             posted_at="2026-08-11",
         )
     ]
+
+
+def test_a_malformed_posting_is_skipped_not_fatal():
+    broken = {"id": "zzz", "text": "Research Intern", "categories": {}}
+    client = mock_client({f"GET {API}": [broken, *POSTINGS]})
+    jobs = LeverSource(client).fetch(COMPANY, known_ids=set())
+    assert [job.id for job in jobs] == ["lever:palantir:abc"]

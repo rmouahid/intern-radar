@@ -39,3 +39,11 @@ def test_get_json_wraps_http_errors():
     assert get_json(client, "GET", "https://api.example/ok") == {"a": 1}
     with pytest.raises(SourceError, match="404"):
         get_json(client, "GET", "https://api.example/missing")
+
+
+def test_get_json_errors_do_not_leak_query_parameters():
+    client = mock_client({})
+    with pytest.raises(SourceError) as info:
+        get_json(client, "GET", "https://api.example/x", params={"app_key": "SECRET"})
+    assert "SECRET" not in str(info.value)
+    assert "404" in str(info.value)

@@ -1,12 +1,13 @@
 """Workable accounts (apply.workable.com widget API)."""
 
 from collections.abc import Container
+from typing import Any
 
 import httpx
 
 from intern_radar.models import Company, Job
 from intern_radar.prefilter import is_internship_title
-from intern_radar.sources.base import get_json, html_to_text, require_param
+from intern_radar.sources.base import collect, get_json, html_to_text, require_param
 
 API = "https://apply.workable.com/api/v1/widget/accounts/{account}"
 
@@ -27,26 +28,25 @@ class WorkableSource:
             API.format(account=account),
             params={"details": "true"},
         )
-        jobs = []
-        for item in data.get("jobs", []):
+
+        def convert(item: dict[str, Any]) -> Job | None:
             job_id = f"workable:{account}:{item['shortcode']}"
             if job_id in known_ids or not is_internship_title(item["title"]):
-                continue
+                return None
             places = [
                 _place(loc.get("city", ""), loc.get("country", ""))
                 for loc in item.get("locations") or []
             ] or [_place(item.get("city", ""), item.get("country", ""))]
-            jobs.append(
-                Job(
-                    id=job_id,
-                    company=company.name,
-                    tier=company.tier,
-                    title=item["title"].strip(),
-                    location="; ".join(place for place in places if place),
-                    url=item["url"],
-                    description=html_to_text(item.get("description") or ""),
-                    source="workable",
-                    posted_at=item.get("published_on"),
-                )
+            return Job(
+                id=job_id,
+                company=company.name,
+                tier=company.tier,
+                title=item["title"].strip(),
+                location="; ".join(place for place in places if place),
+                url=item["url"],
+                description=html_to_text(item.get("description") or ""),
+                source="workable",
+                posted_at=item.get("published_on"),
             )
-        return jobs
+
+        return collect(company, data.get("jobs", []), convert)
