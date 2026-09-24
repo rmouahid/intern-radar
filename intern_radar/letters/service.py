@@ -1,5 +1,6 @@
 """Handle one cover letter request end to end."""
 
+import hashlib
 import logging
 from collections.abc import Callable
 from dataclasses import asdict
@@ -32,18 +33,25 @@ def format_letter_card(
 ) -> str:
     present = report.get("keywords_present", [])
     missing = report.get("keywords_missing", [])
-    lines = [
-        job.title,
-        SEPARATOR,
-        f"🎯  ATS : {len(present)}/{len(present) + len(missing)} mots-clés",
-    ]
+    if report.get("ats_skipped"):
+        ats = "🎯  ATS : description de l'offre absente"
+    else:
+        ats = f"🎯  ATS : {len(present)}/{len(present) + len(missing)} mots-clés"
+    lines = [job.title, SEPARATOR, ats]
     not_in_cv = report.get("keywords_not_in_cv", [])
     if not_in_cv:
         lines.append(f"🚫  Absents de ton CV : {', '.join(not_in_cv)}")
+    inferred = report.get("keywords_inferred", [])
+    if inferred:
+        lines.append(f"🔎  Déduits de ton CV (à vérifier) : {', '.join(inferred)}")
     lines.append(f"🧹  Anti-IA : {report.get('ai_changes', 0)} tournures corrigées")
     flags = [*report.get("unverified", []), *report.get("blacklist_left", [])]
     if flags:
         lines.append(f"⚠️  À vérifier : {', '.join(flags)}")
+    if report.get("dropped"):
+        lines.append(f"⚠️  Caractères retirés du PDF : {' '.join(report['dropped'])}")
+    if report.get("pages", 1) > 1:
+        lines.append(f"⚠️  {report['pages']} pages : à raccourcir")
     lines += [email_status, SEPARATOR, f"📎 {filename}"]
     return "\n".join(lines)
 
@@ -87,27 +95,45 @@ class LetterService:
             self._cap_notice(now)
             return None
         try:
-            letter, report = self._make_writer().write(job)
-        except (LLMError, CvError) as exc:
-            log.warning("letter for %s failed: %s", job_id, exc)
+            return self._generate(job, now)
+        except Exception as exc:  # the user must hear back, whatever failed
+            log.exception("letter for %s failed", job_id)
+            self._notify_failure(job, exc)
+            return None
+
+    def _generate(self, job: Job, now: datetime) -> Path:
+        letter, report = self._make_writer().write(job)
+        pdf, dropped, pages = render(letter, job, self._contact, now.date())
+        last_name = self._contact.name.split()[-1]
+        # One folder per job: two offers can share company and title.
+        folder = hashlib.sha1(job.id.encode()).hexdigest()[:10]
+        path = self._out_dir / folder / file_name(last_name, job.company, job.title)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(pdf)
+        data = {
+            **asdict(report),
+            "dropped": dropped,
+            "pages": pages,
+            "text": letter.text(),
+        }
+        self._store.save_letter(job.id, str(path), data, now)
+        self._deliver(job, path, data)
+        return path
+
+    def _notify_failure(self, job: Job, exc: Exception) -> None:
+        reason = str(exc) if isinstance(exc, (LLMError, CvError)) else ""
+        reason = reason or type(exc).__name__
+        try:
             self._notifier.send(
                 Message(
                     title=f"❌ Lettre non générée · {job.company}",
-                    body=f"{job.title}\n{str(exc)[:300]}",
+                    body=f"{job.title}\n{reason[:300]}",
                     priority=3,
                     tags=("x",),
                 )
             )
-            return None
-        pdf, dropped = render(letter, job, self._contact, now.date())
-        last_name = self._contact.name.split()[-1]
-        path = self._out_dir / file_name(last_name, job.company, job.title)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(pdf)
-        data = {**asdict(report), "dropped": dropped, "text": letter.text()}
-        self._store.save_letter(job_id, str(path), data, now)
-        self._deliver(job, path, data)
-        return path
+        except Exception:
+            log.exception("failure notification for %s not sent", job.id)
 
     def _deliver(self, job: Job, path: Path, report: dict[str, Any]) -> None:
         pdf = path.read_bytes()

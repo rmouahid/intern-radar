@@ -139,3 +139,46 @@ def test_format_letter_card_lists_every_check():
         "🚫  Absents de ton CV : Rust\n🧹  Anti-IA : 2 tournures corrigées\n"
         "⚠️  À vérifier : 40%\n📧  Envoyée par e-mail\n━━━━━━━━━━━━━━━━\n📎 f.pdf"
     )
+
+
+def test_unexpected_error_still_sends_a_failure_notification(tmp_path):
+    service, _, _, notifier = build(
+        tmp_path, writer=FakeWriter(RuntimeError("fpdf exploded"))
+    )
+    assert service.handle("j1") is None
+    [(message,)] = notifier.sent
+    assert message.title == "❌ Lettre non générée · Acme"
+    assert "RuntimeError" in message.body
+
+
+def test_same_company_and_title_do_not_share_a_file(tmp_path):
+    jobs = [
+        make_job(id="a", company="Acme", title="ML Intern", location="Paris"),
+        make_job(id="b", company="Acme", title="ML Intern", location="London"),
+    ]
+    service, _, _, _ = build(tmp_path, jobs=jobs)
+    first, second = service.handle("a"), service.handle("b")
+    assert first != second
+    assert first.name == second.name == "Mouahid_CoverLetter_Acme_ML-Intern.pdf"
+
+
+def test_card_reports_dropped_characters_and_inferred_keywords():
+    report = {
+        "keywords_present": ["Python"],
+        "keywords_missing": [],
+        "keywords_inferred": ["Information Retrieval"],
+        "ai_changes": 0,
+        "dropped": ["🚀"],
+    }
+    card = format_letter_card(make_job(title="T"), report, "f.pdf", "📧  x")
+    assert "🔎  Déduits de ton CV (à vérifier) : Information Retrieval" in card
+    assert "⚠️  Caractères retirés du PDF : 🚀" in card
+    report["pages"] = 2
+    card = format_letter_card(make_job(title="T"), report, "f.pdf", "📧  x")
+    assert "⚠️  2 pages : à raccourcir" in card
+
+
+def test_card_without_description_says_ats_skipped():
+    report = {"ats_skipped": True, "ai_changes": 1}
+    card = format_letter_card(make_job(title="T"), report, "f.pdf", "📧  x")
+    assert "🎯  ATS : description de l'offre absente" in card
