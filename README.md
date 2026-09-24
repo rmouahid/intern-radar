@@ -1,7 +1,98 @@
 # intern-radar
 
-Watches the career pages of top AI/tech companies for internship offers,
-scores them against a candidate profile with an LLM, and sends push
-notifications through [ntfy](https://ntfy.sh).
+[![Tests](https://github.com/rmouahid/intern-radar/actions/workflows/tests.yml/badge.svg)](https://github.com/rmouahid/intern-radar/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-See the design in [`docs/superpowers/specs/`](docs/superpowers/specs/).
+Watches the career pages of ~70 top AI/tech companies (and large groups with
+strong AI teams) for internship offers, scores each new offer against a
+candidate profile with an LLM, and pushes the relevant ones to your phone
+through [ntfy](https://ntfy.sh). Built to find a 4–6 month AI internship
+abroad at the most prestigious company possible.
+
+## How it works
+
+1. **Sources** — one plugin per job feed: public ATS APIs (Greenhouse, Lever,
+   Ashby, Workable, SmartRecruiters, Workday), the Amazon and Microsoft
+   career portals, and [Adzuna](https://developer.adzuna.com) as a catch-all
+   for companies without a public feed. Plugins only keep internship titles
+   and skip offers already seen.
+2. **Pre-filter** — free rules: internship title (`intern`, `co-op`,
+   `placement`…, whole words only), not located only in France, never seen
+   before (SQLite).
+3. **LLM assessment** — new candidates are sent in batches of 10 to
+   `claude -p --json-schema` (Haiku), which returns for each offer: is it an
+   internship, AI relevance (0–10), fit with the internship window,
+   eligibility, visa note, language requirements, one-line summary.
+4. **Final score** — computed in Python, deterministic:
+   `0.5 × company tier + 0.3 × AI relevance + 0.2 × dates fit`
+   (tiers S=10, A=8, B=6, unlisted=4). PhD-only roles, incompatible dates and
+   non-internships are excluded.
+5. **Notifications** — score ≥ 7.5: immediate push with a "View offer"
+   button; 5.5–7.5: evening digest at 21:00; source broken for 3 days or LLM
+   unavailable for a day: low-priority alert.
+
+## Setup
+
+Requirements: Python ≥ 3.12, [Poetry](https://python-poetry.org), the
+`claude` CLI logged in (used for scoring), the ntfy app on your phone.
+
+```bash
+poetry install
+cp config/profile.example.yaml config/profile.yaml   # gitignored
+```
+
+Edit `config/profile.yaml`:
+
+- `candidate_summary`, `window_start`, `window_end`, `min_months`;
+- `ntfy_topic`: a long random name (anyone who knows it can read it), e.g.
+  `python -c "import secrets; print('intern-radar-' + secrets.token_urlsafe(16))"`,
+  then subscribe to that topic in the ntfy app;
+- `adzuna_app_id` / `adzuna_app_key`: free keys from
+  [developer.adzuna.com](https://developer.adzuna.com).
+
+Watched companies live in `config/companies.yaml` (tier, source, board id,
+aliases used to attribute Adzuna offers).
+
+## Usage
+
+```bash
+poetry run intern-radar check-sources        # which companies are covered
+poetry run intern-radar run --dry-run        # full pass, prints instead of notifying
+poetry run intern-radar run                  # full pass with notifications
+poetry run intern-radar digest               # evening digest
+poetry run intern-radar list --min-score 6   # stored offers, best first
+```
+
+`--dry-run` uses a throwaway in-memory database, so it never marks real offers
+as notified.
+
+## Deployment (systemd)
+
+The `deploy/` directory holds timers that run a pass every 2 hours from 08:00
+to 22:00 and the digest at 21:00, Paris time (DST handled by systemd):
+
+```bash
+ln -sf "$PWD"/deploy/intern-radar-*.service "$PWD"/deploy/intern-radar-*.timer /etc/systemd/system/
+cp deploy/logrotate.conf /etc/logrotate.d/intern-radar
+systemctl daemon-reload
+systemctl enable --now intern-radar-run.timer intern-radar-digest.timer
+systemctl list-timers 'intern-radar*'
+journalctl -u intern-radar-run.service -n 30
+```
+
+The unit files assume the repo lives in `/root/remote-claude/intern-radar`;
+adjust `WorkingDirectory` otherwise.
+
+## Tests
+
+```bash
+poetry run pytest -q
+poetry run ruff check . && poetry run ruff format --check .
+```
+
+Every source plugin is tested against payloads mirroring the real API
+responses; the LLM and ntfy are replaced by fakes, so the suite runs offline.
+
+## License
+
+MIT
