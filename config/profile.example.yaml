@@ -1,0 +1,21 @@
+# Copy to config/profile.yaml (gitignored) and fill in.
+candidate_summary: |
+  Computer engineering student (CY Tech, France). Built a RAG agent and a
+  vector search engine from scratch in Python, a local LLM documentation
+  assistant (llama.cpp, FAISS), an MCP server, and a PySpark streaming
+  pipeline. Previous internship: deployed a self-hosted RAG agent (Docker).
+  Skills: Python, NumPy, FastAPI, Docker, PySpark, Java, SQL.
+  Languages: French (native), English (C2), Spanish (B2).
+  Looking for an AI / ML engineering internship.
+window_start: 2027-03-08
+window_end: 2027-08-31
+min_months: 4
+ntfy_topic: intern-radar-CHANGE-ME-to-a-long-random-string
+# ntfy_server: https://ntfy.sh
+# llm_model: haiku
+# max_llm_batches_per_run: 5
+# max_immediate_per_run: 10
+# adzuna_app_id: your-app-id      # free account on developer.adzuna.com
+# adzuna_app_key: your-app-key
+# weights: {tier: 0.5, relevance: 0.3, dates: 0.2}
+# thresholds: {immediate: 7.5, digest: 5.5}
