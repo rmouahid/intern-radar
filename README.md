@@ -25,8 +25,9 @@ abroad at the most prestigious company possible.
    eligibility, visa note, language requirements, one-line summary.
 4. **Final score** — computed in Python, deterministic:
    `0.5 × company tier + 0.3 × AI relevance + 0.2 × dates fit`
-   (tiers S=10, A=8, B=6, unlisted=4). PhD-only roles, incompatible dates and
-   non-internships are excluded.
+   (tiers S=10, A=8, B=6, unlisted=4). PhD-only roles, incompatible dates,
+   non-internships and offers with an AI relevance below 6/10 (finance,
+   design… internships at top companies) are excluded.
 5. **Notifications** — score ≥ 7.5: immediate push with a "View offer"
    button; 5.5–7.5: evening digest at 21:00; source broken for 3 days or LLM
    unavailable for a day: low-priority alert.

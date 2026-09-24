@@ -50,3 +50,11 @@ def test_score_never_goes_below_zero():
 def test_custom_weights():
     assessment = make_assessment(ai_relevance=5, dates_fit="fits")
     assert final_score("B", assessment, Weights(1, 0, 0)) == pytest.approx(6.0)
+
+
+def test_offers_below_the_minimum_ai_relevance_are_excluded():
+    finance = make_assessment(ai_relevance=5)
+    ml = make_assessment(ai_relevance=6)
+    assert final_score("S", finance, W, min_relevance=6) is None
+    assert final_score("S", ml, W, min_relevance=6) == pytest.approx(8.8)
+    assert final_score("S", finance, W) is not None

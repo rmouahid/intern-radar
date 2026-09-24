@@ -26,6 +26,7 @@ class Weights:
 class Thresholds:
     immediate: float = 7.5
     digest: float = 5.5
+    min_relevance: int = 6  # below this AI relevance an offer is never notified
 
 
 @dataclass(frozen=True)
