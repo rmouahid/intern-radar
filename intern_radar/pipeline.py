@@ -147,12 +147,11 @@ class Pipeline:
             self._profile.thresholds.immediate,
             limit=self._profile.max_immediate_per_run,
         )
-        topic = self._profile.requests_topic
-        letter_url = (
-            f"{self._profile.ntfy_server.rstrip('/')}/{topic}" if topic else None
-        )
+        letters = bool(self._profile.cv_url and self._profile.contact)
         for scored in due:
-            if not self._send(format_immediate(scored, letter_url), report):
+            ref = self._store.job_ref(scored.job.id) if letters else None
+            callback = f"L:{ref}" if ref is not None else None
+            if not self._send(format_immediate(scored, callback), report):
                 return False
             self._store.mark_notified(scored.job.id, now)
             report.notified += 1
