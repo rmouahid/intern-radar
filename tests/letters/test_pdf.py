@@ -43,7 +43,7 @@ def test_file_name():
 
 def test_render_contains_header_body_and_signature():
     job = make_job(company="Acme", title="ML Intern", location="London, UK")
-    data, dropped = render(LETTER, job, CONTACT, date(2026, 9, 24))
+    data, dropped, pages = render(LETTER, job, CONTACT, date(2026, 9, 24))
     text = text_of(data)
     assert data.startswith(b"%PDF")
     assert dropped == []
@@ -61,6 +61,25 @@ def test_render_contains_header_body_and_signature():
 
 def test_render_normalises_typography_and_reports_dropped():
     letter = Letter("en", "Dear Team,", ("It’s great — 🚀", "b", "c"), "Best,")
-    data, dropped = render(letter, make_job(), CONTACT, date(2026, 9, 24))
+    data, dropped, _ = render(letter, make_job(), CONTACT, date(2026, 9, 24))
     assert "It's great -" in text_of(data)
     assert dropped == ["🚀"]
+
+
+def test_to_latin1_keeps_french_ligatures_and_symbols():
+    assert to_latin1("cœur, Œuvre, 5 € ‑ ok") == ("coeur, OEuvre, 5 EUR - ok", [])
+
+
+def test_long_letters_are_shrunk_to_fit_one_page():
+    paragraph = "I built retrieval systems in Python for search. " * 55
+    letter = Letter("en", "Dear Team,", (paragraph, "b", "c"), "Best,")
+    data, _, pages = render(letter, make_job(), CONTACT, date(2026, 9, 24))
+    assert pages == 1
+    assert len(PdfReader(io.BytesIO(data)).pages) == 1
+
+
+def test_letters_too_long_for_one_page_report_their_page_count():
+    paragraph = "I built retrieval systems in Python for search. " * 120
+    letter = Letter("en", "Dear Team,", (paragraph, "b", "c"), "Best,")
+    _, _, pages = render(letter, make_job(), CONTACT, date(2026, 9, 24))
+    assert pages == 2
