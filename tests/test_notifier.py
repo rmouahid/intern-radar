@@ -129,3 +129,18 @@ def test_console_notifier_prints_html_and_buttons():
         Message("<b>T</b>", ((Button("Voir", url="u"),),))
     )
     assert lines == ["<b>T</b>\n[Voir]\n"]
+
+
+def test_long_llm_fields_are_capped_and_bad_urls_dropped():
+    job = scored(title="T" * 900, location="L" * 900, url="javascript:alert(1)")
+    message = format_immediate(job)
+    assert len(visible(message.html)) < 2000
+    assert message.buttons == ()
+
+
+def test_permanent_telegram_errors_are_flagged():
+    rejected = TelegramError("sendMessage: HTTP 400 bad", status=400)
+    notifier = TelegramNotifier(FakeTelegram(rejected))
+    with pytest.raises(NotifyError) as info:
+        notifier.send(Message("x"))
+    assert info.value.permanent is True

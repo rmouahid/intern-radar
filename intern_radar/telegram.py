@@ -16,7 +16,11 @@ DOCUMENT_TIMEOUT = 60.0
 
 
 class TelegramError(Exception):
-    """A Bot API call failed."""
+    """A Bot API call failed; `status` is the HTTP status when there was one."""
+
+    def __init__(self, message: str, status: int | None = None) -> None:
+        super().__init__(message)
+        self.status = status
 
 
 @dataclass(frozen=True)
@@ -31,7 +35,7 @@ def _keyboard(rows: tuple[tuple[Button, ...], ...]) -> dict[str, Any]:
         "inline_keyboard": [
             [
                 {"text": b.label, "url": b.url}
-                if b.url
+                if b.url is not None
                 else {"text": b.label, "callback_data": b.callback}
                 for b in row
             ]
@@ -70,14 +74,15 @@ class TelegramClient:
             body["reply_markup"] = _keyboard(buttons)
         self._call("sendMessage", json=body)
 
-    def send_document(self, content: bytes, filename: str, caption: str) -> None:
+    def send_document(
+        self, content: bytes, filename: str, caption: str, html: bool = True
+    ) -> None:
+        data = {"chat_id": str(self.chat_id), "caption": caption}
+        if html:
+            data["parse_mode"] = "HTML"
         self._call(
             "sendDocument",
-            data={
-                "chat_id": str(self.chat_id),
-                "caption": caption,
-                "parse_mode": "HTML",
-            },
+            data=data,
             files={"document": (filename, content, "application/pdf")},
             timeout=DOCUMENT_TIMEOUT,
         )
@@ -118,7 +123,8 @@ class TelegramClient:
             if response.status_code >= 400 or not payload.get("ok"):
                 detail = payload.get("description", "")
                 raise TelegramError(
-                    f"{method}: HTTP {response.status_code} {detail}".strip()
+                    f"{method}: HTTP {response.status_code} {detail}".strip(),
+                    status=response.status_code,
                 )
             return payload.get("result")
-        raise TelegramError(f"{method}: HTTP 429")
+        raise TelegramError(f"{method}: HTTP 429", status=429)

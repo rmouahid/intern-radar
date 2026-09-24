@@ -20,7 +20,15 @@ e = html.escape
 
 
 class NotifyError(Exception):
-    """A notification could not be delivered."""
+    """A notification could not be delivered.
+
+    `permanent` means Telegram rejected this message itself (HTTP 4xx other
+    than 429): sending it again would fail again.
+    """
+
+    def __init__(self, message: str, permanent: bool = False) -> None:
+        super().__init__(message)
+        self.permanent = permanent
 
 
 @dataclass(frozen=True)
@@ -42,7 +50,9 @@ class TelegramNotifier:
         try:
             self._telegram.send_message(message.html, message.buttons, message.silent)
         except TelegramError as exc:
-            raise NotifyError(f"telegram: {exc}") from None
+            permanent = exc.status is not None and 400 <= exc.status < 500
+            permanent = permanent and exc.status != 429
+            raise NotifyError(f"telegram: {exc}", permanent=permanent) from None
 
 
 class ConsoleNotifier:
@@ -58,21 +68,24 @@ class ConsoleNotifier:
 
 def format_immediate(scored: ScoredJob, letter_callback: str | None = None) -> Message:
     job, assessment = scored.job, scored.assessment
+    # Source and LLM fields are unbounded; Telegram rejects texts over 4096.
     lines = [
-        f"🔥 <b>{e(job.company)} · niveau {job.tier}</b>",
-        f"<b>{e(job.title)}</b>",
+        f"🔥 <b>{e(job.company[:80])} · niveau {job.tier}</b>",
+        f"<b>{e(job.title[:200])}</b>",
         SEPARATOR,
-        f"📍  {e(job.location or 'Lieu non précisé')}",
+        f"📍  {e(job.location[:100] or 'Lieu non précisé')}",
         f"⭐  {scored.score:.1f} / 10",
         f"📅  {DATES_LABELS[assessment.dates_fit]}",
-        f"🛂  {e(assessment.visa_note)}",
+        f"🛂  {e(assessment.visa_note[:300])}",
         SEPARATOR,
-        f"<i>{e(assessment.summary)}</i>",
+        f"<i>{e(assessment.summary[:500])}</i>",
     ]
-    buttons = [Button("🔗 Voir l'offre", url=job.url)]
+    buttons = []
+    if job.url.startswith(("https://", "http://")):
+        buttons.append(Button("🔗 Voir l'offre", url=job.url))
     if letter_callback:
         buttons.append(Button("✍️ Lettre de motivation", callback=letter_callback))
-    return Message("\n".join(lines), (tuple(buttons),))
+    return Message("\n".join(lines), (tuple(buttons),) if buttons else ())
 
 
 def format_digest(jobs: list[ScoredJob]) -> Message:
@@ -117,4 +130,11 @@ def format_cap_notice(limit: int) -> Message:
         "⚠️ <b>Limite de lettres atteinte</b>\n"
         f"{limit} lettres sur les dernières 24 h. Réessaie plus tard.",
         silent=True,
+    )
+
+
+def format_letter_undelivered(company: str, title: str, reason: str) -> Message:
+    return Message(
+        f"❌ <b>Lettre non envoyée · {e(company)}</b>\n{e(title)}\n"
+        f"Le PDF est sur le VPS. Erreur : {e(reason[:300])}"
     )
