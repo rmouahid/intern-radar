@@ -1,45 +1,11 @@
 import smtplib
 
-import httpx
 import pytest
 
 from intern_radar.letters.delivery import (
     DeliveryError,
     GmailSender,
-    NtfyAttachmentSender,
 )
-from tests.factories import mock_client
-
-
-def test_ntfy_attachment_is_put_with_query_metadata():
-    seen = {}
-
-    def handler(request: httpx.Request):
-        seen["method"] = request.method
-        seen["params"] = dict(request.url.params)
-        seen["body"] = request.content
-        return httpx.Response(200, json={})
-
-    client = mock_client({"PUT https://ntfy.sh/topic-1": handler})
-    NtfyAttachmentSender("https://ntfy.sh/", "topic-1", client).send(
-        b"%PDF-1.4", "letter.pdf", "✍️ Lettre prête · Acme", "ATS : 3/4"
-    )
-    assert seen == {
-        "method": "PUT",
-        "params": {
-            "filename": "letter.pdf",
-            "title": "✍️ Lettre prête · Acme",
-            "message": "ATS : 3/4",
-            "tags": "memo",
-        },
-        "body": b"%PDF-1.4",
-    }
-
-
-def test_ntfy_attachment_failure_raises():
-    client = mock_client({"PUT https://ntfy.sh/t": 500})
-    with pytest.raises(DeliveryError):
-        NtfyAttachmentSender("https://ntfy.sh", "t", client).send(b"x", "a", "b", "c")
 
 
 class FakeSMTP:

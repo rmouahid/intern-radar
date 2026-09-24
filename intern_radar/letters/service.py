@@ -1,59 +1,91 @@
 """Handle one cover letter request end to end."""
 
 import hashlib
+import html
 import logging
+import re
 from collections.abc import Callable
 from dataclasses import asdict
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 from intern_radar.config import Contact
 from intern_radar.letters.cv import CvError
-from intern_radar.letters.delivery import (
-    DeliveryError,
-    GmailSender,
-    NtfyAttachmentSender,
-)
+from intern_radar.letters.delivery import DeliveryError, GmailSender
 from intern_radar.letters.pdf import file_name, render
 from intern_radar.letters.writer import LetterWriter
 from intern_radar.models import Job
-from intern_radar.notifier import Message, Notifier
+from intern_radar.notifier import Notifier, format_cap_notice, format_letter_failure
 from intern_radar.scorer import LLMError
 from intern_radar.store import Store
+from intern_radar.telegram import TelegramError
 
 log = logging.getLogger(__name__)
 
 SEPARATOR = "━" * 16
 CAP_NOTICE_KEY = "letters_cap_notice_day"
+MAX_CAPTION = 1024
+LIST_ITEMS = 6
+e = html.escape
 
 
-def format_letter_card(
-    job: Job, report: dict[str, Any], filename: str, email_status: str
-) -> str:
+class DocumentSender(Protocol):
+    def send_document(self, content: bytes, filename: str, caption: str) -> None: ...
+
+
+def _items(values: list[str]) -> str:
+    shown = ", ".join(e(v[:40]) for v in values[:LIST_ITEMS])
+    return shown + ("…" if len(values) > LIST_ITEMS else "")
+
+
+def format_letter_caption(job: Job, report: dict[str, Any], email_status: str) -> str:
+    """The report card sent with the PDF (HTML, at most 1024 characters)."""
     present = report.get("keywords_present", [])
     missing = report.get("keywords_missing", [])
     if report.get("ats_skipped"):
-        ats = "🎯  ATS : description de l'offre absente"
+        ats = "🎯  <b>ATS</b> : description de l'offre absente"
     else:
-        ats = f"🎯  ATS : {len(present)}/{len(present) + len(missing)} mots-clés"
-    lines = [job.title, SEPARATOR, ats]
-    not_in_cv = report.get("keywords_not_in_cv", [])
-    if not_in_cv:
-        lines.append(f"🚫  Absents de ton CV : {', '.join(not_in_cv)}")
-    inferred = report.get("keywords_inferred", [])
-    if inferred:
-        lines.append(f"🔎  Déduits de ton CV (à vérifier) : {', '.join(inferred)}")
-    lines.append(f"🧹  Anti-IA : {report.get('ai_changes', 0)} tournures corrigées")
+        total = len(present) + len(missing)
+        ats = f"🎯  <b>ATS</b> : {len(present)}/{total} mots-clés"
+    sections = [
+        f"✍️ <b>Lettre prête · {e(job.company[:60])}</b>\n"
+        f"<b>{e(job.title[:150])}</b>\n{SEPARATOR}",
+        ats,
+    ]
+    if report.get("keywords_not_in_cv"):
+        sections.append(
+            f"🚫  <b>Absents de ton CV</b> :\n{_items(report['keywords_not_in_cv'])}"
+        )
+    if report.get("keywords_inferred"):
+        sections.append(
+            "🔎  <b>Déduits de ton CV (à vérifier)</b> :\n"
+            + _items(report["keywords_inferred"])
+        )
+    sections.append(
+        f"🧹  <b>Anti-IA</b> : {report.get('ai_changes', 0)} tournures corrigées"
+    )
+    warnings = []
     flags = [*report.get("unverified", []), *report.get("blacklist_left", [])]
     if flags:
-        lines.append(f"⚠️  À vérifier : {', '.join(flags)}")
+        warnings.append(f"⚠️  <b>À vérifier</b> : {_items(flags)}")
     if report.get("dropped"):
-        lines.append(f"⚠️  Caractères retirés du PDF : {' '.join(report['dropped'])}")
+        dropped = e(" ".join(report["dropped"]))
+        warnings.append(f"⚠️  <b>Caractères retirés du PDF</b> : {dropped}")
     if report.get("pages", 1) > 1:
-        lines.append(f"⚠️  {report['pages']} pages : à raccourcir")
-    lines += [email_status, SEPARATOR, f"📎 {filename}"]
-    return "\n".join(lines)
+        warnings.append(f"⚠️  <b>{report['pages']} pages</b> : à raccourcir")
+    if warnings:
+        sections.append("\n".join(warnings))
+    sections += [e(email_status), SEPARATOR]
+    caption = "\n\n".join(sections)
+    if len(caption) > MAX_CAPTION:
+        # Safety net only: titles and lists are capped above.
+        caption = re.sub(r"<[^>]*$", "", caption[: MAX_CAPTION - 1]) + "…"
+    return caption
+
+
+def _plain(caption: str) -> str:
+    return html.unescape(re.sub(r"<[^>]+>", "", caption))
 
 
 class LetterService:
@@ -63,7 +95,7 @@ class LetterService:
         make_writer: Callable[[], LetterWriter],
         contact: Contact,
         out_dir: Path,
-        attachments: NtfyAttachmentSender,
+        documents: DocumentSender,
         mail: GmailSender | None,
         notifier: Notifier,
         max_per_day: int,
@@ -73,7 +105,7 @@ class LetterService:
         self._make_writer = make_writer
         self._contact = contact
         self._out_dir = out_dir
-        self._attachments = attachments
+        self._documents = documents
         self._mail = mail
         self._notifier = notifier
         self._max_per_day = max_per_day
@@ -124,14 +156,7 @@ class LetterService:
         reason = str(exc) if isinstance(exc, (LLMError, CvError)) else ""
         reason = reason or type(exc).__name__
         try:
-            self._notifier.send(
-                Message(
-                    title=f"❌ Lettre non générée · {job.company}",
-                    body=f"{job.title}\n{reason[:300]}",
-                    priority=3,
-                    tags=("x",),
-                )
-            )
+            self._notifier.send(format_letter_failure(job.company, job.title, reason))
         except Exception:
             log.exception("failure notification for %s not sent", job.id)
 
@@ -139,11 +164,11 @@ class LetterService:
         pdf = path.read_bytes()
         email_status = "📧  E-mail non configuré"
         if self._mail is not None:
-            card = format_letter_card(job, report, path.name, "")
+            summary = _plain(format_letter_caption(job, report, ""))
             try:
                 self._mail.send(
                     subject=f"Lettre — {job.company} · {job.title}",
-                    body=f"{card}\n\n{report.get('text', '')}",
+                    body=f"{summary}\n\n{report.get('text', '')}",
                     pdf=pdf,
                     filename=path.name,
                 )
@@ -151,26 +176,15 @@ class LetterService:
             except DeliveryError as exc:
                 email_status = f"📧  E-mail en échec : {exc}"
         try:
-            self._attachments.send(
-                pdf,
-                path.name,
-                f"✍️ Lettre prête · {job.company}",
-                format_letter_card(job, report, path.name, email_status),
+            self._documents.send_document(
+                pdf, path.name, format_letter_caption(job, report, email_status)
             )
-        except DeliveryError as exc:
-            log.warning("ntfy delivery of %s failed: %s", path.name, exc)
+        except TelegramError as exc:
+            log.warning("delivery of %s failed: %s", path.name, exc)
 
     def _cap_notice(self, now: datetime) -> None:
         today = now.date().isoformat()
         if self._store.get_meta(CAP_NOTICE_KEY) == today:
             return
-        self._notifier.send(
-            Message(
-                title="Limite de lettres atteinte",
-                body=f"{self._max_per_day} lettres sur les dernières 24 h. "
-                "Réessaie plus tard.",
-                priority=2,
-                tags=("warning",),
-            )
-        )
+        self._notifier.send(format_cap_notice(self._max_per_day))
         self._store.set_meta(CAP_NOTICE_KEY, today)
