@@ -2,12 +2,13 @@
 
 from collections.abc import Container
 from datetime import UTC, datetime
+from typing import Any
 
 import httpx
 
 from intern_radar.models import Company, Job
 from intern_radar.prefilter import is_internship_title
-from intern_radar.sources.base import get_json, html_to_text, require_param
+from intern_radar.sources.base import collect, get_json, html_to_text, require_param
 
 API = "https://api.lever.co/v0/postings/{site}"
 
@@ -30,31 +31,30 @@ class LeverSource:
         postings = get_json(
             self._client, "GET", API.format(site=site), params={"mode": "json"}
         )
-        jobs = []
-        for item in postings:
+
+        def convert(item: dict[str, Any]) -> Job | None:
             job_id = f"lever:{site}:{item['id']}"
             if job_id in known_ids or not is_internship_title(item["text"]):
-                continue
+                return None
             categories = item.get("categories") or {}
             locations = categories.get("allLocations") or [
                 categories.get("location", "")
             ]
             created = item.get("createdAt")
-            jobs.append(
-                Job(
-                    id=job_id,
-                    company=company.name,
-                    tier=company.tier,
-                    title=item["text"].strip(),
-                    location="; ".join(loc for loc in locations if loc),
-                    url=item["hostedUrl"],
-                    description=_description(item),
-                    source="lever",
-                    posted_at=(
-                        datetime.fromtimestamp(created / 1000, UTC).date().isoformat()
-                        if created
-                        else None
-                    ),
-                )
+            return Job(
+                id=job_id,
+                company=company.name,
+                tier=company.tier,
+                title=item["text"].strip(),
+                location="; ".join(loc for loc in locations if loc),
+                url=item["hostedUrl"],
+                description=_description(item),
+                source="lever",
+                posted_at=(
+                    datetime.fromtimestamp(created / 1000, UTC).date().isoformat()
+                    if created
+                    else None
+                ),
             )
-        return jobs
+
+        return collect(company, postings, convert)

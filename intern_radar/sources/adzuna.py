@@ -2,12 +2,19 @@
 
 import re
 from collections.abc import Container
+from typing import Any
 
 import httpx
 
 from intern_radar.models import Company, Job, Tier
 from intern_radar.prefilter import is_internship_title
-from intern_radar.sources.base import SourceError, get_json, html_to_text, iso_date
+from intern_radar.sources.base import (
+    SourceError,
+    collect,
+    get_json,
+    html_to_text,
+    iso_date,
+)
 
 API = "https://api.adzuna.com/v1/api/jobs/{country}/search/1"
 DEFAULT_COUNTRIES = (
@@ -62,6 +69,26 @@ class AdzunaSource:
     def fetch(self, company: Company, known_ids: Container[str]) -> list[Job]:
         if not (self._app_id and self._app_key):
             raise SourceError("adzuna_app_id / adzuna_app_key missing in profile.yaml")
+
+        def convert(item: dict[str, Any]) -> Job | None:
+            job_id = f"adzuna:{item['id']}"
+            title = html_to_text(item.get("title", ""))
+            if job_id in known_ids or not is_internship_title(title):
+                return None
+            employer = (item.get("company") or {}).get("display_name", "")
+            name, tier = match_company(employer, self._lookup)
+            return Job(
+                id=job_id,
+                company=name,
+                tier=tier,
+                title=title,
+                location=(item.get("location") or {}).get("display_name", ""),
+                url=item["redirect_url"],
+                description=html_to_text(item.get("description", "")),
+                source="adzuna",
+                posted_at=iso_date(item.get("created")),
+            )
+
         jobs: list[Job] = []
         for country in company.params.get("countries", DEFAULT_COUNTRIES):
             data = get_json(
@@ -79,24 +106,5 @@ class AdzunaSource:
                     "content-type": "application/json",
                 },
             )
-            for item in data.get("results", []):
-                job_id = f"adzuna:{item['id']}"
-                title = html_to_text(item.get("title", ""))
-                if job_id in known_ids or not is_internship_title(title):
-                    continue
-                employer = (item.get("company") or {}).get("display_name", "")
-                name, tier = match_company(employer, self._lookup)
-                jobs.append(
-                    Job(
-                        id=job_id,
-                        company=name,
-                        tier=tier,
-                        title=title,
-                        location=(item.get("location") or {}).get("display_name", ""),
-                        url=item["redirect_url"],
-                        description=html_to_text(item.get("description", "")),
-                        source="adzuna",
-                        posted_at=iso_date(item.get("created")),
-                    )
-                )
+            jobs.extend(collect(company, data.get("results", []), convert))
         return jobs
