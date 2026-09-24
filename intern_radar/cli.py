@@ -81,7 +81,7 @@ def _pipeline(
     client = make_client()
     store = _open_store(db, dry_run)
     scorer = Scorer(
-        ClaudeCliBackend(model=profile.llm_model),
+        ClaudeCliBackend(model=profile.llm_model, effort=profile.llm_effort),
         profile.candidate_summary,
         profile.window_start,
         profile.window_end,
@@ -187,7 +187,7 @@ def _letter_service(config_dir: Path, db: Path):
     client = make_client()
     store = _open_store(db, dry_run=False)
     cv = CvSource(client, profile.cv_url, CV_CACHE)
-    backend = ClaudeCliBackend(model=profile.letter_model)
+    backend = ClaudeCliBackend(model=profile.letter_model, effort=profile.letter_effort)
 
     def make_writer() -> LetterWriter:
         return LetterWriter(

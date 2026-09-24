@@ -97,10 +97,12 @@ class ClaudeCliBackend:
     def __init__(
         self,
         model: str = "haiku",
+        effort: str | None = None,
         timeout: int = 600,
         runner: Callable[..., subprocess.CompletedProcess] = subprocess.run,
     ) -> None:
         self._model = model
+        self._effort = effort
         self._timeout = timeout
         self._runner = runner
 
@@ -119,6 +121,10 @@ class ClaudeCliBackend:
             "--no-session-persistence",
             "--strict-mcp-config",
         ]
+        if self._effort:
+            # Reasoning tokens are billed as output: "low" cut a letter draft
+            # from ~2.8k to ~0.95k output tokens with comparable text.
+            command += ["--effort", self._effort]
         try:
             proc = self._runner(
                 command,
