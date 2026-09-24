@@ -41,6 +41,8 @@ def _setup_logging() -> None:
             logging.StreamHandler(),
         ],
     )
+    # httpx logs every request URL at INFO, including API keys in query strings.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 def _load(config_dir: Path) -> tuple[Profile, list[Company]]:
