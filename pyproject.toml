@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "intern-radar"
+version = "0.1.0"
+description = "Watches top AI/tech career pages for internships, scores them with an LLM and notifies through ntfy"
+authors = ["rmouahid"]
+license = "MIT"
+readme = "README.md"
+packages = [{ include = "intern_radar" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+httpx = "^0.28.1"
+typer = "^0.27.2"
+pyyaml = "^6.0.3"
+
+[tool.poetry.scripts]
+intern-radar = "intern_radar.cli:app"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+extend-exclude = ["docs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.1.1,<10.0.0)",
+    "ruff (>=0.16.8,<0.17.0)"
+]
