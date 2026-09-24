@@ -265,3 +265,16 @@ def test_low_ai_relevance_offers_are_stored_but_never_notified():
     assert report.scored == 1
     assert notifier.sent == []
     assert pipeline.digest() == 0
+
+
+def test_notifications_carry_the_letter_button_when_configured():
+    notifier = FakeNotifier()
+    pipeline, _, _ = build(
+        {"fake": FakeSource([make_job(id="good", tier="S")])},
+        FakeScorer({"good": make_assessment(ai_relevance=9)}),
+        notifier,
+        requests_topic="req-topic",
+    )
+    pipeline.run()
+    button = notifier.sent[0].actions[1]
+    assert (button.url, button.body) == ("https://ntfy.sh/req-topic", "good")
