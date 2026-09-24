@@ -16,7 +16,12 @@ from intern_radar.letters.delivery import DeliveryError, GmailSender
 from intern_radar.letters.pdf import file_name, render
 from intern_radar.letters.writer import LetterWriter
 from intern_radar.models import Job
-from intern_radar.notifier import Notifier, format_cap_notice, format_letter_failure
+from intern_radar.notifier import (
+    Notifier,
+    format_cap_notice,
+    format_letter_failure,
+    format_letter_undelivered,
+)
 from intern_radar.scorer import LLMError
 from intern_radar.store import Store
 from intern_radar.telegram import TelegramError
@@ -31,7 +36,9 @@ e = html.escape
 
 
 class DocumentSender(Protocol):
-    def send_document(self, content: bytes, filename: str, caption: str) -> None: ...
+    def send_document(
+        self, content: bytes, filename: str, caption: str, html: bool = True
+    ) -> None: ...
 
 
 def _items(values: list[str]) -> str:
@@ -39,8 +46,17 @@ def _items(values: list[str]) -> str:
     return shown + ("…" if len(values) > LIST_ITEMS else "")
 
 
+def _visible_length(caption: str) -> int:
+    """Length as Telegram counts it: after tags and entities are parsed."""
+    return len(html.unescape(re.sub(r"<[^>]+>", "", caption)))
+
+
 def format_letter_caption(job: Job, report: dict[str, Any], email_status: str) -> str:
-    """The report card sent with the PDF (HTML, at most 1024 characters)."""
+    """The report card sent with the PDF: valid HTML, at most 1024 characters.
+
+    When it does not fit, whole optional sections are dropped (least useful
+    first); nothing is ever cut in the middle of a tag or an entity.
+    """
     present = report.get("keywords_present", [])
     missing = report.get("keywords_missing", [])
     if report.get("ats_skipped"):
@@ -48,39 +64,47 @@ def format_letter_caption(job: Job, report: dict[str, Any], email_status: str) -
     else:
         total = len(present) + len(missing)
         ats = f"🎯  <b>ATS</b> : {len(present)}/{total} mots-clés"
-    sections = [
+    header = (
         f"✍️ <b>Lettre prête · {e(job.company[:60])}</b>\n"
-        f"<b>{e(job.title[:150])}</b>\n{SEPARATOR}",
-        ats,
-    ]
+        f"<b>{e(job.title[:150])}</b>\n{SEPARATOR}"
+    )
+    anti_ai = f"🧹  <b>Anti-IA</b> : {report.get('ai_changes', 0)} tournures corrigées"
+    optional: dict[str, str] = {}
     if report.get("keywords_not_in_cv"):
-        sections.append(
+        optional["not_in_cv"] = (
             f"🚫  <b>Absents de ton CV</b> :\n{_items(report['keywords_not_in_cv'])}"
         )
     if report.get("keywords_inferred"):
-        sections.append(
-            "🔎  <b>Déduits de ton CV (à vérifier)</b> :\n"
-            + _items(report["keywords_inferred"])
+        optional["inferred"] = "🔎  <b>Déduits de ton CV (à vérifier)</b> :\n" + _items(
+            report["keywords_inferred"]
         )
-    sections.append(
-        f"🧹  <b>Anti-IA</b> : {report.get('ai_changes', 0)} tournures corrigées"
-    )
     warnings = []
     flags = [*report.get("unverified", []), *report.get("blacklist_left", [])]
     if flags:
         warnings.append(f"⚠️  <b>À vérifier</b> : {_items(flags)}")
     if report.get("dropped"):
-        dropped = e(" ".join(report["dropped"]))
+        dropped = e(" ".join(report["dropped"])[:60])
         warnings.append(f"⚠️  <b>Caractères retirés du PDF</b> : {dropped}")
     if report.get("pages", 1) > 1:
         warnings.append(f"⚠️  <b>{report['pages']} pages</b> : à raccourcir")
     if warnings:
-        sections.append("\n".join(warnings))
-    sections += [e(email_status), SEPARATOR]
-    caption = "\n\n".join(sections)
-    if len(caption) > MAX_CAPTION:
-        # Safety net only: titles and lists are capped above.
-        caption = re.sub(r"<[^>]*$", "", caption[: MAX_CAPTION - 1]) + "…"
+        optional["warnings"] = "\n".join(warnings)
+
+    def build() -> str:
+        sections = [header, ats]
+        sections += [optional[k] for k in ("not_in_cv", "inferred") if k in optional]
+        sections.append(anti_ai)
+        if "warnings" in optional:
+            sections.append(optional["warnings"])
+        sections += [e(email_status[:200]), SEPARATOR]
+        return "\n\n".join(sections)
+
+    caption = build()
+    for least_useful in ("not_in_cv", "inferred", "warnings"):
+        if _visible_length(caption) <= MAX_CAPTION:
+            break
+        optional.pop(least_useful, None)
+        caption = build()
     return caption
 
 
@@ -175,12 +199,25 @@ class LetterService:
                 email_status = "📧  Envoyée par e-mail"
             except DeliveryError as exc:
                 email_status = f"📧  E-mail en échec : {exc}"
+        caption = format_letter_caption(job, report, email_status)
         try:
-            self._documents.send_document(
-                pdf, path.name, format_letter_caption(job, report, email_status)
-            )
+            self._documents.send_document(pdf, path.name, caption)
+            return
         except TelegramError as exc:
-            log.warning("delivery of %s failed: %s", path.name, exc)
+            log.warning(
+                "delivery of %s failed, retrying as plain text: %s", path.name, exc
+            )
+        try:
+            plain = _plain(caption)[: MAX_CAPTION - 24]
+            self._documents.send_document(pdf, path.name, plain, html=False)
+        except TelegramError as exc:
+            log.warning("plain delivery of %s failed: %s", path.name, exc)
+            try:
+                self._notifier.send(
+                    format_letter_undelivered(job.company, job.title, str(exc))
+                )
+            except Exception:
+                log.exception("undelivered notice for %s not sent", job.id)
 
     def _cap_notice(self, now: datetime) -> None:
         today = now.date().isoformat()
