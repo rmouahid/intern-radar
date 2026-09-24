@@ -10,6 +10,7 @@ from intern_radar.config import Contact
 from intern_radar.letters.writer import Letter
 from intern_radar.models import Job
 
+# Characters outside Latin-1 (the core PDF font) with a readable equivalent.
 TYPOGRAPHY = str.maketrans(
     {
         "’": "'",
@@ -18,19 +19,25 @@ TYPOGRAPHY = str.maketrans(
         "”": '"',
         "—": "-",
         "–": "-",
+        "‑": "-",
         "…": "...",
         " ": " ",
         " ": " ",
+        " ": " ",
         "•": "-",
+        "œ": "oe",
+        "Œ": "OE",
+        "€": "EUR",
     }
 )
-LINE_HEIGHT = 5.5
 MARGIN = 25
+# (font size, line height) tried in order until the letter fits on one page.
+SIZES = ((11, 5.5), (10.5, 5.2), (10, 4.9))
 
 
 def to_latin1(text: str) -> tuple[str, list[str]]:
     """Latin-1 text for the core PDF font, and the characters dropped."""
-    text = text.translate(TYPOGRAPHY)
+    text = unicodedata.normalize("NFC", text).translate(TYPOGRAPHY)
     dropped = sorted({c for c in text if ord(c) > 255})
     return "".join(c for c in text if ord(c) <= 255), dropped
 
@@ -47,7 +54,23 @@ def file_name(last_name: str, company: str, title: str) -> str:
 
 def render(
     letter: Letter, job: Job, contact: Contact, today: date
-) -> tuple[bytes, list[str]]:
+) -> tuple[bytes, list[str], int]:
+    """PDF bytes, dropped characters and page count (shrunk to fit one page)."""
+    for size, line_height in SIZES:
+        data, dropped, pages = _render(letter, job, contact, today, size, line_height)
+        if pages == 1:
+            break
+    return data, dropped, pages
+
+
+def _render(
+    letter: Letter,
+    job: Job,
+    contact: Contact,
+    today: date,
+    size: float,
+    line_height: float,
+) -> tuple[bytes, list[str], int]:
     pdf = FPDF(format="A4")
     pdf.set_margins(MARGIN, MARGIN, MARGIN)
     pdf.set_auto_page_break(True, MARGIN)
@@ -57,8 +80,8 @@ def render(
     def write(text: str, style: str = "", gap: float = 0) -> None:
         clean, lost = to_latin1(text)
         dropped.update(lost)
-        pdf.set_font("Helvetica", style=style, size=11)
-        pdf.multi_cell(0, LINE_HEIGHT, clean, new_x="LMARGIN", new_y="NEXT")
+        pdf.set_font("Helvetica", style=style, size=size)
+        pdf.multi_cell(0, line_height, clean, new_x="LMARGIN", new_y="NEXT")
         if gap:
             pdf.ln(gap)
 
@@ -75,4 +98,4 @@ def render(
     pdf.ln(2)
     write(letter.closing)
     write(contact.name)
-    return bytes(pdf.output()), sorted(dropped)
+    return bytes(pdf.output()), sorted(dropped), pdf.page_no()
