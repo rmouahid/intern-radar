@@ -2,6 +2,7 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
+from intern_radar.config import Contact
 from intern_radar.models import Company
 from intern_radar.notifier import NotifyError
 from intern_radar.pipeline import Pipeline
@@ -11,6 +12,10 @@ from intern_radar.store import Store
 from tests.factories import make_assessment, make_job, make_profile
 
 NOW = datetime(2026, 9, 24, 12, 0, tzinfo=UTC)
+
+
+def first_line(message):
+    return message.html.split("\n")[0]
 
 
 class FakeSource:
@@ -93,7 +98,7 @@ def test_run_collects_filters_scores_and_notifies():
     assert (report.fetched, report.new, report.candidates) == (3, 3, 1)
     assert (report.scored, report.notified, report.errors) == (1, 1, [])
     assert scorer.batches == [["good"]]
-    assert [m.title for m in notifier.sent] == ["Acme · niveau S"]
+    assert [first_line(m) for m in notifier.sent] == ["🔥 <b>Acme · niveau S</b>"]
     assert store.known_ids() == {"good", "paris", "eng"}
 
 
@@ -208,7 +213,7 @@ def test_source_alert_after_three_days():
     clock.now = NOW + timedelta(days=3)
     pipeline.run()
     pipeline.run()
-    assert [m.title for m in notifier.sent] == ["Source en panne : Acme"]
+    assert [first_line(m) for m in notifier.sent] == ["⚠️ <b>Source en panne : Acme</b>"]
 
 
 def test_llm_alert_after_a_day():
@@ -221,7 +226,9 @@ def test_llm_alert_after_a_day():
     pipeline.run()
     clock.now = NOW + timedelta(days=1)
     pipeline.run()
-    assert [m.title for m in notifier.sent] == ["Notation LLM indisponible"]
+    assert [first_line(m) for m in notifier.sent] == [
+        "⚠️ <b>Notation LLM indisponible</b>"
+    ]
 
 
 def test_digest_sends_middle_band_once():
@@ -235,7 +242,7 @@ def test_digest_sends_middle_band_once():
     pipeline.run()
     notifier.sent.clear()
     assert pipeline.digest() == 1
-    assert notifier.sent[0].title == "Récap du soir — 1 offre"
+    assert first_line(notifier.sent[0]) == "📋 <b>Récap du soir — 1 offre</b>"
     assert pipeline.digest() == 0
     assert len(notifier.sent) == 1
 
@@ -267,14 +274,15 @@ def test_low_ai_relevance_offers_are_stored_but_never_notified():
     assert pipeline.digest() == 0
 
 
-def test_notifications_carry_the_letter_button_when_configured():
+def test_notifications_carry_the_letter_button_when_letters_are_enabled():
     notifier = FakeNotifier()
-    pipeline, _, _ = build(
+    pipeline, store, _ = build(
         {"fake": FakeSource([make_job(id="good", tier="S")])},
         FakeScorer({"good": make_assessment(ai_relevance=9)}),
         notifier,
-        requests_topic="req-topic",
+        cv_url="https://cv",
+        contact=Contact("A B", "P", "1", "e", "l", "g"),
     )
     pipeline.run()
-    button = notifier.sent[0].actions[1]
-    assert (button.url, button.body) == ("https://ntfy.sh/req-topic", "good")
+    button = notifier.sent[0].buttons[0][1]
+    assert button.callback == f"L:{store.job_ref('good')}"

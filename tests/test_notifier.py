@@ -1,135 +1,131 @@
-import json
+import re
 
-import httpx
 import pytest
 
 from intern_radar.models import ScoredJob
 from intern_radar.notifier import (
-    Action,
     ConsoleNotifier,
     Message,
     NotifyError,
-    NtfyNotifier,
+    TelegramNotifier,
+    format_cap_notice,
     format_digest,
     format_immediate,
+    format_letter_failure,
     format_llm_alert,
     format_source_alert,
 )
-from tests.factories import make_assessment, make_job, mock_client
+from intern_radar.telegram import Button, TelegramError
+from tests.factories import make_assessment, make_job
+
+SEP = "━" * 16
 
 
 def scored(job_id="j1", score=9.7, **job_overrides):
     return ScoredJob(make_job(id=job_id, **job_overrides), make_assessment(), score)
 
 
-def test_format_immediate_uses_the_card_layout():
+def visible(html: str) -> str:
+    return re.sub(r"<[^>]+>", "", html)
+
+
+def test_format_immediate_matches_the_approved_layout():
     message = format_immediate(
-        scored(company="Google DeepMind", tier="S", title="Research Engineer Intern")
+        scored(company="Google DeepMind", tier="S", title="Research Engineer Intern"),
+        "L:7",
     )
-    assert message.title == "Google DeepMind · niveau S"
-    assert message.body == (
-        "Research Engineer Intern\n"
-        "━━━━━━━━━━━━━━━━\n"
+    assert message.html == (
+        "🔥 <b>Google DeepMind · niveau S</b>\n"
+        "<b>Research Engineer Intern</b>\n"
+        f"{SEP}\n"
         "📍  London, UK\n"
         "⭐  9.7 / 10\n"
         "📅  Dates compatibles\n"
         "🛂  UK: GAE scheme via a sponsor\n"
-        "━━━━━━━━━━━━━━━━\n"
-        "Applied ML on LLM agents."
+        f"{SEP}\n"
+        "<i>Applied ML on LLM agents.</i>"
     )
-    assert message.priority == 4
-    assert message.tags == ("fire",)
-    assert message.click == "https://example.com/jobs/1"
-    assert message.actions == (Action("Voir l'offre", "https://example.com/jobs/1"),)
+    assert message.buttons == (
+        (
+            Button("🔗 Voir l'offre", url="https://example.com/jobs/1"),
+            Button("✍️ Lettre de motivation", callback="L:7"),
+        ),
+    )
+    assert message.silent is False
 
 
-def test_format_immediate_without_location():
-    message = format_immediate(scored(location=""))
-    assert "📍  Lieu non précisé" in message.body
+def test_letter_button_only_when_letters_are_enabled():
+    assert len(format_immediate(scored()).buttons[0]) == 1
 
 
-def test_format_digest_lists_offers():
+def test_dynamic_values_are_escaped():
+    message = format_immediate(scored(company="R&D <Labs>", title="C++ <Intern>"))
+    assert "R&amp;D &lt;Labs&gt;" in message.html
+    assert "C++ &lt;Intern&gt;" in message.html
+
+
+def test_format_digest_matches_the_approved_layout():
     offer = scored(
         "a", 7.1, company="Databricks", title="ML Intern", location="Amsterdam"
     )
     message = format_digest([offer])
-    assert message.title == "Récap du soir — 1 offre"
-    assert message.body == "• [A] Databricks — ML Intern · Amsterdam · 7.1"
-    assert message.priority == 3
+    assert message.html == (
+        "📋 <b>Récap du soir — 1 offre</b>\n"
+        f"{SEP}\n\n"
+        "<b>Databricks</b> · niveau A\n"
+        '<a href="https://example.com/jobs/1">ML Intern</a>\n'
+        "📍 Amsterdam   ⭐ 7.1 / 10\n\n"
+        f"{SEP}"
+    )
+    assert message.silent is True
 
 
-def test_digest_is_truncated_after_20_lines():
+def test_digest_stays_under_the_telegram_limit():
     jobs = [
-        scored(f"j{i}", 6.0, title="Machine Learning Intern " * 3) for i in range(45)
+        scored(f"j{i}", 6.0, title="Machine Learning Intern " * 10, location="X" * 90)
+        for i in range(45)
     ]
     message = format_digest(jobs)
-    lines = message.body.split("\n")
-    assert message.title == "Récap du soir — 45 offres"
-    assert len(lines) == 21
-    assert lines[-1] == "… et 25 autres (intern-radar list)"
-    assert len(message.body.encode()) < 4096
+    assert "… et 30 autres (intern-radar list)" in message.html
+    assert len(visible(message.html)) < 4096
 
 
-def test_alert_messages():
-    assert format_source_alert("Acme", "HTTP 500").title == "Source en panne : Acme"
-    assert "HTTP 500" in format_source_alert("Acme", "HTTP 500").body
-    assert format_llm_alert().priority == 2
-
-
-def test_ntfy_notifier_posts_json_to_the_server_root():
-    seen = {}
-
-    def handler(request):
-        seen["body"] = json.loads(request.content)
-        return httpx.Response(200, json={"id": "x"})
-
-    client = mock_client({"POST https://ntfy.sh/": handler})
-    message = Message(
-        "T",
-        "B",
-        4,
-        ("fire",),
-        "https://u",
-        (
-            Action("Voir l'offre", "https://u"),
-            Action("Lettre", "https://ntfy.sh/req", method="POST", body="job-1"),
-        ),
+def test_alerts_and_failures():
+    assert format_source_alert("Acme", "HTTP 500").html.startswith(
+        "⚠️ <b>Source en panne : Acme</b>\n"
     )
-    NtfyNotifier("https://ntfy.sh/", "topic-1", client).send(message)
-    assert seen["body"] == {
-        "topic": "topic-1",
-        "title": "T",
-        "message": "B",
-        "priority": 4,
-        "tags": ["fire"],
-        "click": "https://u",
-        "actions": [
-            {"action": "view", "label": "Voir l'offre", "url": "https://u"},
-            {
-                "action": "http",
-                "label": "Lettre",
-                "url": "https://ntfy.sh/req",
-                "method": "POST",
-                "body": "job-1",
-            },
-        ],
-    }
-
-
-def test_format_immediate_adds_the_letter_button():
-    message = format_immediate(scored(), "https://ntfy.sh/req")
-    assert message.actions[1] == Action(
-        "✍️ Lettre de motivation", "https://ntfy.sh/req", method="POST", body="j1"
+    assert format_llm_alert().silent is True
+    failure = format_letter_failure("Acme", "ML Intern", "CV unavailable")
+    assert failure.html == (
+        "❌ <b>Lettre non générée · Acme</b>\nML Intern\nCV unavailable"
     )
+    assert failure.silent is False
+    assert "10 lettres" in format_cap_notice(10).html
 
 
-def test_ntfy_notifier_raises_on_http_error():
-    client = mock_client({"POST https://ntfy.sh/": 429})
-    with pytest.raises(NotifyError):
-        NtfyNotifier("https://ntfy.sh", "t", client).send(Message("T", "B"))
+class FakeTelegram:
+    def __init__(self, error=None):
+        self.sent = []
+        self.error = error
+
+    def send_message(self, html, buttons=(), silent=False):
+        if self.error:
+            raise self.error
+        self.sent.append((html, buttons, silent))
 
 
-def test_console_notifier_writes_the_message():
+def test_telegram_notifier_sends_and_wraps_errors():
+    telegram = FakeTelegram()
+    TelegramNotifier(telegram).send(Message("<b>x</b>", (), True))
+    assert telegram.sent == [("<b>x</b>", (), True)]
+    failing = TelegramNotifier(FakeTelegram(TelegramError("sendMessage: HTTP 500")))
+    with pytest.raises(NotifyError, match="telegram: sendMessage: HTTP 500"):
+        failing.send(Message("x"))
+
+
+def test_console_notifier_prints_html_and_buttons():
     lines = []
-    ConsoleNotifier(write=lines.append).send(Message("T", "B", 4))
-    assert lines == ["[priority 4] T\nB\n"]
+    ConsoleNotifier(write=lines.append).send(
+        Message("<b>T</b>", ((Button("Voir", url="u"),),))
+    )
+    assert lines == ["<b>T</b>\n[Voir]\n"]

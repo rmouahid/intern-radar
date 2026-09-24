@@ -1,14 +1,14 @@
-"""ntfy notifications and their formatting."""
+"""Telegram notifications and their HTML formatting."""
 
+import html
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Protocol
 
-import httpx
-
 from intern_radar.models import ScoredJob
+from intern_radar.telegram import Button, TelegramClient, TelegramError
 
-MAX_DIGEST_LINES = 20
+MAX_DIGEST_LINES = 15
 SEPARATOR = "━" * 16
 DATES_LABELS = {
     "fits": "Dates compatibles",
@@ -16,6 +16,7 @@ DATES_LABELS = {
     "unknown": "Dates non précisées",
     "incompatible": "Dates incompatibles",
 }
+e = html.escape
 
 
 class NotifyError(Exception):
@@ -23,64 +24,25 @@ class NotifyError(Exception):
 
 
 @dataclass(frozen=True)
-class Action:
-    """A notification button: opens `url`, or sends an HTTP request if `method`."""
-
-    label: str
-    url: str
-    method: str | None = None
-    body: str | None = None
-
-
-@dataclass(frozen=True)
 class Message:
-    title: str
-    body: str
-    priority: int = 3
-    tags: tuple[str, ...] = ()
-    click: str | None = None
-    actions: tuple[Action, ...] = ()
+    html: str
+    buttons: tuple[tuple[Button, ...], ...] = ()
+    silent: bool = False
 
 
 class Notifier(Protocol):
     def send(self, message: Message) -> None: ...
 
 
-class NtfyNotifier:
-    def __init__(self, server: str, topic: str, client: httpx.Client) -> None:
-        self._server = server.rstrip("/") + "/"
-        self._topic = topic
-        self._client = client
+class TelegramNotifier:
+    def __init__(self, telegram: TelegramClient) -> None:
+        self._telegram = telegram
 
     def send(self, message: Message) -> None:
-        payload: dict[str, Any] = {
-            "topic": self._topic,
-            "title": message.title,
-            "message": message.body,
-            "priority": message.priority,
-            "tags": list(message.tags),
-        }
-        if message.click:
-            payload["click"] = message.click
-        if message.actions:
-            payload["actions"] = [_action_payload(a) for a in message.actions]
         try:
-            response = self._client.post(self._server, json=payload)
-            response.raise_for_status()
-        except httpx.HTTPError as exc:
-            raise NotifyError(f"ntfy: {exc}") from exc
-
-
-def _action_payload(action: Action) -> dict[str, str]:
-    if action.method is None:
-        return {"action": "view", "label": action.label, "url": action.url}
-    return {
-        "action": "http",
-        "label": action.label,
-        "url": action.url,
-        "method": action.method,
-        "body": action.body or "",
-    }
+            self._telegram.send_message(message.html, message.buttons, message.silent)
+        except TelegramError as exc:
+            raise NotifyError(f"telegram: {exc}") from None
 
 
 class ConsoleNotifier:
@@ -90,75 +52,69 @@ class ConsoleNotifier:
         self._write = write
 
     def send(self, message: Message) -> None:
-        self._write(f"[priority {message.priority}] {message.title}\n{message.body}\n")
+        labels = " ".join(f"[{b.label}]" for row in message.buttons for b in row)
+        self._write(f"{message.html}\n{labels}\n")
 
 
-def format_immediate(
-    scored: ScoredJob, letter_request_url: str | None = None
-) -> Message:
+def format_immediate(scored: ScoredJob, letter_callback: str | None = None) -> Message:
     job, assessment = scored.job, scored.assessment
-    body = "\n".join(
-        [
-            job.title,
-            SEPARATOR,
-            f"📍  {job.location or 'Lieu non précisé'}",
-            f"⭐  {scored.score:.1f} / 10",
-            f"📅  {DATES_LABELS[assessment.dates_fit]}",
-            f"🛂  {assessment.visa_note}",
-            SEPARATOR,
-            assessment.summary,
-        ]
-    )
-    actions = [Action("Voir l'offre", job.url)]
-    if letter_request_url:
-        actions.append(
-            Action(
-                "✍️ Lettre de motivation",
-                letter_request_url,
-                method="POST",
-                body=job.id,
-            )
-        )
-    return Message(
-        title=f"{job.company} · niveau {job.tier}",
-        body=body,
-        priority=4,
-        tags=("fire",),
-        click=job.url,
-        actions=tuple(actions),
-    )
+    lines = [
+        f"🔥 <b>{e(job.company)} · niveau {job.tier}</b>",
+        f"<b>{e(job.title)}</b>",
+        SEPARATOR,
+        f"📍  {e(job.location or 'Lieu non précisé')}",
+        f"⭐  {scored.score:.1f} / 10",
+        f"📅  {DATES_LABELS[assessment.dates_fit]}",
+        f"🛂  {e(assessment.visa_note)}",
+        SEPARATOR,
+        f"<i>{e(assessment.summary)}</i>",
+    ]
+    buttons = [Button("🔗 Voir l'offre", url=job.url)]
+    if letter_callback:
+        buttons.append(Button("✍️ Lettre de motivation", callback=letter_callback))
+    return Message("\n".join(lines), (tuple(buttons),))
 
 
 def format_digest(jobs: list[ScoredJob]) -> Message:
-    lines = [
-        f"• [{s.job.tier}] {s.job.company} — {s.job.title[:80]}"
-        f" · {s.job.location[:40]} · {s.score:.1f}"
+    blocks = [
+        f"<b>{e(s.job.company)}</b> · niveau {s.job.tier}\n"
+        f'<a href="{e(s.job.url)}">{e(s.job.title[:80])}</a>\n'
+        f"📍 {e(s.job.location[:40] or 'Lieu non précisé')}   ⭐ {s.score:.1f} / 10"
         for s in jobs[:MAX_DIGEST_LINES]
     ]
     if len(jobs) > MAX_DIGEST_LINES:
-        lines.append(f"… et {len(jobs) - MAX_DIGEST_LINES} autres (intern-radar list)")
+        blocks.append(f"… et {len(jobs) - MAX_DIGEST_LINES} autres (intern-radar list)")
     noun = "offre" if len(jobs) == 1 else "offres"
-    return Message(
-        title=f"Récap du soir — {len(jobs)} {noun}",
-        body="\n".join(lines),
-        priority=3,
-        tags=("clipboard",),
-    )
+    header = f"📋 <b>Récap du soir — {len(jobs)} {noun}</b>\n{SEPARATOR}"
+    body = "\n\n".join(blocks)
+    return Message(f"{header}\n\n{body}\n\n{SEPARATOR}", silent=True)
 
 
 def format_source_alert(company: str, error: str) -> Message:
     return Message(
-        title=f"Source en panne : {company}",
-        body=f"En échec depuis 3 jours. Dernière erreur : {error[:300]}",
-        priority=2,
-        tags=("warning",),
+        f"⚠️ <b>Source en panne : {e(company)}</b>\n"
+        f"En échec depuis 3 jours. Dernière erreur : {e(error[:300])}",
+        silent=True,
     )
 
 
 def format_llm_alert() -> Message:
     return Message(
-        title="Notation LLM indisponible",
-        body="La notation échoue depuis un jour ; des offres attendent d'être notées.",
-        priority=2,
-        tags=("warning",),
+        "⚠️ <b>Notation LLM indisponible</b>\n"
+        "La notation échoue depuis un jour ; des offres attendent d'être notées.",
+        silent=True,
+    )
+
+
+def format_letter_failure(company: str, title: str, reason: str) -> Message:
+    return Message(
+        f"❌ <b>Lettre non générée · {e(company)}</b>\n{e(title)}\n{e(reason[:300])}"
+    )
+
+
+def format_cap_notice(limit: int) -> Message:
+    return Message(
+        "⚠️ <b>Limite de lettres atteinte</b>\n"
+        f"{limit} lettres sur les dernières 24 h. Réessaie plus tard.",
+        silent=True,
     )
