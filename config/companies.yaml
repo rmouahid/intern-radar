@@ -1,12 +1,80 @@
-- name: Anthropic
-  tier: S
-  source: greenhouse
-  board: anthropic
-- name: OpenAI
-  tier: S
-  source: ashby
-  org: openai
-- name: Palantir
-  tier: A
-  source: lever
-  site: palantir
+# Watched companies. `source: none` = no public job feed; those companies
+# are only covered by the Adzuna catch-all (matched by name or alias).
+
+# Tier S
+- {name: Google, tier: S, source: none, aliases: [DeepMind, Google DeepMind]}
+- {name: Meta, tier: S, source: none, aliases: [Facebook]}
+- {name: Apple, tier: S, source: none}
+- {name: Microsoft, tier: S, source: microsoft}
+- {name: Amazon, tier: S, source: amazon, aliases: [AWS, Amazon Web Services]}
+- {name: NVIDIA, tier: S, source: workday, host: nvidia.wd5.myworkdayjobs.com, tenant: nvidia, site: NVIDIAExternalCareerSite}
+- {name: OpenAI, tier: S, source: ashby, org: openai}
+- {name: Anthropic, tier: S, source: greenhouse, board: anthropic}
+
+# Tier A — AI and tech
+- {name: Mistral AI, tier: A, source: none, aliases: [Mistral]}
+- {name: Cohere, tier: A, source: ashby, org: cohere}
+- {name: Databricks, tier: A, source: greenhouse, board: databricks}
+- {name: Scale AI, tier: A, source: greenhouse, board: scaleai}
+- {name: Hugging Face, tier: A, source: workable, account: huggingface}
+- {name: Stripe, tier: A, source: greenhouse, board: stripe}
+- {name: Palantir, tier: A, source: lever, site: palantir}
+- {name: Perplexity, tier: A, source: ashby, org: perplexity}
+- {name: xAI, tier: A, source: greenhouse, board: xai}
+- {name: Tesla, tier: A, source: none}
+- {name: ByteDance, tier: A, source: none, aliases: [TikTok]}
+- {name: IBM, tier: A, source: none}
+- {name: Salesforce, tier: A, source: workday, host: salesforce.wd12.myworkdayjobs.com, tenant: salesforce, site: External_Career_Site}
+- {name: Adobe, tier: A, source: workday, host: adobe.wd5.myworkdayjobs.com, tenant: adobe, site: external_experienced}
+- {name: Intel, tier: A, source: workday, host: intel.wd1.myworkdayjobs.com, tenant: intel, site: External}
+- {name: Samsung, tier: A, source: workday, host: sec.wd3.myworkdayjobs.com, tenant: sec, site: Samsung_Careers}
+
+# Tier A — finance and quant
+- {name: Jane Street, tier: A, source: greenhouse, board: janestreet}
+- {name: Citadel, tier: A, source: none, aliases: [Citadel Securities]}
+- {name: Two Sigma, tier: A, source: none}
+- {name: Goldman Sachs, tier: A, source: none}
+- {name: JPMorgan Chase, tier: A, source: none, aliases: [JP Morgan, J.P. Morgan, JPMorgan]}
+- {name: Point72, tier: A, source: greenhouse, board: point72}
+- {name: DRW, tier: A, source: greenhouse, board: drweng}
+- {name: IMC Trading, tier: A, source: greenhouse, board: imc}
+- {name: XTX Markets, tier: A, source: greenhouse, board: xtxmarketstechnologies}
+- {name: Citi, tier: A, source: workday, host: citi.wd5.myworkdayjobs.com, tenant: citi, site: "2"}
+- {name: BlackRock, tier: A, source: workday, host: blackrock.wd1.myworkdayjobs.com, tenant: blackrock, site: BlackRock_Professional}
+
+# Tier A — consulting
+- {name: McKinsey, tier: A, source: none, aliases: [QuantumBlack]}
+- {name: BCG, tier: A, source: none, aliases: [Boston Consulting Group, BCG X]}
+
+# Tier B
+- {name: Snowflake, tier: B, source: ashby, org: snowflake}
+- {name: Datadog, tier: B, source: greenhouse, board: datadog}
+- {name: Figma, tier: B, source: greenhouse, board: figma}
+- {name: Cloudflare, tier: B, source: greenhouse, board: cloudflare}
+- {name: Airbnb, tier: B, source: greenhouse, board: airbnb}
+- {name: Pinterest, tier: B, source: greenhouse, board: pinterest}
+- {name: Reddit, tier: B, source: greenhouse, board: reddit}
+- {name: Waymo, tier: B, source: greenhouse, board: waymo}
+- {name: Coinbase, tier: B, source: greenhouse, board: coinbase}
+- {name: Robinhood, tier: B, source: greenhouse, board: robinhood}
+- {name: Samsara, tier: B, source: greenhouse, board: samsara}
+- {name: Spotify, tier: B, source: lever, site: spotify}
+- {name: Uber, tier: B, source: none}
+- {name: Qualcomm, tier: B, source: none}
+- {name: DeepL, tier: B, source: ashby, org: deepl}
+- {name: ElevenLabs, tier: B, source: ashby, org: elevenlabs}
+- {name: Synthesia, tier: B, source: ashby, org: synthesia}
+- {name: Wayve, tier: B, source: greenhouse, board: wayve}
+- {name: Helsing, tier: B, source: greenhouse, board: helsing}
+- {name: Canva, tier: B, source: smartrecruiters, company_id: Canva}
+- {name: Bosch, tier: B, source: smartrecruiters, company_id: BoschGroup}
+- {name: Mastercard, tier: B, source: workday, host: mastercard.wd1.myworkdayjobs.com, tenant: mastercard, site: CorporateCareers}
+- {name: Accenture, tier: B, source: workday, host: accenture.wd103.myworkdayjobs.com, tenant: accenture, site: AccentureCareers}
+- {name: Airbus, tier: B, source: workday, host: ag.wd3.myworkdayjobs.com, tenant: ag, site: Airbus}
+- {name: Siemens, tier: B, source: none}
+- {name: Grab, tier: B, source: none}
+- {name: Sea, tier: B, source: none, aliases: [Shopee, Garena]}
+- {name: Shopify, tier: B, source: none}
+
+# Catch-all
+- {name: Adzuna, tier: unlisted, source: adzuna}
