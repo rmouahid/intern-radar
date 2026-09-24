@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Personal configuration (profile, CV summary, ntfy topic)
+config/profile.yaml
+
+# Runtime data
+data/
+logs/
