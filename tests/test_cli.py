@@ -15,7 +15,8 @@ PROFILE = """candidate_summary: Student.
 window_start: 2027-03-08
 window_end: 2027-08-31
 min_months: 4
-ntfy_topic: t
+telegram_token: "1:x"
+telegram_chat_id: 42
 """
 COMPANIES = """- {name: Acme, tier: A, source: greenhouse, board: acme}
 - {name: Meta, tier: S, source: none}

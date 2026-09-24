@@ -47,7 +47,8 @@ def make_profile(**overrides: Any) -> Profile:
         "window_start": date(2027, 3, 8),
         "window_end": date(2027, 8, 31),
         "min_months": 4,
-        "ntfy_topic": "test-topic",
+        "telegram_token": "123:ABC",
+        "telegram_chat_id": 42,
     }
     values.update(overrides)
     return Profile(**values)
