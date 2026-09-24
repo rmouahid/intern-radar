@@ -29,3 +29,16 @@ def test_unverified_tokens_flags_unknown_names_and_numbers():
 
 def test_sentence_initial_words_are_not_flagged():
     assert unverified_tokens("During my internship I learned a lot.", [""]) == []
+
+
+def test_accented_proper_nouns_are_checked():
+    assert unverified_tokens("I studied at the École Polytechnique.", ["x"]) == [
+        "École",
+        "Polytechnique",
+    ]
+
+
+def test_numbers_are_checked_with_the_following_word():
+    text = "I worked at SYSETELE for 3 years."
+    assert unverified_tokens(text, ["SYSETELE internship, 3 projects"]) == ["3 years"]
+    assert unverified_tokens("I shipped 3 projects.", ["3 projects"]) == []
