@@ -1,72 +1,117 @@
-import httpx
+from datetime import UTC, datetime
 
 from intern_radar.letters.inbox import (
-    LAST_ID_KEY,
-    RequestStream,
-    parse_line,
+    LAST_UPDATE_KEY,
+    LetterRequests,
+    TelegramUpdates,
     run_listener,
 )
 from intern_radar.store import Store
-from tests.factories import mock_client
+from intern_radar.telegram import TelegramError
+from tests.factories import make_job
+
+NOW = datetime(2026, 9, 24, tzinfo=UTC)
+CHAT = 42
 
 
-def test_parse_line_keeps_only_messages():
-    line = '{"id":"a1","event":"message","message":" job-1 "}'
-    assert parse_line(line) == ("a1", "job-1")
-    assert parse_line('{"id":"k","event":"keepalive"}') is None
-    assert parse_line("not json") is None
-    assert parse_line("") is None
+class FakeTelegram:
+    def __init__(self, batches=()):
+        self.batches = list(batches)
+        self.offsets = []
+        self.answers = []
+
+    def get_updates(self, offset, timeout=50):
+        self.offsets.append(offset)
+        batch = self.batches.pop(0)
+        if isinstance(batch, Exception):
+            raise batch
+        return batch
+
+    def answer_callback(self, callback_id, text):
+        self.answers.append((callback_id, text))
 
 
-def test_request_stream_reads_lines_since_the_last_id():
-    seen = {}
-
-    def handler(request):
-        seen["since"] = request.url.params["since"]
-        return httpx.Response(
-            200,
-            content=(
-                b'{"id":"o","event":"open"}\n'
-                b'{"id":"m1","event":"message","message":"job-1"}\n'
-            ),
-        )
-
-    client = mock_client({"GET https://ntfy.sh/req/json": handler})
-    stream = RequestStream(client, "https://ntfy.sh", "req")
-    assert list(stream.messages("m0")) == [("m1", "job-1")]
-    assert seen["since"] == "m0"
-    list(stream.messages(None))
-    assert seen["since"] == "12h"
-
-
-class FlakyStream:
+class FakeService:
     def __init__(self):
-        self.calls = []
+        self.handled = []
 
-    def messages(self, since):
-        self.calls.append(since)
-        if len(self.calls) == 1:
-            yield ("m1", "boom")
-            yield ("m2", "job-2")
-            raise httpx.ReadTimeout("dropped")
-        yield ("m3", "job-3")
+    def handle(self, job_id):
+        self.handled.append(job_id)
+
+
+def callback(data, chat=CHAT, sender=CHAT, cid="c1"):
+    return {
+        "id": cid,
+        "data": data,
+        "from": {"id": sender},
+        "message": {"chat": {"id": chat}},
+    }
+
+
+def setup():
+    store = Store(":memory:")
+    store.add(make_job(id="job-1"), "pending", NOW)
+    telegram, service = FakeTelegram(), FakeService()
+    return store, telegram, service, LetterRequests(telegram, store, service, CHAT)
+
+
+def test_tap_answers_then_writes_the_letter():
+    store, telegram, service, requests = setup()
+    requests(callback(f"L:{store.job_ref('job-1')}"))
+    assert telegram.answers == [("c1", "⏳ Lettre en préparation…")]
+    assert service.handled == ["job-1"]
+
+
+def test_callbacks_from_other_chats_are_ignored():
+    store, telegram, service, requests = setup()
+    ref = store.job_ref("job-1")
+    requests(callback(f"L:{ref}", chat=7, sender=7))
+    requests(callback(f"L:{ref}", chat=CHAT, sender=7))
+    assert telegram.answers == [] and service.handled == []
+
+
+def test_unknown_or_malformed_refs_are_answered_without_a_letter():
+    _, telegram, service, requests = setup()
+    requests(callback("L:999", cid="a"))
+    requests(callback("X:1", cid="b"))
+    assert telegram.answers == [("a", "Offre introuvable"), ("b", "Action inconnue")]
+    assert service.handled == []
+
+
+def test_updates_resume_after_the_last_id():
+    telegram = FakeTelegram([[{"update_id": 8, "callback_query": {"id": "x"}}]])
+    assert list(TelegramUpdates(telegram).callbacks(7)) == [(8, {"id": "x"})]
+    assert telegram.offsets == [8]
 
 
 def test_listener_survives_errors_and_resumes():
     store = Store(":memory:")
+    telegram = FakeTelegram(
+        [
+            [
+                {"update_id": 1, "callback_query": {"id": "boom"}},
+                {"update_id": 2, "callback_query": {"id": "ok"}},
+            ],
+            TelegramError("getUpdates: ReadTimeout"),
+            [{"update_id": 3}],
+        ]
+    )
     handled, sleeps = [], []
 
-    def handle(body):
-        if body == "boom":
-            raise RuntimeError("bad request")
-        handled.append(body)
+    def on_callback(cb):
+        if cb["id"] == "boom":
+            raise RuntimeError("bad")
+        handled.append(cb["id"])
 
-    stream = FlakyStream()
-    rounds = iter([True, True, False])
+    rounds = iter([True, True, True, False])
     run_listener(
-        stream, handle, store, sleep=sleeps.append, keep_going=lambda: next(rounds)
+        TelegramUpdates(telegram),
+        on_callback,
+        store,
+        sleep=sleeps.append,
+        keep_going=lambda: next(rounds),
     )
-    assert handled == ["job-2", "job-3"]
-    assert stream.calls == [None, "m2"]
-    assert store.get_meta(LAST_ID_KEY) == "m3"
-    assert sleeps[0] == 5
+    assert handled == ["ok"]
+    assert telegram.offsets == [None, 3, 3]
+    assert store.get_meta(LAST_UPDATE_KEY) == "3"
+    assert sleeps == [5]
