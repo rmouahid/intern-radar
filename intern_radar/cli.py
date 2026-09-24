@@ -13,6 +13,11 @@ from intern_radar.config import (
     load_profile,
 )
 from intern_radar.http import make_client
+from intern_radar.letters.cv import CvSource
+from intern_radar.letters.delivery import GmailSender, NtfyAttachmentSender
+from intern_radar.letters.inbox import RequestStream, run_listener
+from intern_radar.letters.service import LetterService
+from intern_radar.letters.writer import LetterWriter
 from intern_radar.models import Company
 from intern_radar.notifier import ConsoleNotifier, NotifyError, NtfyNotifier
 from intern_radar.pipeline import Pipeline
@@ -26,6 +31,8 @@ app = typer.Typer(
 )
 
 LOG_PATH = Path("logs/intern-radar.log")
+CV_CACHE = Path("data/cv-cache.json")
+LETTERS_DIR = Path("data/letters")
 CONFIG_DIR = typer.Option(Path("config"), "--config-dir", help="Configuration dir.")
 DB_PATH = typer.Option(Path("data/intern-radar.db"), "--db", help="SQLite file.")
 DRY_RUN = typer.Option(False, "--dry-run", help="Print instead of notifying.")
@@ -163,3 +170,78 @@ def check_sources(config_dir: Path = CONFIG_DIR) -> None:
         client.close()
     if failures:
         raise typer.Exit(1)
+
+
+def _letter_service(config_dir: Path, db: Path):
+    profile, _ = _load(config_dir)
+    missing = [key for key in ("cv_url", "contact") if getattr(profile, key) is None]
+    if missing:
+        typer.echo(
+            f"Configuration error: set {', '.join(missing)} in profile.yaml",
+            err=True,
+        )
+        raise typer.Exit(2)
+    client = make_client()
+    store = _open_store(db, dry_run=False)
+    cv = CvSource(client, profile.cv_url, CV_CACHE)
+    backend = ClaudeCliBackend(model=profile.letter_model)
+
+    def make_writer() -> LetterWriter:
+        return LetterWriter(
+            backend,
+            cv.text(),
+            profile.window_start,
+            profile.window_end,
+            profile.min_months,
+        )
+
+    mail = (
+        GmailSender(profile.letters_email, profile.smtp_app_password)
+        if profile.letters_email and profile.smtp_app_password
+        else None
+    )
+    service = LetterService(
+        store,
+        make_writer,
+        profile.contact,
+        LETTERS_DIR,
+        NtfyAttachmentSender(profile.ntfy_server, profile.ntfy_topic, client),
+        mail,
+        NtfyNotifier(profile.ntfy_server, profile.ntfy_topic, client),
+        profile.max_letters_per_day,
+    )
+    return service, store, client, profile
+
+
+@app.command()
+def letter(job_id: str, config_dir: Path = CONFIG_DIR, db: Path = DB_PATH) -> None:
+    """Write, render and deliver the cover letter for one stored offer."""
+    _setup_logging()
+    service, store, client, _ = _letter_service(config_dir, db)
+    try:
+        path = service.handle(job_id)
+    finally:
+        store.close()
+        client.close()
+    if path is None:
+        typer.echo("No letter produced (see logs).", err=True)
+        raise typer.Exit(1)
+    typer.echo(str(path))
+
+
+@app.command()
+def listen(config_dir: Path = CONFIG_DIR, db: Path = DB_PATH) -> None:
+    """Wait for letter requests from the notification button (runs forever)."""
+    _setup_logging()
+    service, store, client, profile = _letter_service(config_dir, db)
+    try:
+        if not profile.requests_topic:
+            typer.echo(
+                "Configuration error: set requests_topic in profile.yaml", err=True
+            )
+            raise typer.Exit(2)
+        stream = RequestStream(client, profile.ntfy_server, profile.requests_topic)
+        run_listener(stream, service.handle, store)
+    finally:
+        store.close()
+        client.close()

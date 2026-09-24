@@ -1,0 +1,16 @@
+[Unit]
+Description=intern-radar: cover letters on demand
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/remote-claude/intern-radar
+Environment=HOME=/root
+Environment=PATH=/root/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/root/.local/bin/poetry run intern-radar listen
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

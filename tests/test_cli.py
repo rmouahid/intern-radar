@@ -106,3 +106,36 @@ def test_logging_setup_silences_httpx_request_urls(config_dir):
     logging.getLogger("httpx").setLevel(logging.NOTSET)
     cli._setup_logging()
     assert logging.getLogger("httpx").level == logging.WARNING
+
+
+LETTER_PROFILE = PROFILE + (
+    "cv_url: https://cv\n"
+    "contact: {name: A B, location: P, phone: '1', email: e, linkedin: l,"
+    " github: g}\n"
+)
+
+
+def test_letter_requires_cv_url_and_contact(config_dir):
+    result = runner.invoke(cli.app, ["letter", "some-job"])
+    assert result.exit_code == 2
+    assert "cv_url" in result.output and "contact" in result.output
+
+
+def test_listen_requires_a_requests_topic(config_dir):
+    (config_dir / "profile.yaml").write_text(LETTER_PROFILE)
+    result = runner.invoke(cli.app, ["listen"])
+    assert result.exit_code == 2
+    assert "requests_topic" in result.output
+
+
+def test_letter_command_prints_the_pdf_path(config_dir, monkeypatch):
+    (config_dir / "profile.yaml").write_text(LETTER_PROFILE)
+
+    class FakeService:
+        def handle(self, job_id):
+            return config_dir / f"{job_id}.pdf"
+
+    monkeypatch.setattr(cli, "LetterService", lambda *a, **k: FakeService())
+    result = runner.invoke(cli.app, ["letter", "job-1"])
+    assert result.exit_code == 0
+    assert "job-1.pdf" in result.output

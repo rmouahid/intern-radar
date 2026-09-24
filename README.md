@@ -32,6 +32,37 @@ abroad at the most prestigious company possible.
    button; 5.5–7.5: evening digest at 21:00; source broken for 3 days or LLM
    unavailable for a day: low-priority alert.
 
+## Cover letters on demand
+
+Each offer notification carries a **✍️ Lettre de motivation** button. Tapping
+it makes the ntfy app post the offer id to a second secret topic; the
+`intern-radar-letters` service streams that topic (outbound connection only,
+no open port) and, for each request:
+
+1. reads the CV text from its PDF export (`cv_url`, cached 24 h);
+2. drafts a ~300-word, 3-paragraph letter with the LLM (`letter_model`,
+   default Sonnet), using only facts from the CV;
+3. **ATS check**: extracts the offer's keywords, adds the ones the CV
+   supports, and lists the ones the CV lacks (never added);
+4. **anti-AI rewrite**: a second pass replaces clichés and generic phrasing;
+   a blacklist check triggers one more pass if needed;
+5. **fidelity check**: names and numbers found neither in the CV nor in the
+   offer are flagged;
+6. renders a simple PDF and delivers it as an ntfy attachment and by e-mail
+   (Gmail app password), with the check results.
+
+A second tap re-delivers the stored letter. At most `max_letters_per_day`
+new letters are written per 24 h.
+
+Profile keys: `requests_topic`, `cv_url`, `contact` (name, location, phone,
+email, linkedin, github), `letters_email`, `smtp_app_password`,
+`letter_model`, `max_letters_per_day` (see `config/profile.example.yaml`).
+
+```bash
+poetry run intern-radar letter <job_id>   # write and deliver one letter
+poetry run intern-radar listen            # wait for button taps (service)
+```
+
 ## Setup
 
 Requirements: Python ≥ 3.12, [Poetry](https://python-poetry.org), the
@@ -77,6 +108,7 @@ ln -sf "$PWD"/deploy/intern-radar-*.service "$PWD"/deploy/intern-radar-*.timer /
 cp deploy/logrotate.conf /etc/logrotate.d/intern-radar
 systemctl daemon-reload
 systemctl enable --now intern-radar-run.timer intern-radar-digest.timer
+systemctl enable --now intern-radar-letters.service   # cover letters
 systemctl list-timers 'intern-radar*'
 journalctl -u intern-radar-run.service -n 30
 ```
