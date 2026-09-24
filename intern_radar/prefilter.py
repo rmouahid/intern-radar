@@ -13,17 +13,28 @@ FRANCE_RE = re.compile(
     r"|bordeaux|lille|rennes|grenoble|sophia[- ]antipolis)\b",
     re.IGNORECASE,
 )
-LOCATION_SEPARATOR_RE = re.compile(r"\s*(?:;|\||/|\bor\b)\s*", re.IGNORECASE)
+LOCATION_SEPARATOR_RE = re.compile(r"\s*(?:[;,|/&]|\band\b|\bor\b)\s*", re.IGNORECASE)
+# Parts that say nothing about the country ("Paris, Île-de-France, France").
+NEUTRAL_RE = re.compile(
+    r"^(remote|hybrid|on-?site|office|europe|emea|eu|idf|[iî]le-de-france)$",
+    re.IGNORECASE,
+)
 
 
 def is_internship_title(title: str) -> bool:
     return bool(TITLE_RE.search(title))
 
 
+def _is_french(part: str) -> bool:
+    return bool(FRANCE_RE.search(part)) and "exclud" not in part.lower()
+
+
 def is_france_only(location: str) -> bool:
-    """True when every listed location is in France."""
-    segments = [s for s in LOCATION_SEPARATOR_RE.split(location) if s.strip()]
-    return bool(segments) and all(FRANCE_RE.search(s) for s in segments)
+    """True when the location names France and no place outside France."""
+    parts = [p.strip() for p in LOCATION_SEPARATOR_RE.split(location) if p.strip()]
+    french = [p for p in parts if _is_french(p)]
+    others = [p for p in parts if not _is_french(p) and not NEUTRAL_RE.match(p)]
+    return bool(french) and not others
 
 
 def passes(job: Job) -> bool:
