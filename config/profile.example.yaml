@@ -19,3 +19,18 @@ ntfy_topic: intern-radar-CHANGE-ME-to-a-long-random-string
 # adzuna_app_key: your-app-key
 # weights: {tier: 0.5, relevance: 0.3, dates: 0.2}
 # thresholds: {immediate: 7.5, digest: 5.5, min_relevance: 6}
+
+# --- Cover letters (optional) ---
+# requests_topic: intern-radar-requests-CHANGE-ME   # second secret topic
+# cv_url: https://docs.google.com/document/d/<id>/export?format=pdf
+# letters_email: you@gmail.com
+# smtp_app_password: xxxx xxxx xxxx xxxx          # Gmail app password
+# letter_model: sonnet
+# max_letters_per_day: 10
+# contact:
+#   name: Your Name
+#   location: Paris, France
+#   phone: "+33 ..."
+#   email: you@gmail.com
+#   linkedin: linkedin.com/in/you
+#   github: github.com/you
