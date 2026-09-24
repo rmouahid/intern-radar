@@ -173,11 +173,18 @@ Triggered by a button tap:
    (`max_letters_per_day`, 10) → one notice per day.
 4. CV text from the Google Doc PDF export (`pypdf`), cached 24 h; a stale
    cache is used when the download fails.
-5. LLM (sonnet), up to 5 calls: draft (3 paragraphs, CV as sole source of
-   facts, offer wrapped in `<offer>` as untrusted data) → keyword extraction
-   (skipped when the offer has no description) → ATS revision if CV-backed
-   keywords are missing → anti-cliché rewrite → second rewrite if a
-   blacklisted phrase remains.
+5. LLM (sonnet, `--effort low`), 2 to 4 calls:
+   - **draft + keywords** in one call: 3 paragraphs with the CV as sole source
+     of facts, the offer wrapped in `<offer>` as untrusted data, and the
+     offer's 10–15 ATS keywords with an `in_cv` flag (ignored when the offer
+     has no description);
+   - **ATS pass**, only if CV-backed keywords are missing, and **anti-cliché
+     pass**, always; a second anti-cliché pass only if a blacklisted phrase
+     remains. These passes return **edits** (`{"before", "after"}`, exact
+     substrings), not a new letter; `apply_edits` replaces each `before`
+     once (whitespace-tolerant), skips edits that do not match or would
+     empty a paragraph, and counts them (`edits_failed`, shown in the
+     caption).
 6. Pure checks: keyword coverage, blacklist, fidelity (proper nouns — with
    accented capitals — and "number + unit" not found in CV/offer),
    keywords the model judged "in the CV" without literal evidence.
@@ -254,6 +261,12 @@ Judgement:
   Observed: 39 % of assessments have `dates_fit = unknown`; a "Class of
   2029" Amazon Japan posting scored 8.5 although it likely targets another
   graduation year. Scores are a triage aid, not a decision.
+- Scoring is not deterministic: the same 10 offers scored twice agreed on
+  internship status, dates and eligibility for 7 of 10, and `ai_relevance`
+  moved by 0.7 point on average. An offer near a threshold can land on
+  either side of it.
+- Letters come out shorter than the requested ~300 words (202–276 words
+  measured); the one-page layout is unaffected.
 - `ai_relevance < 6` excluded 91 of the first 100 scored offers (the backlog
   starts with tier-S Amazon postings, many non-technical).
 - Fidelity checks do not verify sentence-initial words; skills the model
@@ -275,30 +288,42 @@ Platform:
 
 ## 7. LLM usage and cost (measured)
 
-Numbers from the CLI's JSON envelope (`usage`, `total_cost_usd`). Input =
-fresh + cache-creation + cache-read tokens (the CLI's own system prompt,
-~2.5 k tokens, is served from cache on every call). `total_cost_usd` is the
+Numbers from the CLI's JSON envelope (`usage`, `output_tokens_details`,
+`total_cost_usd`). Input = fresh + cache-creation + cache-read tokens (the
+CLI's own system prompt, ~2.5 k tokens, is served from cache on every call).
+Reasoning ("thinking") tokens are billed as output. `total_cost_usd` is the
 **API-equivalent** price: with a subscription it is consumed quota, not
-billed money.
+billed money; single calls also vary with cache state, so compare tokens
+first.
 
-| Operation | Model | Calls | Input tokens | Output tokens | Latency | API-equivalent |
+| Operation | Model / effort | Calls | Input | Output (of which reasoning) | Latency | API-equiv. |
 |---|---|---|---|---|---|---|
-| Score 10 offers (31.6 k chars prompt) | haiku | 1 | 15.3 k | 10.7 k | 107 s | $0.072 |
-| Write one letter (draft, keywords, ATS, anti-AI) | sonnet | 4 | 28.2 k | 5.7 k | 56 s | $0.141 |
+| Score 10 offers | haiku / default | 1 | 15.3 k | 7.9–10.7 k (≈ 83 %) | 81–107 s | $0.072 |
+| Letter, v1 (draft, keywords, ATS rewrite, anti-AI rewrite) | sonnet / default | 4 | 28.2 k | 5.7 k | 56 s | $0.141 |
+| Letter, v2 (draft+keywords, ATS edits, anti-AI edits) | sonnet / default | 3 | 22.4 k | 4.7 k | 46 s | $0.127 |
+| **Letter, v2 (current)** | **sonnet / low** | **3** | **22.7 k** | **2.25 k (0.4 k)** | **25 s** | **$0.084** |
 
-Projections:
+Same NVIDIA offer for every letter row. v1 → current: output −61 %,
+latency −56 %, API-equivalent −40 %. The largest single lever was
+reasoning: the draft call alone went from 2,779 output tokens (1,770
+reasoning, 24.9 s) to 952 (0 reasoning, 9.7 s) with comparable text; moving
+from full rewrites to edits saved one call and ~20 % of input.
+
+Projections (current configuration):
 
 | Scenario | Batches/day | Scoring | Letters | Total/day (API-equiv.) |
 |---|---|---|---|---|
-| Backlog (first 2–3 days) | 5 × 8 = 40 | $2.9, ~70 min LLM time | — | ~$3/day, then drops |
-| Steady state (~30 new postings/day, 99 % pass the pre-filter) | ~3 | $0.22 | 2 letters: $0.28 | **~$0.50/day ≈ $15/month** |
-| Cap (all limits reached) | 40 | $2.9 | 10 letters: $1.4 | ~$4.3/day |
+| Backlog (first 2–3 days) | 5 × 8 = 40 | $2.9, ~60 min LLM time | — | ~$3/day, then drops |
+| Steady state (~30 new postings/day, 99 % pass the pre-filter) | ~3 | $0.22 | 2 letters: $0.17 | **~$0.39/day ≈ $12/month** |
+| Cap (all limits reached) | 40 | $2.9 | 10 letters: $0.84 | ~$3.7/day |
 
 Observations and levers:
 
-- Haiku emits ~1 k output tokens per offer for a ~150-token JSON object
-  (reasoning and structured-output overhead). Output dominates scoring cost
-  and latency; shorter instructions or a leaner schema are the first lever.
+- Scoring output is ~83 % reasoning (6.5–7.4 k of 7.9–8.9 k tokens per
+  batch). `--effort low` had no effect on haiku in the same measurement, so
+  `llm_effort` stays unset; reducing reasoning for scoring would need
+  another model/effort combination and a quality check against the
+  run-to-run variance above.
 - Descriptions are truncated at 3,000 characters for scoring and 6,000 for
   letters; lowering them reduces input linearly.
 - A second tap on the same offer costs nothing (stored letter).
