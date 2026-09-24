@@ -157,3 +157,22 @@ def test_long_job_ids_are_replaced_by_batch_numbers():
     result = make_scorer(backend).assess([job])
     assert "workday:nvidia" not in backend.prompts[0]
     assert result == {job.id: make_assessment()}
+
+
+def test_cli_failure_message_names_the_api_error():
+    envelope = {
+        "type": "result",
+        "is_error": True,
+        "subtype": "error_during_execution",
+        "api_error_status": 429,
+        "result": "rate limited",
+        "usage": {"input_tokens": 0},
+    }
+    runner = FakeRunner(returncode=1, stdout=json.dumps(envelope))
+    with pytest.raises(LLMError) as info:
+        ClaudeCliBackend(runner=runner).complete("P", {})
+    message = str(info.value)
+    assert "api_error_status=429" in message
+    assert "subtype=error_during_execution" in message
+    assert "rate limited" in message
+    assert "usage" not in message
