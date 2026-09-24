@@ -39,6 +39,16 @@ CREATE TABLE IF NOT EXISTS llm_health (
     first_failure TEXT NOT NULL,
     alerted INTEGER NOT NULL DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS letters (
+    job_id TEXT PRIMARY KEY,
+    path TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    report TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS meta (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
 """
 
 JOB_COLUMNS = (
@@ -87,6 +97,10 @@ class Store:
                 f" status) VALUES ({', '.join('?' * (len(JOB_COLUMNS) + 2))})",
                 [*values, now.isoformat(), status],
             )
+
+    def get_job(self, job_id: str) -> Job | None:
+        row = self._db.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
+        return _row_to_job(row) if row else None
 
     def has_similar(self, company: str, title: str) -> bool:
         row = self._db.execute(
@@ -224,3 +238,38 @@ class Store:
     def mark_llm_alerted(self) -> None:
         with self._db:
             self._db.execute("UPDATE llm_health SET alerted = 1")
+
+    # --- letters and meta -------------------------------------------------
+
+    def save_letter(self, job_id: str, path: str, report: dict, now: datetime) -> None:
+        with self._db:
+            self._db.execute(
+                "INSERT OR REPLACE INTO letters (job_id, path, created_at, report)"
+                " VALUES (?, ?, ?, ?)",
+                (job_id, path, now.isoformat(), json.dumps(report)),
+            )
+
+    def letter(self, job_id: str) -> tuple[str, dict] | None:
+        row = self._db.execute(
+            "SELECT path, report FROM letters WHERE job_id = ?", (job_id,)
+        ).fetchone()
+        return (row["path"], json.loads(row["report"])) if row else None
+
+    def letters_since(self, since: datetime) -> int:
+        row = self._db.execute(
+            "SELECT count(*) AS n FROM letters WHERE created_at >= ?",
+            (since.isoformat(),),
+        ).fetchone()
+        return row["n"]
+
+    def get_meta(self, key: str) -> str | None:
+        row = self._db.execute(
+            "SELECT value FROM meta WHERE key = ?", (key,)
+        ).fetchone()
+        return row["value"] if row else None
+
+    def set_meta(self, key: str, value: str) -> None:
+        with self._db:
+            self._db.execute(
+                "INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)", (key, value)
+            )
