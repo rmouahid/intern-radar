@@ -21,7 +21,8 @@ BLACKLIST: tuple[str, ...] = (
     "seamless",
     "—",
 )
-TOKEN_RE = re.compile(r"\d+(?:[.,]\d+)*%?|[A-Za-z][\w+#.-]*[\w+#]|[A-Za-z]")
+TOKEN_RE = re.compile(r"\d+(?:[.,]\d+)*%?|[^\W\d_][\w+#.-]*[\w+#]|[^\W\d_]")
+YEAR_RE = re.compile(r"(19|20)\d\d")
 SENTENCE_RE = re.compile(r"(?<=[.!?])\s+")
 
 
@@ -45,18 +46,34 @@ def blacklisted(text: str) -> list[str]:
 
 
 def unverified_tokens(text: str, sources: list[str]) -> list[str]:
-    """Proper nouns and numbers of `text` found in none of `sources`."""
+    """Proper nouns and numbers of `text` found in none of `sources`.
+
+    A number is checked together with the word that follows it ("3 years"),
+    so a "3" elsewhere in the CV does not vouch for it; years stand alone.
+    """
     haystack = " ".join(sources)
     flagged: list[str] = []
     for sentence in SENTENCE_RE.split(text):
-        for index, word in enumerate(TOKEN_RE.findall(sentence)):
-            is_number = word[0].isdigit()
-            is_proper = (
+        words = TOKEN_RE.findall(sentence)
+        for index, word in enumerate(words):
+            if word[0].isdigit():
+                following = words[index + 1] if index + 1 < len(words) else ""
+                if (
+                    following
+                    and not following[0].isdigit()
+                    and not YEAR_RE.fullmatch(word)
+                ):
+                    candidate = f"{word} {following}"
+                else:
+                    candidate = word
+            elif (
                 len(word) > 1
                 and word[0].isupper()
                 and (index > 0 or any(c.isupper() for c in word[1:]))
-            )
-            if (is_number or is_proper) and word not in flagged:
-                if not _contains(haystack, word):
-                    flagged.append(word)
+            ):
+                candidate = word
+            else:
+                continue
+            if candidate not in flagged and not _contains(haystack, candidate):
+                flagged.append(candidate)
     return flagged
