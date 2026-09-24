@@ -130,8 +130,8 @@ class ClaudeCliBackend:
         except (OSError, subprocess.TimeoutExpired) as exc:
             raise LLMError(f"claude CLI failed to run: {exc}") from exc
         if proc.returncode != 0:
-            detail = (proc.stderr or proc.stdout or "").strip()[:300]
-            raise LLMError(f"claude CLI exited with {proc.returncode}: {detail}")
+            detail = _failure_detail(proc.stdout) or (proc.stderr or "").strip()
+            raise LLMError(f"claude CLI exited with {proc.returncode}: {detail[:300]}")
         try:
             envelope = json.loads(proc.stdout)
         except json.JSONDecodeError as exc:
@@ -141,6 +141,20 @@ class ClaudeCliBackend:
             detail = str(envelope.get("result", ""))[:300]
             raise LLMError(f"claude CLI returned no structured output: {detail}")
         return output
+
+
+def _failure_detail(stdout: str) -> str:
+    """The useful fields of a JSON error envelope, or the raw output."""
+    try:
+        envelope = json.loads(stdout)
+    except (json.JSONDecodeError, TypeError):
+        return (stdout or "").strip()
+    if not isinstance(envelope, dict):
+        return stdout.strip()
+    fields = ("api_error_status", "subtype", "terminal_reason", "result")
+    return " ".join(
+        f"{key}={envelope[key]}" for key in fields if envelope.get(key) is not None
+    )
 
 
 def _parse(item: Any) -> Assessment | None:
