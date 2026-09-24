@@ -187,13 +187,15 @@ class Scorer:
         )
 
     def build_prompt(self, jobs: list[Job]) -> str:
+        # Jobs are numbered 1..n: long source ids (Workday paths) are easy for
+        # the LLM to mangle, which would leave the job unscored.
         blocks = [
-            f"--- job_id: {job.id}\n"
+            f"--- job_id: {number}\n"
             f"Company: {job.company}\n"
             f"Title: {job.title}\n"
             f"Location: {job.location or 'not stated'}\n"
             f"Description:\n{job.description[:DESCRIPTION_LIMIT]}\n"
-            for job in jobs
+            for number, job in enumerate(jobs, start=1)
         ]
         return self._header + "\n".join(blocks)
 
@@ -201,11 +203,11 @@ class Scorer:
         if not jobs:
             return {}
         result = self._backend.complete(self.build_prompt(jobs), ASSESSMENT_SCHEMA)
-        wanted = {job.id for job in jobs}
+        by_number = {str(number): job.id for number, job in enumerate(jobs, 1)}
         assessments: dict[str, Assessment] = {}
         for item in result.get("assessments", []):
             parsed = _parse(item)
-            job_id = item.get("job_id") if isinstance(item, dict) else None
-            if parsed is not None and job_id in wanted:
-                assessments[job_id] = parsed
+            number = str(item.get("job_id", "")) if isinstance(item, dict) else ""
+            if parsed is not None and number in by_number:
+                assessments[by_number[number]] = parsed
         return assessments
