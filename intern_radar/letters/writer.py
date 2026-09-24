@@ -88,8 +88,10 @@ closing (e.g. "Sincerely,") and the language as an ISO code."""
 
 KEYWORDS = """List the 10 to 15 most important keywords (skills, tools,
 technologies, concepts) an applicant tracking system would look for in this
-internship offer. Set in_cv to true only when the CV below shows that the
-candidate has it.
+internship offer. Each keyword is 1 to 3 words, written as in the offer;
+leave out degree, enrolment and soft-skill requirements. Set in_cv to true
+when the CV mentions the keyword or clearly demonstrates it (for example, a
+RAG project demonstrates information retrieval).
 
 <cv>
 {cv}

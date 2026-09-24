@@ -122,3 +122,11 @@ def test_report_flags_unverified_facts():
 def test_invalid_letters_raise_llm_error(answer):
     with pytest.raises(LLMError):
         make_writer(ScriptedBackend(answer)).write(make_job())
+
+
+def test_keyword_prompt_asks_for_short_keywords_judged_on_evidence():
+    backend = ScriptedBackend(draft(CLEAN), keywords(), rewrite(CLEAN, 0))
+    make_writer(backend).write(make_job())
+    prompt = backend.calls[1][0]
+    assert "1 to 3 words" in prompt
+    assert "demonstrates" in prompt
