@@ -53,7 +53,7 @@ class FakeNotifier:
 
     def send(self, message):
         if self.fail:
-            raise NotifyError("ntfy down")
+            raise NotifyError("telegram down")
         self.sent.append(message)
 
 
@@ -182,7 +182,7 @@ def test_notification_failure_leaves_offers_for_the_next_run():
     )
     report = pipeline.run()
     assert report.notified == 0
-    assert report.errors == ["ntfy down"]
+    assert report.errors == ["telegram down"]
     assert [s.job.id for s in store.due_immediate(7.5, limit=10)] == ["good"]
 
 
