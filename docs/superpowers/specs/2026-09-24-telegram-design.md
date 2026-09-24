@@ -122,7 +122,7 @@ Digest (silent):
 ━━━━━━━━━━━━━━━━
 ```
 
-At most 20 offers, then "… et N autres (intern-radar list)".
+At most 15 offers (Telegram 4096-character limit), then "… et N autres (intern-radar list)".
 
 Alerts (silent): `⚠️ <b>Source en panne : X</b>` / `⚠️ <b>Notation LLM
 indisponible</b>` / `⚠️ <b>Limite de lettres atteinte</b>` with one line
