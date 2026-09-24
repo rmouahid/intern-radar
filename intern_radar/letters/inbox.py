@@ -76,7 +76,7 @@ def run_listener(
                     except Exception:  # one bad tap must not stop the listener
                         log.exception("button tap %s failed", update_id)
                 store.set_meta(LAST_UPDATE_KEY, str(update_id))
-                delay = FIRST_DELAY
+            delay = FIRST_DELAY  # any successful poll, even an empty one
         except TelegramError as exc:
             log.warning("Telegram polling failed (%s), retrying in %s s", exc, delay)
             sleep(delay)
