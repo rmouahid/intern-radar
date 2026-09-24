@@ -45,8 +45,8 @@ class Profile:
     window_start: date
     window_end: date
     min_months: int
-    ntfy_topic: str
-    ntfy_server: str = "https://ntfy.sh"
+    telegram_token: str
+    telegram_chat_id: int
     llm_model: str = "haiku"
     max_llm_batches_per_run: int = 5
     max_immediate_per_run: int = 10
@@ -54,7 +54,6 @@ class Profile:
     adzuna_app_key: str | None = None
     weights: Weights = field(default_factory=Weights)
     thresholds: Thresholds = field(default_factory=Thresholds)
-    requests_topic: str | None = None
     cv_url: str | None = None
     letters_email: str | None = None
     smtp_app_password: str | None = None
@@ -68,7 +67,8 @@ REQUIRED_PROFILE_KEYS = (
     "window_start",
     "window_end",
     "min_months",
-    "ntfy_topic",
+    "telegram_token",
+    "telegram_chat_id",
 )
 
 
@@ -135,6 +135,8 @@ def load_profile(path: Path) -> Profile:
             raise ConfigError(f"{path}: {key} must be a date (YYYY-MM-DD)")
     if data["window_start"] >= data["window_end"]:
         raise ConfigError(f"{path}: window_start must be before window_end")
+    if not isinstance(data["telegram_chat_id"], int):
+        raise ConfigError(f"{path}: telegram_chat_id must be an integer")
     values = dict(data)
     values["weights"] = _build(Weights, data.get("weights", {}), "weights")
     values["thresholds"] = _build(Thresholds, data.get("thresholds", {}), "thresholds")

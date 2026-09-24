@@ -10,8 +10,8 @@ candidate_summary: |
 window_start: 2027-03-08
 window_end: 2027-08-31
 min_months: 4
-ntfy_topic: intern-radar-CHANGE-ME-to-a-long-random-string
-# ntfy_server: https://ntfy.sh
+telegram_token: "123456:ABC-CHANGE-ME"   # from @BotFather
+telegram_chat_id: 123456789              # your chat with the bot
 # llm_model: haiku
 # max_llm_batches_per_run: 5
 # max_immediate_per_run: 10
@@ -21,7 +21,6 @@ ntfy_topic: intern-radar-CHANGE-ME-to-a-long-random-string
 # thresholds: {immediate: 7.5, digest: 5.5, min_relevance: 6}
 
 # --- Cover letters (optional) ---
-# requests_topic: intern-radar-requests-CHANGE-ME   # second secret topic
 # cv_url: https://docs.google.com/document/d/<id>/export?format=pdf
 # letters_email: you@gmail.com
 # smtp_app_password: xxxx xxxx xxxx xxxx          # Gmail app password

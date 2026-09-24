@@ -72,7 +72,8 @@ candidate_summary: Engineering student.
 window_start: 2027-03-08
 window_end: 2027-08-31
 min_months: 4
-ntfy_topic: secret-topic
+telegram_token: "123:ABC"
+telegram_chat_id: 42
 """
 
 
@@ -80,7 +81,7 @@ def test_load_profile_applies_defaults(tmp_path):
     profile = load_profile(write(tmp_path, "profile.yaml", PROFILE))
     assert profile.window_start == date(2027, 3, 8)
     assert profile.window_end == date(2027, 8, 31)
-    assert profile.ntfy_server == "https://ntfy.sh"
+    assert (profile.telegram_token, profile.telegram_chat_id) == ("123:ABC", 42)
     assert profile.llm_model == "haiku"
     assert profile.weights == Weights(0.5, 0.3, 0.2)
     assert profile.thresholds == Thresholds(7.5, 5.5, 6)
@@ -98,7 +99,7 @@ def test_load_profile_overrides_weights_and_thresholds(tmp_path):
     "content, message",
     [
         ("min_months: 4", "missing"),
-        (PROFILE + "ntfy_toppic: typo\n", "unknown key"),
+        (PROFILE + "telegram_tokn: typo\n", "unknown key"),
         (PROFILE + "weights: {tiers: 1}\n", "weights"),
         (PROFILE.replace("2027-08-31", "2027-01-01"), "window_start"),
         (PROFILE.replace("2027-03-08", "soon"), "date"),
@@ -120,7 +121,7 @@ CONTACT = """contact:
 
 
 def test_load_profile_reads_letter_settings(tmp_path):
-    content = PROFILE + CONTACT + "requests_topic: req-topic\ncv_url: https://cv\n"
+    content = PROFILE + CONTACT + "cv_url: https://cv\n"
     profile = load_profile(write(tmp_path, "profile.yaml", content))
     assert profile.contact == Contact(
         "Rayân Mouahid",
@@ -130,7 +131,6 @@ def test_load_profile_reads_letter_settings(tmp_path):
         "linkedin.com/in/me",
         "github.com/me",
     )
-    assert profile.requests_topic == "req-topic"
     assert profile.cv_url == "https://cv"
     assert profile.letter_model == "sonnet"
     assert profile.max_letters_per_day == 10
@@ -139,10 +139,21 @@ def test_load_profile_reads_letter_settings(tmp_path):
 def test_letter_settings_are_optional(tmp_path):
     profile = load_profile(write(tmp_path, "profile.yaml", PROFILE))
     assert profile.contact is None
-    assert profile.requests_topic is None
+    assert profile.cv_url is None
 
 
 def test_incomplete_contact_is_rejected(tmp_path):
     content = PROFILE + "contact: {name: X}\n"
     with pytest.raises(ConfigError, match="contact"):
+        load_profile(write(tmp_path, "profile.yaml", content))
+
+
+def test_old_ntfy_keys_are_rejected(tmp_path):
+    with pytest.raises(ConfigError, match="unknown key"):
+        load_profile(write(tmp_path, "profile.yaml", PROFILE + "ntfy_topic: t\n"))
+
+
+def test_chat_id_must_be_an_integer(tmp_path):
+    content = PROFILE.replace("telegram_chat_id: 42", "telegram_chat_id: me")
+    with pytest.raises(ConfigError, match="telegram_chat_id"):
         load_profile(write(tmp_path, "profile.yaml", content))
