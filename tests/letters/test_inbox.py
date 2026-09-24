@@ -115,3 +115,18 @@ def test_listener_survives_errors_and_resumes():
     assert telegram.offsets == [None, 3, 3]
     assert store.get_meta(LAST_UPDATE_KEY) == "3"
     assert sleeps == [5]
+
+
+def test_backoff_resets_after_a_successful_empty_poll():
+    store = Store(":memory:")
+    telegram = FakeTelegram([TelegramError("x"), [], TelegramError("y"), []])
+    sleeps = []
+    rounds = iter([True, True, True, True, False])
+    run_listener(
+        TelegramUpdates(telegram),
+        lambda cb: None,
+        store,
+        sleep=sleeps.append,
+        keep_going=lambda: next(rounds),
+    )
+    assert sleeps == [5, 5]
