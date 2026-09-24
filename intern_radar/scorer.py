@@ -77,6 +77,7 @@ Return one assessment per job below, with the same job_id:
 - language_ok: false if the role requires a language other than English,
   Spanish or French.
 - summary: one sentence describing the role.
+Write visa_note and summary in French.
 
 Jobs:
 """

@@ -9,11 +9,12 @@ import httpx
 from intern_radar.models import ScoredJob
 
 MAX_DIGEST_LINES = 20
+SEPARATOR = "━" * 16
 DATES_LABELS = {
-    "fits": "dates OK",
-    "too_short_extendable": "too short, ask to extend",
-    "unknown": "dates not stated",
-    "incompatible": "dates incompatible",
+    "fits": "Dates compatibles",
+    "too_short_extendable": "Trop court, demander une prolongation",
+    "unknown": "Dates non précisées",
+    "incompatible": "Dates incompatibles",
 }
 
 
@@ -77,18 +78,23 @@ def format_immediate(scored: ScoredJob) -> Message:
     job, assessment = scored.job, scored.assessment
     body = "\n".join(
         [
-            f"📍 {job.location or 'location not stated'} · score {scored.score:.1f}",
-            f"📅 {DATES_LABELS[assessment.dates_fit]} · 🛂 {assessment.visa_note}",
+            job.title,
+            SEPARATOR,
+            f"📍  {job.location or 'Lieu non précisé'}",
+            f"⭐  {scored.score:.1f} / 10",
+            f"📅  {DATES_LABELS[assessment.dates_fit]}",
+            f"🛂  {assessment.visa_note}",
+            SEPARATOR,
             assessment.summary,
         ]
     )
     return Message(
-        title=f"[{job.tier}] {job.company} — {job.title}",
+        title=f"{job.company} · niveau {job.tier}",
         body=body,
         priority=4,
         tags=("fire",),
         click=job.url,
-        actions=(("View offer", job.url),),
+        actions=(("Voir l'offre", job.url),),
     )
 
 
@@ -99,10 +105,10 @@ def format_digest(jobs: list[ScoredJob]) -> Message:
         for s in jobs[:MAX_DIGEST_LINES]
     ]
     if len(jobs) > MAX_DIGEST_LINES:
-        lines.append(f"… and {len(jobs) - MAX_DIGEST_LINES} more (intern-radar list)")
-    noun = "offer" if len(jobs) == 1 else "offers"
+        lines.append(f"… et {len(jobs) - MAX_DIGEST_LINES} autres (intern-radar list)")
+    noun = "offre" if len(jobs) == 1 else "offres"
     return Message(
-        title=f"Digest — {len(jobs)} {noun}",
+        title=f"Récap du soir — {len(jobs)} {noun}",
         body="\n".join(lines),
         priority=3,
         tags=("clipboard",),
@@ -111,8 +117,8 @@ def format_digest(jobs: list[ScoredJob]) -> Message:
 
 def format_source_alert(company: str, error: str) -> Message:
     return Message(
-        title=f"Source broken: {company}",
-        body=f"Failing for 3 days. Last error: {error[:300]}",
+        title=f"Source en panne : {company}",
+        body=f"En échec depuis 3 jours. Dernière erreur : {error[:300]}",
         priority=2,
         tags=("warning",),
     )
@@ -120,8 +126,8 @@ def format_source_alert(company: str, error: str) -> Message:
 
 def format_llm_alert() -> Message:
     return Message(
-        title="LLM scoring unavailable",
-        body="claude -p has been failing for a day; offers are waiting to be scored.",
+        title="Notation LLM indisponible",
+        body="La notation échoue depuis un jour ; des offres attendent d'être notées.",
         priority=2,
         tags=("warning",),
     )

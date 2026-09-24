@@ -56,6 +56,7 @@ def test_prompt_contains_profile_window_and_truncated_jobs():
     assert "RAG and LLM student." in prompt
     assert "2027-03-08 to 2027-08-31" in prompt
     assert "at least 4 months" in prompt
+    assert "Write visa_note and summary in French." in prompt
     assert "job_id: 1\n" in prompt
     assert "j1" not in prompt
     assert "x" * 3000 in prompt and "x" * 3001 not in prompt
