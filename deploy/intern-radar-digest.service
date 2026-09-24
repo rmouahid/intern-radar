@@ -1,0 +1,11 @@
+[Unit]
+Description=intern-radar: evening digest
+After=network-online.target intern-radar-run.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/remote-claude/intern-radar
+Environment=HOME=/root
+Environment=PATH=/root/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/root/.local/bin/poetry run intern-radar digest

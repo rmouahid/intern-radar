@@ -1,0 +1,12 @@
+[Unit]
+Description=intern-radar: fetch, score and notify internship offers
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/remote-claude/intern-radar
+Environment=HOME=/root
+Environment=PATH=/root/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/root/.local/bin/poetry run intern-radar run
+TimeoutStartSec=1h
