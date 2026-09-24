@@ -357,7 +357,7 @@ Runbook:
 
 ## 9. Quality gates
 
-- 208 tests (`pytest`), offline: source plugins run against payloads that
+- 216 tests (`pytest`), offline: source plugins run against payloads that
   mirror the real API responses (captured on 2026-09-24); LLM, Telegram and
   SMTP are replaced by fakes; SQLite runs in memory.
 - `ruff check` + `ruff format --check` in GitHub Actions on every PR.
