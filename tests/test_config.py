@@ -82,7 +82,7 @@ def test_load_profile_applies_defaults(tmp_path):
     assert profile.ntfy_server == "https://ntfy.sh"
     assert profile.llm_model == "haiku"
     assert profile.weights == Weights(0.5, 0.3, 0.2)
-    assert profile.thresholds == Thresholds(7.5, 5.5)
+    assert profile.thresholds == Thresholds(7.5, 5.5, 6)
     assert profile.adzuna_app_id is None
 
 
@@ -90,7 +90,7 @@ def test_load_profile_overrides_weights_and_thresholds(tmp_path):
     content = PROFILE + "weights: {tier: 0.6}\nthresholds: {immediate: 8}\n"
     profile = load_profile(write(tmp_path, "profile.yaml", content))
     assert profile.weights == Weights(0.6, 0.3, 0.2)
-    assert profile.thresholds == Thresholds(8, 5.5)
+    assert profile.thresholds == Thresholds(8, 5.5, 6)
 
 
 @pytest.mark.parametrize(

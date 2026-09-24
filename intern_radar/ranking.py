@@ -17,8 +17,15 @@ def is_excluded(assessment: Assessment) -> bool:
     )
 
 
-def final_score(tier: Tier, assessment: Assessment, weights: Weights) -> float | None:
-    if is_excluded(assessment):
+def final_score(
+    tier: Tier, assessment: Assessment, weights: Weights, min_relevance: int = 0
+) -> float | None:
+    """Score out of 10, or None when the offer must never be notified.
+
+    `min_relevance` keeps non-AI internships at top companies (finance,
+    design…) from outranking AI ones on company tier alone.
+    """
+    if is_excluded(assessment) or assessment.ai_relevance < min_relevance:
         return None
     score = (
         weights.tier * TIER_POINTS[tier]

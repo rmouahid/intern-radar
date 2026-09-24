@@ -226,7 +226,7 @@ def test_llm_alert_after_a_day():
 
 def test_digest_sends_middle_band_once():
     answers = {
-        "mid": make_assessment(ai_relevance=5, dates_fit="unknown"),
+        "mid": make_assessment(ai_relevance=6, dates_fit="unknown"),
         "top": make_assessment(ai_relevance=10),
     }
     jobs = [make_job(id="mid", tier="B"), make_job(id="top", tier="S")]
@@ -241,7 +241,7 @@ def test_digest_sends_middle_band_once():
 
 
 def test_digest_failure_raises_and_keeps_offers():
-    answers = {"mid": make_assessment(ai_relevance=5, dates_fit="unknown")}
+    answers = {"mid": make_assessment(ai_relevance=6, dates_fit="unknown")}
     pipeline, store, _ = build(
         {"fake": FakeSource([make_job(id="mid", tier="B")])},
         FakeScorer(answers),
@@ -251,3 +251,17 @@ def test_digest_failure_raises_and_keeps_offers():
     with pytest.raises(NotifyError):
         pipeline.digest()
     assert len(store.due_digest(5.5, 7.5)) == 1
+
+
+def test_low_ai_relevance_offers_are_stored_but_never_notified():
+    answers = {"finance": make_assessment(ai_relevance=3)}
+    notifier = FakeNotifier()
+    pipeline, store, _ = build(
+        {"fake": FakeSource([make_job(id="finance", tier="S")])},
+        FakeScorer(answers),
+        notifier,
+    )
+    report = pipeline.run()
+    assert report.scored == 1
+    assert notifier.sent == []
+    assert pipeline.digest() == 0

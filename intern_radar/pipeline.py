@@ -132,7 +132,12 @@ class Pipeline:
                 assessment = assessments.get(job.id)
                 if assessment is None:
                     continue
-                score = ranking.final_score(job.tier, assessment, self._profile.weights)
+                score = ranking.final_score(
+                    job.tier,
+                    assessment,
+                    self._profile.weights,
+                    self._profile.thresholds.min_relevance,
+                )
                 self._store.save_assessment(job.id, assessment, score)
                 report.scored += 1
 

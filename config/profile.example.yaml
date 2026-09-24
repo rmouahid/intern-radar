@@ -18,4 +18,4 @@ ntfy_topic: intern-radar-CHANGE-ME-to-a-long-random-string
 # adzuna_app_id: your-app-id      # free account on developer.adzuna.com
 # adzuna_app_key: your-app-key
 # weights: {tier: 0.5, relevance: 0.3, dates: 0.2}
-# thresholds: {immediate: 7.5, digest: 5.5}
+# thresholds: {immediate: 7.5, digest: 5.5, min_relevance: 6}
