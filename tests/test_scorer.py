@@ -176,3 +176,14 @@ def test_cli_failure_message_names_the_api_error():
     assert "subtype=error_during_execution" in message
     assert "rate limited" in message
     assert "usage" not in message
+
+
+def test_cli_backend_passes_the_effort_level():
+    envelope = {"is_error": False, "structured_output": {}}
+    runner = FakeRunner(stdout=json.dumps(envelope))
+    ClaudeCliBackend(model="sonnet", effort="low", runner=runner).complete("P", {})
+    command = runner.calls[0][0]
+    assert command[command.index("--effort") + 1] == "low"
+    default = FakeRunner(stdout=json.dumps(envelope))
+    ClaudeCliBackend(runner=default).complete("P", {})
+    assert "--effort" not in default.calls[0][0]

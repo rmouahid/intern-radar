@@ -133,6 +133,8 @@ def test_load_profile_reads_letter_settings(tmp_path):
     )
     assert profile.cv_url == "https://cv"
     assert profile.letter_model == "sonnet"
+    assert profile.letter_effort == "low"
+    assert profile.llm_effort is None
     assert profile.max_letters_per_day == 10
 
 

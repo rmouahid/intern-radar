@@ -13,6 +13,7 @@ min_months: 4
 telegram_token: "123456:ABC-CHANGE-ME"   # from @BotFather
 telegram_chat_id: 123456789              # your chat with the bot
 # llm_model: haiku
+# llm_effort: low                 # optional: less reasoning, fewer output tokens
 # max_llm_batches_per_run: 5
 # max_immediate_per_run: 10
 # adzuna_app_id: your-app-id      # free account on developer.adzuna.com
@@ -25,6 +26,7 @@ telegram_chat_id: 123456789              # your chat with the bot
 # letters_email: you@gmail.com
 # smtp_app_password: xxxx xxxx xxxx xxxx          # Gmail app password
 # letter_model: sonnet
+# letter_effort: low              # default; remove for the CLI's default effort
 # max_letters_per_day: 10
 # contact:
 #   name: Your Name

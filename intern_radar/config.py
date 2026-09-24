@@ -48,6 +48,7 @@ class Profile:
     telegram_token: str
     telegram_chat_id: int
     llm_model: str = "haiku"
+    llm_effort: str | None = None
     max_llm_batches_per_run: int = 5
     max_immediate_per_run: int = 10
     adzuna_app_id: str | None = None
@@ -58,6 +59,7 @@ class Profile:
     letters_email: str | None = None
     smtp_app_password: str | None = None
     letter_model: str = "sonnet"
+    letter_effort: str | None = "low"
     max_letters_per_day: int = 10
     contact: Contact | None = None
 
