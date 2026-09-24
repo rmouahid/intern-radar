@@ -127,3 +127,26 @@ def test_pending_scores_top_tiers_and_newest_offers_first(store):
         "ashby:1",
         "adzuna:1",
     ]
+
+
+def test_get_job(store):
+    store.add(make_job(id="a", description="full"), "pending", NOW)
+    assert store.get_job("a") == make_job(id="a", description="full")
+    assert store.get_job("missing") is None
+
+
+def test_letters_are_saved_counted_and_replaced(store):
+    store.save_letter("a", "/tmp/a.pdf", {"ai_changes": 2}, NOW)
+    store.save_letter("b", "/tmp/b.pdf", {}, NOW - timedelta(days=2))
+    assert store.letter("a") == ("/tmp/a.pdf", {"ai_changes": 2})
+    assert store.letter("zzz") is None
+    assert store.letters_since(NOW - timedelta(days=1)) == 1
+    store.save_letter("a", "/tmp/a2.pdf", {}, NOW)
+    assert store.letter("a") == ("/tmp/a2.pdf", {})
+
+
+def test_meta_values(store):
+    assert store.get_meta("k") is None
+    store.set_meta("k", "v1")
+    store.set_meta("k", "v2")
+    assert store.get_meta("k") == "v2"
