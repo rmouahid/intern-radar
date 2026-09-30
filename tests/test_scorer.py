@@ -195,3 +195,10 @@ def test_cli_backend_passes_the_effort_level():
     default = FakeRunner(stdout=json.dumps(envelope))
     ClaudeCliBackend(runner=default).complete("P", {})
     assert "--effort" not in default.calls[0][0]
+
+
+def test_prompt_and_schema_know_undergrad_only():
+    backend = FakeBackend({"assessments": []})
+    make_scorer(backend).assess([make_job()])
+    assert '"undergrad_only"' in backend.prompts[0]
+    assert "master's" in backend.prompts[0]

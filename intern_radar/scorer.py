@@ -69,8 +69,13 @@ Return one assessment per job below, with the same job_id:
   internship); "incompatible" if it cannot start inside the window (e.g. a
   January-April co-op, a fall internship); "unknown" if the posting does not
   say.
-- eligibility: "phd_only" if a PhD enrolment is required;
-  "local_students_only" if applicants must be enrolled at a university in the
+- eligibility: "phd_only" if a PhD enrolment is required; "undergrad_only"
+  if the title or requirements name only bachelor's / undergraduate students
+  or explicitly exclude master's students (the candidate is a master's-level
+  student: "Intern, Bachelor's" or "pursuing a bachelor's degree" alone means
+  undergrad_only; "Bachelor's or Master's", or no degree stated, does not);
+  "local_students_only"
+  if applicants must be enrolled at a university in the
   job's country; "ok" if a student from a French engineering school can
   apply; "unknown" otherwise.
 - visa_note: one short sentence on the work authorisation a French citizen

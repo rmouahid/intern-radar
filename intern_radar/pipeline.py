@@ -105,7 +105,7 @@ class Pipeline:
                 if job.id in known:
                     continue
                 known.add(job.id)
-                if not prefilter.passes(job, extra):
+                if not prefilter.passes(job, extra, self._profile.window_start.year):
                     status = "rejected"
                     report.out_of_scope += prefilter.is_internship_title(
                         job.title

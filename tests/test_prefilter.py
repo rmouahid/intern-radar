@@ -4,6 +4,8 @@ from intern_radar.prefilter import (
     is_france_only,
     is_internship_title,
     is_out_of_scope,
+    is_past_cycle,
+    is_undergrad_only_title,
     passes,
 )
 from tests.factories import make_job
@@ -170,3 +172,53 @@ def test_extra_excluded_words_extend_the_list():
     assert not is_out_of_scope("Event Data Science Intern", extra=("event",))
     job = make_job(title="Event Coordinator Intern")
     assert not passes(job, extra_excluded=("event",))
+
+
+@pytest.mark.parametrize(
+    "title, past",
+    [
+        ("2026 Software Dev Engineer Intern - UK", True),
+        ("2026 Applied Scientist Intern, Amazon University Talent Acquisition", True),
+        ("Summer 2025 / 2026 ML Intern", True),
+        ("2026-2027 Research Intern", False),
+        ("ML Intern (Summer 2027)", False),
+        ("【Class of 2029／Internship】Applied Scientists", False),
+        ("Machine Learning Intern", False),
+        ("Intern, Model 2026X team", False),
+    ],
+)
+def test_past_recruiting_cycles_are_detected(title, past):
+    assert is_past_cycle(title, 2027) is past
+
+
+def test_passes_drops_past_cycles_only_with_a_window_year():
+    job = make_job(title="2026 ML Intern")
+    assert passes(job)
+    assert not passes(job, window_year=2027)
+    assert passes(make_job(title="2027 ML Intern"), window_year=2027)
+
+
+@pytest.mark.parametrize(
+    "title, undergrad",
+    [
+        ("Software Engineering - Intern, Bachelor’s", True),
+        ("Undergrad Intern Sales and Marketing", True),
+        ("Undergraduate Intern Technical (OpenVINO)", True),
+        (
+            "2027 Applied Science Internship - Undergrad Student Science Recruiting",
+            True,
+        ),
+        ("Intern, Bachelor's or Master's", False),
+        (
+            "2027 Applied Science Internship - Master's Student Science Recruiting",
+            False,
+        ),
+        ("Research Intern (MS/PhD)", False),
+        ("Graduate Trainee - AI", False),
+        ("ML Intern", False),
+    ],
+)
+def test_undergrad_only_titles(title, undergrad):
+    assert is_undergrad_only_title(title) is undergrad
+    if undergrad:
+        assert not passes(make_job(title=title))
