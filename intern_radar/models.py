@@ -9,7 +9,12 @@ Eligibility = Literal[
     "ok", "phd_only", "undergrad_only", "local_students_only", "unknown"
 ]
 WorkAuthorisation = Literal[
-    "free", "programme", "sponsorship_stated", "uncertain", "unlikely"
+    "free",
+    "self_arranged",
+    "programme",
+    "sponsorship_stated",
+    "uncertain",
+    "unlikely",
 ]
 
 TIERS: tuple[str, ...] = ("S", "A", "B", "unlisted")
@@ -29,6 +34,7 @@ ELIGIBILITY_VALUES: tuple[str, ...] = (
 
 WORK_AUTHORISATION_VALUES: tuple[str, ...] = (
     "free",
+    "self_arranged",
     "programme",
     "sponsorship_stated",
     "uncertain",

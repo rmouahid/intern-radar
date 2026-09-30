@@ -198,7 +198,9 @@ of ~70 countries and regions) and punctuation; it is stored in
   `undergrad_only` (one via a Portuguese *bacharelado* requirement), no
   master's-level posting misclassified.
 - Work authorisation enum (French citizen, this location): `free` (EU/EEA/
-  Switzerland), `programme` (standard intern visa: US J-1, UK GAE, Working
+  Switzerland), `self_arranged` (a country where the candidate obtains the
+  visa without an employer sponsor, e.g. a working holiday visa;
+  `self_sponsored_countries`), `programme` (standard intern visa: US J-1, UK GAE, Working
   Holiday…), `sponsorship_stated`, `uncertain`, `unlikely`; `visa_note`
   keeps the explanation. Assessments stored before the field existed load
   as `uncertain`. Checked on 10 stored offers from 10 countries: EU → free,
@@ -253,7 +255,7 @@ excluded (score NULL) if: not an internship, dates incompatible, PhD only,
 score = 0.3·tier + 0.5·relevance + 0.2·dates      (tier S10 A8 B6 unlisted4;
                                                    dates fits10 unknown6 short4)
       − 2 if local students only                   rounded to 0.1
-      − visa penalty: free 0, programme 0.5, sponsorship_stated 0,
+      − visa penalty: free 0, self_arranged 0, programme 0.5, sponsorship_stated 0,
                       uncertain 1, unlikely 3      (never excludes)
 ```
 
@@ -285,14 +287,27 @@ again as immediate offers.
   letters are configured (the listener runs), entries are numbered and an
   inline keyboard of `🔔 1` … `🔔 15` buttons (5 per row, `callback_data =
   P:<rowid>` of the group lead) is attached.
+- Work authorisation fixed by rules (`countries.py`, `ranking.with_rule_based_visa`):
+  offers in the EU/EEA/Switzerland are always `free` and offers in a
+  `self_sponsored_countries` location are `self_arranged`, whatever the LLM
+  said; countries are recognised by name, ISO-3 code (upper case) and main
+  cities, never by two-letter codes (`CA` is California as often as
+  Canada). Applied at scoring and by `rescore`, which also fixes
+  assessments stored before the field existed.
 - Interview chance (`chance.py`): when `config/candidate.json` exists,
   every immediate or promoted notification ends with
   `🎯 Chance d'entretien : N %` and 1–3 reasons (✅ / ⚠️, French, ≤ 15
   words). One LLM call per offer (`chance_model` sonnet, `chance_effort`
-  low) at notification time, never during bulk scoring; the prompt starts
-  from a base rate for the programme and company, then adjusts for profile
-  fit (4 selected items), eligibility, work authorisation, language and
-  offer age. Stored in the `chances` table and reused on re-send; a failure
+  low) at notification time, never during bulk scoring. Recalibrated on
+  2026-09-30 (the first version anchored every company on "a few percent"):
+  explicit base rates by company type (elite quant 2–5 %, big tech mass
+  programmes 5–10 %, frontier AI labs 5–15 %, scale-ups 10–25 %, startups
+  and mid-size European companies 20–40 %), a fit multiplier (×0.5 to ×2,
+  judged on this candidate's profile), bounded adjustments (−30 % to +20 %
+  each) for work authorisation, eligibility, language and offer age, and an
+  instruction to use the whole scale. A `self_arranged` or `free` work
+  authorisation counts as a strength. `rescore` clears stored estimates so
+  they are recomputed with the current method. Stored in the `chances` table and reused on re-send; a failure
   only omits the line. Measured: ~$0.025–0.04 API-equivalent and 4–6 s per
   estimate (e.g. NVIDIA *Deep Learning*, Santa Clara: 3 %). It is an
   estimate until application outcomes (#42) allow calibration.

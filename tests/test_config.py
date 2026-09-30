@@ -88,7 +88,8 @@ def test_load_profile_applies_defaults(tmp_path):
     assert profile.thresholds == Thresholds(7.5, 5.5, 6)
     assert profile.adzuna_app_id is None
     assert profile.extra_excluded_title_words == ()
-    assert profile.visa_penalties == VisaPenalties(0, 0.5, 0, 1, 3)
+    assert profile.visa_penalties == VisaPenalties()
+    assert profile.self_sponsored_countries == ()
 
 
 def test_load_profile_reads_extra_excluded_title_words(tmp_path):

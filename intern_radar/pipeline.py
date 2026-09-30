@@ -201,6 +201,9 @@ class Pipeline:
                 assessment = assessments.get(job.id)
                 if assessment is None:
                     continue
+                assessment = ranking.with_rule_based_visa(
+                    assessment, job.location, self._profile.self_sponsored_countries
+                )
                 score = ranking.final_score(
                     job.tier,
                     assessment,

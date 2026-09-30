@@ -111,3 +111,20 @@ def test_notification_shows_the_chance_and_its_reasons():
     assert "🎯  <b>Chance d'entretien : 12 %</b>" in html
     assert "  ✅ RAG &lt;prod&gt;\n  ⚠️ Visa" in html
     assert "🎯" not in format_immediate(scored()).html
+
+
+def test_prompt_uses_base_rates_bounded_adjustments_and_self_sponsored():
+    backend = FakeBackend()
+    estimate = ChanceEstimator(
+        backend,
+        parse_candidate(profile_dict()),
+        "window",
+        today=lambda: date(2026, 9, 30),
+        self_sponsored=("Canada", "Japan"),
+    )
+    estimate(scored())
+    prompt = backend.calls[0][0]
+    assert "elite quant trading firms" in prompt and "20-40 %" in prompt
+    assert "x0.5" in prompt and "Use the whole scale" in prompt
+    assert "without any\nemployer sponsorship: Canada, Japan" in prompt
+    assert '"self_arranged"' in prompt
