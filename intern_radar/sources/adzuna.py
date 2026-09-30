@@ -1,4 +1,10 @@
-"""Adzuna job search API, a catch-all for companies without a usable feed."""
+"""Adzuna job search API, a catch-all for companies without a usable feed.
+
+The search targets the watched companies that have no public feed: it asks
+for "intern" offers mentioning their names or aliases, then keeps only the
+offers whose employer is a watched company. Generic results (thousands of
+employers outside the watch list) would only cost LLM scoring.
+"""
 
 import re
 from collections.abc import Container
@@ -33,6 +39,22 @@ DEFAULT_COUNTRIES = (
 )
 
 Lookup = dict[str, tuple[str, Tier]]
+MAX_DAYS_OLD = 14
+# Words of company names that match far too many offers on their own.
+GENERIC_WORDS = {"ai", "group", "consulting", "securities", "chase", "labs"}
+
+
+def search_terms(companies: list[Company]) -> str:
+    """Words of the names and aliases of companies without a feed."""
+    words: dict[str, None] = {}
+    for company in companies:
+        if company.source != "none":
+            continue
+        for name in [company.name, *company.params.get("aliases", [])]:
+            for word in re.findall(r"[\w&.]+", name.lower()):
+                if len(word) > 2 and word not in GENERIC_WORDS:
+                    words.setdefault(word)
+    return " ".join(words)
 
 
 def company_lookup(companies: list[Company]) -> Lookup:
@@ -60,11 +82,13 @@ class AdzunaSource:
         app_id: str | None,
         app_key: str | None,
         lookup: Lookup,
+        terms: str,
     ) -> None:
         self._client = client
         self._app_id = app_id
         self._app_key = app_key
         self._lookup = lookup
+        self._terms = terms
 
     def fetch(self, company: Company, known_ids: Container[str]) -> list[Job]:
         if not (self._app_id and self._app_key):
@@ -77,6 +101,8 @@ class AdzunaSource:
                 return None
             employer = (item.get("company") or {}).get("display_name", "")
             name, tier = match_company(employer, self._lookup)
+            if tier == "unlisted":  # not a watched company
+                return None
             return Job(
                 id=job_id,
                 company=name,
@@ -100,9 +126,8 @@ class AdzunaSource:
                     "app_key": self._app_key,
                     "results_per_page": 50,
                     "what": "intern",
-                    "what_or": "machine learning ai data llm",
-                    "max_days_old": 7,
-                    "sort_by": "date",
+                    "what_or": self._terms or "machine learning ai data llm",
+                    "max_days_old": MAX_DAYS_OLD,
                     "content-type": "application/json",
                 },
             )

@@ -468,3 +468,15 @@ def test_tracking_buttons_and_reminders():
         f"N:{ref}",
     ]
     assert pipeline.remind(14) == 0
+
+
+def test_min_interval_hours_spaces_out_quota_limited_sources():
+    source = FakeSource([make_job(id="a")])
+    company = Company("Quota", "unlisted", "fake", {"min_interval_hours": 6})
+    pipeline, _, clock = build({"fake": source}, FakeScorer(), companies=(company,))
+    pipeline.run()
+    clock.now += timedelta(hours=2)
+    pipeline.run()
+    clock.now += timedelta(hours=5)
+    pipeline.run()
+    assert len(source.calls) == 2

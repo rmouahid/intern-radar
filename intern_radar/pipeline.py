@@ -121,7 +121,7 @@ class Pipeline:
         known = self._store.known_ids()
         extra = self._profile.extra_excluded_title_words
         for company in self._companies:
-            if company.source == "none":
+            if company.source == "none" or self._fetched_recently(company, now):
                 continue
             source = self._sources.get(company.source)
             try:
@@ -134,6 +134,8 @@ class Pipeline:
                 self._store.record_source_result(company.name, str(exc), now)
                 continue
             self._store.record_source_result(company.name, None, now)
+            if company.params.get("min_interval_hours"):
+                self._store.set_meta(f"last_fetch:{company.name}", now.isoformat())
             report.fetched += len(jobs)
             for job in jobs:
                 if job.id in known:
@@ -153,6 +155,15 @@ class Pipeline:
                 self._store.add(job, status, now)
                 report.new += 1
                 report.candidates += status == "pending"
+
+    def _fetched_recently(self, company: Company, now: datetime) -> bool:
+        """True within `min_interval_hours` of the last successful fetch
+        (used for quota-limited sources such as Adzuna)."""
+        hours = company.params.get("min_interval_hours")
+        last = self._store.get_meta(f"last_fetch:{company.name}") if hours else None
+        if last is None:
+            return False
+        return now - datetime.fromisoformat(last) < timedelta(hours=float(hours))
 
     def _score(self, report: RunReport) -> None:
         now = self._clock()

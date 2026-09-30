@@ -75,6 +75,17 @@ are the bulk). Growth follows new postings (~30/day), i.e. well under
 66 companies in `config/companies.yaml` (tiers: 8 S, 29 A, 28 B, plus the
 Adzuna catch-all). 46 have a live feed, 19 have none and rely on Adzuna.
 
+Adzuna is targeted at those companies: each fetch asks, per country (12),
+for `what=intern` offers of the last 14 days mentioning the names and aliases
+of the companies with `source: none` (`what_or`, generic words such as "ai"
+or "group" removed), then keeps only the offers whose employer matches a
+watched company. The previous generic search returned 200 offers per fetch
+from employers outside the watch list and none from Google, Meta, Apple…;
+the targeted one returned 91 offers, all from watched companies (Siemens,
+IBM, ByteDance, BCG, Meta, Google, Sea, Grab, JPMorgan…), 77 of them passing
+the pre-filter. The API's `company` filter was rejected: it needs Adzuna's
+canonical employer name (`Meta` → HTTP 400, `Apple` → 0 results).
+
 | Plugin | Endpoint | Paging / caps | Detail call |
 |---|---|---|---|
 | greenhouse (22) | `boards-api.greenhouse.io/v1/boards/{board}/jobs` | full list | 1 per **new** internship |
@@ -501,8 +512,10 @@ Platform:
   of callback data, ~1 message/s per chat.
 - The scoring depends on the `claude` CLI being logged in on the VPS; its
   subscription quota is shared with interactive use.
-- Adzuna free tier: 12 requests per run × 8 runs = 96/day; check the
-  account limits before relying on it.
+- Adzuna free tier: `min_interval_hours: 6` in `companies.yaml` limits it to
+  about 3 fetches a day (12 requests each, ~36/day). The interval is a
+  generic company parameter: the last successful fetch time is kept in
+  `meta` (`last_fetch:<company>`).
 
 ## 7. LLM usage and cost (measured)
 
