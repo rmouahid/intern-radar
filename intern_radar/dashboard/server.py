@@ -1,7 +1,9 @@
-"""A small read-only HTTP server for the dashboard (standard library only).
+"""A small HTTP server for the dashboard (standard library only).
 
 It is meant to listen on the server's Tailscale address only: the tailnet is
 the access control, so there is no login and nothing is exposed publicly.
+The data is read-only; the only action is `POST /run`, which asks systemd
+to start the scheduled run and is accepted only from the page itself.
 """
 
 import logging
@@ -9,9 +11,17 @@ import subprocess
 from collections.abc import Callable
 from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import parse_qs, urlparse
 
 from intern_radar.dashboard import queries
 from intern_radar.dashboard.render import page
+from intern_radar.dashboard.runner import RunStatus
+
+NOTICES = {
+    "started": "Run lancé : les résultats apparaîtront à la fin (quelques minutes).",
+    "busy": "Un run est déjà en cours.",
+    "error": "systemd a refusé de lancer le run (voir les logs du serveur).",
+}
 
 log = logging.getLogger(__name__)
 
@@ -31,7 +41,11 @@ def tailscale_ip(
 
 
 def render_dashboard(
-    db_path: str, thresholds: tuple[float, float], now: datetime
+    db_path: str,
+    thresholds: tuple[float, float],
+    now: datetime,
+    run: RunStatus | None = None,
+    notice: str | None = None,
 ) -> str:
     db = queries.connect(db_path)
     try:
@@ -44,6 +58,8 @@ def render_dashboard(
             queries.sources(db),
             queries.applications(db),
             queries.llm_usage(db, now),
+            run,
+            notice,
         )
     finally:
         db.close()
@@ -55,14 +71,19 @@ def make_server(
     port: int,
     thresholds: tuple[float, float],
     clock: Callable[[], datetime] = lambda: datetime.now(UTC),
+    status: Callable[[], RunStatus] | None = None,
+    trigger: Callable[[], bool] | None = None,
 ) -> ThreadingHTTPServer:
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self) -> None:  # noqa: N802 (http.server API)
-            if self.path == "/healthz":
+            url = urlparse(self.path)
+            if url.path == "/healthz":
                 self._reply(200, "text/plain; charset=utf-8", "ok")
-            elif self.path in ("/", "/index.html"):
+            elif url.path in ("/", "/index.html"):
+                notice = NOTICES.get((parse_qs(url.query).get("run") or [""])[0])
                 try:
-                    body = render_dashboard(db_path, thresholds, clock())
+                    run = status() if status else None
+                    body = render_dashboard(db_path, thresholds, clock(), run, notice)
                 except Exception:
                     log.exception("dashboard rendering failed")
                     self._reply(500, "text/plain; charset=utf-8", "error")
@@ -71,9 +92,31 @@ def make_server(
             else:
                 self._reply(404, "text/plain; charset=utf-8", "not found")
 
-        def _reply(self, status: int, content_type: str, body: str) -> None:
+        def do_POST(self) -> None:  # noqa: N802 (http.server API)
+            if urlparse(self.path).path != "/run" or trigger is None:
+                self._reply(404, "text/plain; charset=utf-8", "not found")
+                return
+            if not self._same_origin():
+                self._reply(403, "text/plain; charset=utf-8", "forbidden")
+                return
+            if status is not None and status().running:
+                outcome = "busy"
+            else:
+                outcome = "started" if trigger() else "error"
+            self.send_response(303)
+            self.send_header("Location", f"/?run={outcome}")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
+        def _same_origin(self) -> bool:
+            """The form must come from this page (Origin, else Referer)."""
+            source = self.headers.get("Origin") or self.headers.get("Referer") or ""
+            host = self.headers.get("Host") or ""
+            return bool(host) and urlparse(source).netloc == host
+
+        def _reply(self, code: int, content_type: str, body: str) -> None:
             data = body.encode("utf-8")
-            self.send_response(status)
+            self.send_response(code)
             self.send_header("Content-Type", content_type)
             self.send_header("Content-Length", str(len(data)))
             self.send_header("Cache-Control", "no-store")

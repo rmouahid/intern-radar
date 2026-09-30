@@ -29,6 +29,7 @@ from intern_radar.config import (
     load_companies,
     load_profile,
 )
+from intern_radar.dashboard.runner import run_status, start_run
 from intern_radar.dashboard.server import make_server, tailscale_ip
 from intern_radar.description import clean_description
 from intern_radar.http import make_client
@@ -299,7 +300,14 @@ def dashboard(
         raise typer.Exit(2)
     Store(str(db)).close()  # creates or migrates the schema once
     thresholds = (profile.thresholds.digest, profile.thresholds.immediate)
-    server = make_server(str(db), address, port or profile.dashboard_port, thresholds)
+    server = make_server(
+        str(db),
+        address,
+        port or profile.dashboard_port,
+        thresholds,
+        status=run_status,
+        trigger=start_run,
+    )
     typer.echo(f"dashboard on http://{address}:{server.server_address[1]}/")
     try:
         server.serve_forever()

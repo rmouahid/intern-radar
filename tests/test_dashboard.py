@@ -131,3 +131,103 @@ def test_tailscale_ip():
 
     assert tailscale_ip(ok) == "100.1.2.3"
     assert tailscale_ip(missing) is None
+
+
+def test_run_status_and_start_parse_systemd(tmp_path):
+    from intern_radar.dashboard.runner import run_status, start_run
+
+    calls = []
+
+    def fake(cmd, **kwargs):
+        calls.append(cmd)
+        if cmd[:2] == ["systemctl", "show"]:
+            out = (
+                "ActiveState=inactive\nResult=success\n"
+                "ExecMainStartTimestamp=Wed 2026-09-30 18:00:22 UTC\n"
+                "ExecMainExitTimestamp=Wed 2026-09-30 18:03:39 UTC\n"
+            )
+        elif cmd[0] == "journalctl":
+            out = "Started\nfetched=5 new=5 scored=3\nFinished\n"
+        else:
+            out = ""
+        return subprocess.CompletedProcess(cmd, 0, out, "")
+
+    status = run_status(fake)
+    assert (status.running, status.result, status.summary) == (
+        False,
+        "success",
+        "fetched=5 new=5 scored=3",
+    )
+    assert status.finished.endswith("18:03:39 UTC")
+    assert start_run(fake) is True
+    assert calls[-1] == [
+        "systemctl",
+        "start",
+        "--no-block",
+        "intern-radar-run.service",
+    ]
+
+
+def serve(db_path, running=False, trigger_ok=True):
+    from intern_radar.dashboard.runner import RunStatus
+
+    started = []
+
+    def trigger():
+        started.append(True)
+        return trigger_ok
+
+    status = RunStatus(running, "success", "Wed 18:00", "Wed 18:03", "fetched=5")
+    server = make_server(
+        db_path,
+        "127.0.0.1",
+        0,
+        (5.5, 7.5),
+        clock=lambda: NOW,
+        status=lambda: status,
+        trigger=trigger,
+    )
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    return server, f"127.0.0.1:{server.server_address[1]}", started
+
+
+def test_run_button_starts_a_run_from_the_page(db_path):
+    server, host, started = serve(db_path)
+    try:
+        home = httpx.get(f"http://{host}/")
+        assert "<button>Lancer un run</button>" in home.text
+        assert "Dernier run ✅ réussi" in home.text and "fetched=5" in home.text
+        post = httpx.post(f"http://{host}/run", headers={"Origin": f"http://{host}"})
+        assert post.status_code == 303 and post.headers["location"] == "/?run=started"
+        assert started == [True]
+        notice = httpx.get(f"http://{host}/?run=started")
+        assert "Run lancé" in notice.text
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_run_button_refuses_foreign_origins_and_busy_runs(db_path):
+    server, host, started = serve(db_path, running=True)
+    try:
+        assert httpx.post(f"http://{host}/run").status_code == 403
+        evil = httpx.post(f"http://{host}/run", headers={"Origin": "http://evil.test"})
+        assert evil.status_code == 403
+        busy = httpx.post(f"http://{host}/run", headers={"Referer": f"http://{host}/"})
+        assert busy.headers["location"] == "/?run=busy" and started == []
+        page_html = httpx.get(f"http://{host}/").text
+        assert "Run en cours" in page_html and "<button disabled>" in page_html
+        assert 'http-equiv="refresh"' in page_html
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_run_button_reports_systemd_refusal(db_path):
+    server, host, _ = serve(db_path, trigger_ok=False)
+    try:
+        post = httpx.post(f"http://{host}/run", headers={"Origin": f"http://{host}"})
+        assert post.headers["location"] == "/?run=error"
+    finally:
+        server.shutdown()
+        server.server_close()

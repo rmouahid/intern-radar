@@ -10,6 +10,7 @@ from intern_radar.dashboard.queries import (
     UsageRow,
     Week,
 )
+from intern_radar.dashboard.runner import RunStatus
 from intern_radar.tracking import STATUS_TEXT
 
 e = html.escape
@@ -41,6 +42,13 @@ th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line);
 th { color:var(--muted); font-weight:600; } td.n, th.n { text-align:right; }
 .warn { color:var(--warn); font-weight:600; } .ok { color:var(--ok); }
 a { color:var(--accent); text-decoration:none; }
+.run { display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+  justify-content:space-between; }
+button { background:var(--accent); color:#fff; border:0; border-radius:10px;
+  padding:10px 18px; font-size:15px; font-weight:600; cursor:pointer; }
+button:disabled { opacity:.5; cursor:default; }
+.notice { background:var(--card); border:1px solid var(--accent);
+  border-radius:12px; padding:10px 14px; margin:12px 0; }
 svg text { fill:var(--muted); font-size:11px; }
 """
 
@@ -185,6 +193,24 @@ def _usage(rows: list[UsageRow]) -> str:
     )
 
 
+def _run(run: RunStatus) -> str:
+    if run.running:
+        state = f"⏳ Run en cours depuis {e(run.started or '…')}"
+    elif run.finished:
+        outcome = "✅ réussi" if run.result == "success" else f"❌ {e(run.result)}"
+        state = f"Dernier run {outcome}, terminé le {e(run.finished)}"
+    else:
+        state = "Aucun run enregistré"
+    summary = f'<div class="muted">{e(run.summary)}</div>' if run.summary else ""
+    disabled = " disabled" if run.running else ""
+    return (
+        '<section class="run"><div><h2>Pipeline</h2>'
+        f"<div>{state}</div>{summary}</div>"
+        '<form method="post" action="/run">'
+        f"<button{disabled}>Lancer un run</button></form></section>"
+    )
+
+
 def page(
     now: datetime,
     kpis: Kpis,
@@ -194,14 +220,20 @@ def page(
     sources: list[SourceRow],
     applications: list[ApplicationRow],
     usage: list[UsageRow],
+    run: RunStatus | None = None,
+    notice: str | None = None,
 ) -> str:
     digest, immediate = thresholds
+    # While a run is active the page reloads itself (no JavaScript needed).
+    refresh = '<meta http-equiv="refresh" content="15">' if run and run.running else ""
     return (
         '<!doctype html><html lang="fr"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
-        f"<title>intern-radar</title><style>{CSS}</style></head><body><main>"
-        "<h1>intern-radar</h1>"
+        f"{refresh}<title>intern-radar</title><style>{CSS}</style></head><body>"
+        "<main><h1>intern-radar</h1>"
         f'<p class="muted">Mis à jour le {now:%d/%m/%Y à %H:%M} UTC</p>'
+        + (f'<div class="notice">{e(notice)}</div>' if notice else "")
+        + (_run(run) if run else "")
         + _kpis(kpis)
         + _funnel(weeks)
         + _histogram(histogram, digest, immediate)
