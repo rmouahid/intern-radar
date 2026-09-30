@@ -7,6 +7,7 @@ from typing import Any
 
 from intern_radar.store import Store
 from intern_radar.telegram import TelegramError
+from intern_radar.tracking import ACTIONS as TRACKING_CODES
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +42,7 @@ class ButtonRequests:
         chat_id: int,
         promoter: Any | None = None,
         resumes: Any | None = None,
+        tracker: Any | None = None,
     ) -> None:
         self._telegram = telegram
         self._store = store
@@ -48,6 +50,7 @@ class ButtonRequests:
         self._chat_id = chat_id
         self._promoter = promoter
         self._resumes = resumes
+        self._tracker = tracker
 
     def __call__(self, callback: dict) -> None:
         chat = ((callback.get("message") or {}).get("chat") or {}).get("id")
@@ -60,8 +63,13 @@ class ButtonRequests:
         known = ["L:"]
         known += ["P:"] if self._promoter is not None else []
         known += ["C:"] if self._resumes is not None else []
+        if self._tracker is not None:
+            known += [f"{code}:" for code in TRACKING_CODES]
         if action not in known or not ref.isdigit():
             self._answer(callback, "Action inconnue")
+            return
+        if action[0] in TRACKING_CODES and self._tracker is not None:
+            self._answer(callback, self._tracker.handle(action[0], int(ref), callback))
             return
         if action == "P:":
             found = self._promoter.promote(int(ref))

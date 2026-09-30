@@ -80,6 +80,7 @@ class Profile:
     resume_model: str = "sonnet"
     resume_effort: str | None = "low"
     max_resumes_per_day: int = 10
+    reminder_days: int = 14
     max_letters_per_day: int = 10
     contact: Contact | None = None
     extra_excluded_title_words: tuple[str, ...] = ()

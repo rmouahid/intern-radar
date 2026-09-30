@@ -97,6 +97,27 @@ def test_cv_taps_are_routed_to_the_resume_service():
     ]
 
 
+def test_tracking_taps_are_routed_to_the_tracker():
+    store, telegram, service, _ = setup()
+
+    class FakeTracker:
+        def __init__(self):
+            self.calls = []
+
+        def handle(self, code, ref, tap):
+            self.calls.append((code, ref))
+            return "Candidature envoyée"
+
+    tracker = FakeTracker()
+    requests = ButtonRequests(telegram, store, service, CHAT, None, None, tracker)
+    requests(callback("A:3", cid="a"))
+    assert tracker.calls == [("A", 3)]
+    assert telegram.answers == [("a", "Candidature envoyée")]
+    _, telegram2, _, plain = setup()
+    plain(callback("A:3"))
+    assert telegram2.answers == [("c1", "Action inconnue")]
+
+
 def test_promotion_taps_without_promoter_are_unknown_actions():
     _, telegram, _, requests = setup()
     requests(callback("P:1"))

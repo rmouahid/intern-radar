@@ -9,6 +9,7 @@ from intern_radar.chance import Chance
 from intern_radar.grouping import group_scored
 from intern_radar.models import ScoredJob
 from intern_radar.telegram import Button, TelegramClient, TelegramError
+from intern_radar.tracking import tracking_row
 
 MAX_DIGEST_LINES = 15
 MAX_GROUP_LOCATIONS = 5
@@ -102,6 +103,7 @@ def format_immediate(
     siblings: Sequence[ScoredJob] = (),
     chance: Chance | None = None,
     resume_callback: str | None = None,
+    track_ref: int | None = None,
 ) -> Message:
     """Notification for one posting; `siblings` are its copies in other places."""
     job, assessment = scored.job, scored.assessment
@@ -132,7 +134,10 @@ def format_immediate(
         buttons.append(Button("✍️ Lettre de motivation", callback=letter_callback))
     if resume_callback:
         buttons.append(Button("📄 CV adapté", callback=resume_callback))
-    return Message("\n".join(lines), (tuple(buttons),) if buttons else ())
+    rows = (tuple(buttons),) if buttons else ()
+    if track_ref is not None:
+        rows += (tracking_row(None, track_ref),)
+    return Message("\n".join(lines), rows)
 
 
 def format_digest(

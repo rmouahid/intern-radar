@@ -49,6 +49,13 @@ CREATE TABLE IF NOT EXISTS letters (
     created_at TEXT NOT NULL,
     report TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS applications (
+    job_id TEXT PRIMARY KEY,
+    status TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    applied_at TEXT,
+    reminded_at TEXT
+);
 CREATE TABLE IF NOT EXISTS resumes (
     job_id TEXT PRIMARY KEY,
     path TEXT NOT NULL,
@@ -382,6 +389,53 @@ class Store:
             (since.isoformat(),),
         ).fetchone()
         return row["n"]
+
+    def application_status(self, job_id: str) -> str | None:
+        row = self._db.execute(
+            "SELECT status FROM applications WHERE job_id = ?", (job_id,)
+        ).fetchone()
+        return row["status"] if row else None
+
+    def set_application(self, job_id: str, status: str, now: datetime) -> None:
+        stamp = now.isoformat()
+        with self._db:
+            self._db.execute(
+                "INSERT INTO applications (job_id, status, updated_at, applied_at)"
+                " VALUES (?, ?, ?, CASE WHEN ? = 'applied' THEN ? END)"
+                " ON CONFLICT(job_id) DO UPDATE SET status = excluded.status,"
+                " updated_at = excluded.updated_at,"
+                " applied_at = COALESCE(applications.applied_at, excluded.applied_at)",
+                (job_id, status, stamp, status, stamp),
+            )
+
+    def applications(self) -> list[tuple[Job, str, str, str | None]]:
+        """Tracked offers: job, status, last update, application date."""
+        rows = self._db.execute(
+            "SELECT j.*, a.status AS a_status, a.updated_at AS a_updated,"
+            " a.applied_at AS a_applied FROM applications a JOIN jobs j"
+            " ON j.id = a.job_id ORDER BY a.updated_at DESC"
+        )
+        return [
+            (_row_to_job(row), row["a_status"], row["a_updated"], row["a_applied"])
+            for row in rows
+        ]
+
+    def due_reminders(self, before: datetime) -> list[tuple[Job, str]]:
+        """Applications still waiting since `before`, never reminded."""
+        rows = self._db.execute(
+            "SELECT j.*, a.applied_at AS a_applied FROM applications a JOIN jobs j"
+            " ON j.id = a.job_id WHERE a.status = 'applied'"
+            " AND a.reminded_at IS NULL AND a.updated_at <= ? ORDER BY a.applied_at",
+            (before.isoformat(),),
+        )
+        return [(_row_to_job(row), row["a_applied"]) for row in rows]
+
+    def mark_reminded(self, job_id: str, now: datetime) -> None:
+        with self._db:
+            self._db.execute(
+                "UPDATE applications SET reminded_at = ? WHERE job_id = ?",
+                (now.isoformat(), job_id),
+            )
 
     def save_resume(self, job_id: str, path: str, report: dict, now: datetime) -> None:
         with self._db:

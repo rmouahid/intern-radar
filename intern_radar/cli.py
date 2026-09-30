@@ -42,6 +42,7 @@ from intern_radar.scorer import ClaudeCliBackend, LLMError, Scorer
 from intern_radar.sources import SOURCE_NAMES, build_sources
 from intern_radar.store import Store
 from intern_radar.telegram import TelegramClient
+from intern_radar.tracking import STATUS_TEXT, Tracker
 
 app = typer.Typer(
     help="Watch top AI/tech companies for internship offers.",
@@ -136,6 +137,7 @@ def _pipeline(
         profile,
         chance=_chance(config_dir, profile, store),
         resumes=bool(profile.contact and (config_dir / "candidate.json").exists()),
+        tracking=bool(profile.cv_url and profile.contact),  # the listener runs
     )
     return pipeline, store, client
 
@@ -166,16 +168,18 @@ def digest(
 ) -> None:
     """Send the evening digest of mid-score offers."""
     _setup_logging()
+    profile, _ = _load(config_dir)
     pipeline, store, client = _pipeline(config_dir, db, dry_run)
     try:
         count = pipeline.digest()
+        reminders = pipeline.remind(profile.reminder_days)
     except NotifyError as exc:
         typer.echo(f"Digest not sent: {exc}", err=True)
         raise typer.Exit(1) from exc
     finally:
         store.close()
         client.close()
-    typer.echo(f"digest: {count} offer(s)")
+    typer.echo(f"digest: {count} offer(s), {reminders} reminder(s)")
 
 
 @app.command("list")
@@ -253,6 +257,21 @@ def generate_profile(
         path.replace(path.with_suffix(".json.bak"))
     save_candidate(candidate, path)
     typer.echo(f"saved {path}")
+
+
+@app.command()
+def applications(db: Path = DB_PATH) -> None:
+    """Print tracked applications, most recent update first."""
+    store = Store(str(db))
+    try:
+        for job, status, updated, applied in store.applications():
+            since = f" · postulé le {applied[:10]}" if applied else ""
+            typer.echo(
+                f"{STATUS_TEXT.get(status, status):<20} {job.company} — {job.title}"
+                f" · maj {updated[:10]}{since}\n      {job.url}"
+            )
+    finally:
+        store.close()
 
 
 @app.command("check-sources")
@@ -379,9 +398,16 @@ def listen(config_dir: Path = CONFIG_DIR, db: Path = DB_PATH) -> None:
             letters=True,
             chance=_chance(config_dir, profile, store),
             resumes=resumes is not None,
+            tracking=True,
         )
         requests = ButtonRequests(
-            telegram, store, service, profile.telegram_chat_id, promoter, resumes
+            telegram,
+            store,
+            service,
+            profile.telegram_chat_id,
+            promoter,
+            resumes,
+            Tracker(store, telegram),
         )
         run_listener(TelegramUpdates(telegram), requests, store)
     finally:

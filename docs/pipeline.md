@@ -368,6 +368,33 @@ C:<rowid>`), handled by the listener.
 Measured on the NVIDIA *Deep Learning* offer with the production profile:
 8–9 s, one page, no bullet dropped.
 
+### 3.8 Application tracking (`tracking.py`)
+
+When the listener runs, immediate and promoted notifications carry a second
+row: *✅ Postulé* (`A:<rowid>`) and *🙈 Pas intéressé* (`D:`). The state
+machine is pure and tested:
+
+```
+(new) ─✅→ applied ─🗣→ interview ─🎉→ offer
+  │          │ └─❌→ rejected      └─❌→ rejected
+  │          └─🔕→ no_answer ─🗣/❌→ interview / rejected
+  └─🙈→ dismissed ─✅→ applied
+```
+
+- A tap stores the new status (`applications` table: status, last update,
+  first application date, reminder date), answers with the new status and
+  replaces the tracking row of the tapped message with the next steps
+  (`editMessageReplyMarkup`; the other buttons are kept). An invalid step is
+  answered "Déjà : …" and changes nothing; a keyboard update failure never
+  loses the status.
+- A dismissed posting is never announced again for another country: the
+  posting group already carries its notification date (§3.2b).
+- Reminders: the evening `digest` run sends one *⏰ Relance* per application
+  still `applied` after `reminder_days` (14), with *Entretien / Refusé /
+  Pas de réponse* buttons, then marks it reminded.
+- `intern-radar applications` lists the tracker (status, last update,
+  application date, link).
+
 ## 4. Reliability — failure modes
 
 | Failure | Detection | Behaviour | Recovery |

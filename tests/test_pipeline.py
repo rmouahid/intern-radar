@@ -431,3 +431,40 @@ def test_immediate_notifications_carry_the_interview_chance():
     pipeline.run()
     assert asked == ["good"]
     assert "Chance d'entretien : 15 %" in notifier.sent[0].html
+
+
+def test_tracking_buttons_and_reminders():
+    scorer = FakeScorer({"good": make_assessment(ai_relevance=9)})
+    notifier = FakeNotifier()
+    store = Store(":memory:")
+    clock = Clock()
+    pipeline = Pipeline(
+        [ACME],
+        {"fake": FakeSource([make_job(id="good", tier="S")])},
+        store,
+        scorer,
+        notifier,
+        make_profile(),
+        clock,
+        tracking=True,
+    )
+    pipeline.run()
+    ref = store.job_ref("good")
+    assert [b.callback for b in notifier.sent[0].buttons[-1]] == [
+        f"A:{ref}",
+        f"D:{ref}",
+    ]
+
+    store.set_application("good", "applied", clock.now)
+    assert pipeline.remind(14) == 0
+    clock.now += timedelta(days=15)
+    assert pipeline.remind(14) == 1
+    reminder = notifier.sent[-1]
+    assert reminder.html.startswith("⏰ <b>Relance · Acme</b>")
+    assert "il y a 15 jours" in reminder.html
+    assert [b.callback for b in reminder.buttons[0]] == [
+        f"I:{ref}",
+        f"R:{ref}",
+        f"N:{ref}",
+    ]
+    assert pipeline.remind(14) == 0
