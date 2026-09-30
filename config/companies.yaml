@@ -77,4 +77,5 @@
 - {name: Shopify, tier: B, source: none}
 
 # Catch-all
-- {name: Adzuna, tier: unlisted, source: adzuna}
+# Adzuna: queried at most every 6 h to stay within the free API quota.
+- {name: Adzuna, tier: unlisted, source: adzuna, min_interval_hours: 6}

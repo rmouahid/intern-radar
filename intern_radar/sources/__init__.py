@@ -4,7 +4,7 @@ import httpx
 
 from intern_radar.config import Profile
 from intern_radar.models import Company
-from intern_radar.sources.adzuna import AdzunaSource, company_lookup
+from intern_radar.sources.adzuna import AdzunaSource, company_lookup, search_terms
 from intern_radar.sources.amazon import AmazonSource
 from intern_radar.sources.ashby import AshbySource
 from intern_radar.sources.base import Source
@@ -48,5 +48,6 @@ def build_sources(
             profile.adzuna_app_id,
             profile.adzuna_app_key,
             company_lookup(companies),
+            search_terms(companies),
         ),
     }
