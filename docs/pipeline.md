@@ -288,8 +288,19 @@ Triggered by a button tap:
    `telegram_chat_id`; it is answered at once ("⏳ Lettre en préparation…").
 3. Stored letter present → re-sent, no LLM call. Daily cap
    (`max_letters_per_day`, 10) → one notice per day.
-4. CV text from the Google Doc PDF export (`pypdf`), cached 24 h; a stale
-   cache is used when the download fails.
+4. Candidate facts. When `config/candidate.json` exists (see
+   `generate-profile`), `select_items()` ranks experiences and projects by
+   the number of their skills and keywords found (whole words) in the offer
+   title and cleaned description, and the draft receives the summary,
+   education, the **4 best items in full**, the others as one line, skills,
+   languages and extras. The keyword report and the fidelity check use the
+   **whole** profile, so a keyword present in a non-selected item is not
+   reported as missing. Otherwise the CV text comes from the Google Doc PDF
+   export (`pypdf`, wrapped lines rejoined), cached 24 h; a stale cache is
+   used when the download fails. Measured on the NVIDIA *Deep Learning*
+   offer with the first generated profile (5 items): draft prompt 2,289 →
+   2,139 tokens; with a longer dossier the prompt stays bounded by the
+   4-item selection.
 5. LLM (sonnet, `--effort low`), 2 to 4 calls:
    - **draft + keywords** in one call: 3 paragraphs with the CV as sole source
      of facts, the offer wrapped in `<offer>` as untrusted data, and the

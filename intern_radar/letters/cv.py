@@ -23,7 +23,9 @@ def pdf_text(data: bytes) -> str:
     reader = PdfReader(io.BytesIO(data))
     text = "\n".join(page.extract_text() or "" for page in reader.pages)
     text = re.sub(r"[ \t\xa0]+", " ", text)
-    return re.sub(r"\s*\n\s*", "\n", text).strip()
+    text = re.sub(r"\s*\n\s*", "\n", text)
+    # Justified text comes out one word per line: rejoin wrapped lines.
+    return re.sub(r"\n(?=[a-z(])", " ", text).strip()
 
 
 class CvSource:

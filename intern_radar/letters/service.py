@@ -120,7 +120,7 @@ class LetterService:
     def __init__(
         self,
         store: Store,
-        make_writer: Callable[[], LetterWriter],
+        make_writer: Callable[[Job], LetterWriter],
         contact: Contact,
         out_dir: Path,
         documents: DocumentSender,
@@ -162,7 +162,7 @@ class LetterService:
             return None
 
     def _generate(self, job: Job, now: datetime) -> Path:
-        letter, report = self._make_writer().write(job)
+        letter, report = self._make_writer(job).write(job)
         pdf, dropped, pages = render(letter, job, self._contact, now.date())
         last_name = self._contact.name.split()[-1]
         # One folder per job: two offers can share company and title.

@@ -340,6 +340,22 @@ def check_candidate(candidate: Candidate, dossier: str) -> list[str]:
     return warnings
 
 
+def select_items(candidate: Candidate, offer: str, limit: int = 4) -> list[Item]:
+    """The experiences and projects that best match an offer, best first.
+
+    Deterministic: an item scores one point per skill or keyword that appears
+    in the offer text (whole words); ties keep the profile order.
+    """
+    text = _normalise(offer)
+
+    def score(item: Item) -> int:
+        terms = {t for t in (*item.skills, *item.keywords) if t.strip()}
+        return sum(_normalise(term) in text for term in terms)
+
+    ranked = sorted(enumerate(candidate.items), key=lambda p: (-score(p[1]), p[0]))
+    return [item for _, item in ranked[:limit]]
+
+
 def item_text(item: Item) -> str:
     lines = [f"{item.title} — {item.organisation} ({item.dates})", item.context]
     lines += [f"- {action}" for action in item.actions]
