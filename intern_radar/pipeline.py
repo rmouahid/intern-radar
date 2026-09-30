@@ -42,6 +42,7 @@ class RunReport:
     new: int = 0
     candidates: int = 0
     out_of_scope: int = 0  # internship titles dropped by the field filter
+    stale: int = 0  # offers published more than max_offer_age_days ago
     scored: int = 0
     notified: int = 0
     grouped: int = 0  # jobs that reused the result of their posting group
@@ -83,7 +84,11 @@ class Pipeline:
 
     def digest(self) -> int:
         thresholds = self._profile.thresholds
-        jobs = self._store.due_digest(thresholds.digest, thresholds.immediate)
+        jobs = self._store.due_digest(
+            thresholds.digest,
+            thresholds.immediate,
+            min_posted=self._min_posted(self._clock()),
+        )
         if not jobs:
             return 0
         refs = None
@@ -141,7 +146,12 @@ class Pipeline:
                 if job.id in known:
                     continue
                 known.add(job.id)
-                if not prefilter.passes(job, extra, self._profile.window_start.year):
+                if prefilter.is_stale(
+                    job.posted_at, now.date(), self._profile.max_offer_age_days
+                ):
+                    status = "rejected"
+                    report.stale += 1
+                elif not prefilter.passes(job, extra, self._profile.window_start.year):
                     status = "rejected"
                     report.out_of_scope += prefilter.is_internship_title(
                         job.title
@@ -155,6 +165,11 @@ class Pipeline:
                 self._store.add(job, status, now)
                 report.new += 1
                 report.candidates += status == "pending"
+
+    def _min_posted(self, now: datetime) -> str | None:
+        """Oldest publication date still worth sending, or None (no limit)."""
+        days = self._profile.max_offer_age_days
+        return (now.date() - timedelta(days=days)).isoformat() if days > 0 else None
 
     def _fetched_recently(self, company: Company, now: datetime) -> bool:
         """True within `min_interval_hours` of the last successful fetch
@@ -199,7 +214,9 @@ class Pipeline:
 
     def _notify(self, report: RunReport) -> bool:
         now = self._clock()
-        due = self._store.due_immediate(self._profile.thresholds.immediate)
+        due = self._store.due_immediate(
+            self._profile.thresholds.immediate, min_posted=self._min_posted(now)
+        )
         groups = group_scored(due)[: self._profile.max_immediate_per_run]
         letters = bool(self._profile.cv_url and self._profile.contact)
         for lead, *siblings in groups:

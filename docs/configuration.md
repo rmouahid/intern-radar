@@ -85,6 +85,7 @@ Letters are enabled (button shown, commands usable) when `cv_url` and
 | `resume_effort` | string | `low` | `--effort` for tailored CVs |
 | `dashboard_host` | string | Tailscale IP | address the dashboard listens on |
 | `dashboard_port` | int | `8787` | dashboard port |
+| `max_offer_age_days` | int | `60` | offers first published earlier are dropped and never sent; `0` disables |
 | `reminder_days` | int | `14` | days without news before an application reminder |
 | `max_resumes_per_day` | int | `10` | new tailored CVs per 24 h; re-sending a stored one is free |
 

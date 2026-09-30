@@ -179,7 +179,7 @@ def run(
         f"fetched={report.fetched} new={report.new} candidates={report.candidates}"
         f" scored={report.scored} notified={report.notified}"
         f" errors={len(report.errors)} grouped={report.grouped}"
-        f" out_of_scope={report.out_of_scope}"
+        f" out_of_scope={report.out_of_scope} stale={report.stale}"
     )
 
 

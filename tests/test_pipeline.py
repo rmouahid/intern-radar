@@ -480,3 +480,39 @@ def test_min_interval_hours_spaces_out_quota_limited_sources():
     clock.now += timedelta(hours=5)
     pipeline.run()
     assert len(source.calls) == 2
+
+
+def test_stale_offers_are_rejected_and_old_stored_ones_not_sent():
+    jobs = [
+        make_job(id="new", tier="S", title="ML Intern A", posted_at="2026-09-20"),
+        make_job(id="old", tier="S", title="ML Intern B", posted_at="2026-05-01"),
+    ]
+    scorer = FakeScorer({"new": make_assessment(ai_relevance=9)})
+    notifier = FakeNotifier()
+    pipeline, store, _ = build({"fake": FakeSource(jobs)}, scorer, notifier)
+    report = pipeline.run()
+    assert (report.stale, report.candidates) == (1, 1)
+    assert scorer.batches == [["new"]]
+
+    # Offers stored before the rule existed are no longer sent either.
+    store.add(
+        make_job(id="legacy", title="ML Intern C", posted_at="2026-03-01"),
+        "pending",
+        NOW,
+    )
+    store.save_assessment("legacy", make_assessment(ai_relevance=9), 9.0)
+    store.add(
+        make_job(id="mid", title="ML Intern D", posted_at="2026-03-01"), "pending", NOW
+    )
+    store.save_assessment("mid", make_assessment(), 6.0)
+    pipeline.run()
+    assert pipeline.digest() == 0
+    sent = " ".join(m.html for m in notifier.sent)
+    assert "ML Intern C" not in sent and "ML Intern D" not in sent
+
+
+def test_offer_age_limit_can_be_disabled():
+    job = make_job(id="old", tier="S", posted_at="2020-01-01")
+    scorer = FakeScorer({"old": make_assessment(ai_relevance=9)})
+    pipeline, _, _ = build({"fake": FakeSource([job])}, scorer, max_offer_age_days=0)
+    assert pipeline.run().stale == 0 and scorer.batches == [["old"]]

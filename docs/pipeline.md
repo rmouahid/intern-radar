@@ -144,6 +144,13 @@ collection ~2 min.
   would have been rejected, 43 % of those with an AI relevance ≤ 3, and
   none of the offers ever notified or digested. Counted as
   `out_of_scope=N` in the run summary.
+- Offer age: an offer first published more than `max_offer_age_days` (60)
+  ago is rejected at collection, before any LLM call (`stale=N` in the run
+  summary), and stored offers older than that are no longer due for
+  immediate notifications or the digest. Offers without a date are kept;
+  `0` disables the rule. Measured on 2026-09-30: 220 of 1,179 scored offers
+  were older than 60 days (up to 487 days), 34 of them had been sent; they
+  are usually filled or evergreen postings.
 - Recruiting cycle: a title whose years are all before the window start
   year (`2026 SDE Intern`, `Fall 2026`) is rejected; `2026-2027`,
   `Summer 2027`, `Class of 2029` and titles without a year are kept.

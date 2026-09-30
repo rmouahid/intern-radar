@@ -5,6 +5,7 @@ from intern_radar.prefilter import (
     is_internship_title,
     is_out_of_scope,
     is_past_cycle,
+    is_stale,
     is_undergrad_only_title,
     passes,
 )
@@ -222,3 +223,20 @@ def test_undergrad_only_titles(title, undergrad):
     assert is_undergrad_only_title(title) is undergrad
     if undergrad:
         assert not passes(make_job(title=title))
+
+
+@pytest.mark.parametrize(
+    "posted_at, stale",
+    [
+        ("2026-08-01", False),  # 60 days before today: kept
+        ("2026-07-31", True),  # 61 days
+        ("2025-06-01T10:00:00Z", True),
+        (None, False),
+        ("not a date", False),
+    ],
+)
+def test_is_stale(posted_at, stale):
+    from datetime import date
+
+    assert is_stale(posted_at, date(2026, 9, 30), 60) is stale
+    assert is_stale(posted_at, date(2026, 9, 30), 0) is False
