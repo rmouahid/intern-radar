@@ -34,11 +34,33 @@ def test_to_latin1():
 
 
 def test_file_name():
-    assert file_name("Mouahid", "Hugging Face", "ML Intern (2027)") == (
-        "Mouahid_CoverLetter_Hugging-Face_ML-Intern-2027.pdf"
+    assert file_name("Rayân Mouahid") == "Rayan_Mouahid_CoverLetter.pdf"
+
+
+def test_country_conventions_shape_the_letter():
+    import io
+
+    from pypdf import PdfReader
+
+    from intern_radar.conventions import CONVENTIONS
+
+    us = make_job(company="Acme", title="ML Intern", location="Austin, TX")
+    data, _, _ = render(LETTER, us, CONTACT, date(2026, 9, 30), CONVENTIONS["us"])
+    reader = PdfReader(io.BytesIO(data))
+    assert round(float(reader.pages[0].mediabox.width)) == 612
+    assert reader.metadata.title == "Rayân Mouahid - Cover letter"
+    assert "September 30, 2026" in text_of(data)
+    assert "Application for ML Intern" in text_of(data)
+    uk = render(LETTER, us, CONTACT, date(2026, 9, 30), CONVENTIONS["uk"])[0]
+    assert "30 September 2026" in text_of(uk)
+    german = Letter(
+        "de",
+        "Sehr geehrte Damen und Herren,",
+        ("a", "b", "c", "d"),
+        "Mit freundlichen Grüßen",
     )
-    long_name = file_name("Mouahid", "Amazon", "Robotics " * 30)
-    assert len(long_name) <= 80 and long_name.endswith(".pdf")
+    de = render(german, us, CONTACT, date(2026, 9, 30), CONVENTIONS["dach"])[0]
+    assert "30.09.2026" in text_of(de) and "Bewerbung als ML Intern" in text_of(de)
 
 
 def test_render_contains_header_body_and_signature():
@@ -50,9 +72,9 @@ def test_render_contains_header_body_and_signature():
     for expected in (
         "Rayân Mouahid",
         "me@example.com",
-        "September 24, 2026",
+        "24 September 2026",
         "Acme - Hiring Team",
-        "Re: ML Intern (London, UK)",
+        "Application for ML Intern",
         "Second paragraph.",
         "Sincerely,",
     ):

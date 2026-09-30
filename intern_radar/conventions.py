@@ -9,6 +9,7 @@ international (A4, British-leaning) default.
 
 import re
 from dataclasses import dataclass
+from datetime import date
 
 from intern_radar.countries import mentions_any
 
@@ -316,3 +317,59 @@ def work_status_line(convention: Convention, work_authorisation: str) -> str:
         "free": "EU citizen: no work permit required",
         "self_arranged": "Eligible for a Working Holiday visa: no sponsorship required",
     }.get(work_authorisation, "French citizen: requires visa sponsorship")
+
+
+# --- cover letters -------------------------------------------------------------
+
+FRENCH_MONTHS = (
+    "janvier février mars avril mai juin juillet août septembre octobre "
+    "novembre décembre"
+).split()
+
+
+def letter_formulas(convention: Convention, language: str) -> tuple[str, str]:
+    """Salutation and closing for an unnamed recipient, by language and region."""
+    if language == "fr":
+        return (
+            "Madame, Monsieur,",
+            "Veuillez agréer, Madame, Monsieur, l'expression de mes salutations "
+            "distinguées.",
+        )
+    if language == "de":
+        swiss = convention is CONVENTIONS["switzerland"]
+        return (
+            "Sehr geehrte Damen und Herren,",
+            "Mit freundlichen Grüssen" if swiss else "Mit freundlichen Grüßen",
+        )
+    if language == "es":
+        return "Estimados señores:", "Atentamente,"
+    return "Dear Hiring Manager,", convention.closing_unnamed
+
+
+def letter_date(convention: Convention, language: str, day: date) -> str:
+    if language == "fr":
+        return f"{day.day} {FRENCH_MONTHS[day.month - 1]} {day.year}"
+    if language == "de":
+        return f"{day:%d.%m.%Y}"
+    if convention.letter_date == "us":
+        return f"{day:%B} {day.day}, {day.year}"
+    return f"{day.day} {day:%B} {day.year}"
+
+
+def letter_subject(language: str, title: str) -> str:
+    return {
+        "fr": f"Objet : candidature au poste de {title}",
+        "de": f"Bewerbung als {title}",
+        "es": f"Asunto: candidatura para {title}",
+    }.get(language, f"Application for {title}")
+
+
+def visa_fact(work_authorisation: str) -> str:
+    """Right-to-work fact for the letter; "" in the EU/EEA/Switzerland."""
+    return {
+        "free": "",
+        "self_arranged": "The candidate can obtain a Working Holiday visa "
+        "without any employer sponsorship.",
+        "programme": "The candidate would need the standard intern visa "
+        "programme for this country.",
+    }.get(work_authorisation, "The candidate would need visa sponsorship.")

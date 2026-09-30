@@ -349,7 +349,25 @@ Triggered by a button tap:
    offer with the first generated profile (5 items): draft prompt 2,289 →
    2,139 tokens; with a longer dossier the prompt stays bounded by the
    4-item selection.
-5. LLM (sonnet, `--effort low`), 2 to 4 calls:
+5. Country conventions (`conventions.py`, same regions as CVs, §3.7): the
+   draft follows the guide's structure — hook, proof (achievements with
+   stack, scale and results), fit (what the candidate knows of the company;
+   explains what the CV shows), closing (availability, the right-to-work
+   fact outside the EU/EEA/Switzerland, interview proposal) — in 250–400
+   words (150–300 in Benelux and the Nordics), with the region's spelling
+   and tone. The salutation and closing are then set in Python from the
+   language and region (`Dear Hiring Manager,` / `Sincerely,` in North
+   America, `Yours faithfully,` in the UK, Ireland and the Gulf, `Sehr
+   geehrte Damen und Herren,` / `Mit freundlichen Grüßen` — `Grüssen` in
+   Switzerland — in German, `Madame, Monsieur,` / `Veuillez agréer…` in
+   French). The PDF uses the region's paper, the same margins as the CV,
+   the local date format (`September 30, 2026`, `30 September 2026`,
+   `30.09.2026` on the right as in DIN 5008, `30 septembre 2026`), a subject
+   line (`Application for …`, `Bewerbung als …`, `Objet : candidature au
+   poste de …`), PDF title and author, and the file name
+   `Firstname_Lastname_CoverLetter.pdf`. Measured on the NVIDIA *Deep
+   Learning* offer: US Letter, 312 words, 4 paragraphs, one page.
+6. LLM (sonnet, `--effort low`), 2 to 4 calls:
    - **draft + keywords** in one call: 3 paragraphs with the CV as sole source
      of facts, the offer wrapped in `<offer>` as untrusted data, and the
      offer's 10–15 ATS keywords with an `in_cv` flag (ignored when the offer
@@ -361,14 +379,14 @@ Triggered by a button tap:
      once (whitespace-tolerant), skips edits that do not match or would
      empty a paragraph, and counts them (`edits_failed`, shown in the
      caption).
-6. Pure checks: keyword coverage, blacklist, fidelity (proper nouns — with
+7. Pure checks: keyword coverage, blacklist, fidelity (proper nouns — with
    accented capitals — and "number + unit" not found in CV/offer),
    keywords the model judged "in the CV" without literal evidence.
-7. PDF (`fpdf2`, A4, Helvetica, Latin-1 after NFKC and typographic mapping;
+8. PDF (`fpdf2`, Letter or A4, Helvetica, Latin-1 after NFKC and typographic mapping;
    unknown characters become spaces and are reported); font shrinks
    11 → 10.5 → 10 pt to fit one page; the model's signature is stripped from
    the closing. Stored under `data/letters/<sha1(job id)[:10]>/`.
-8. `sendDocument` with an HTML caption built by dropping whole optional
+9. `sendDocument` with an HTML caption built by dropping whole optional
    sections until the *visible* text fits 1,024 characters; if Telegram
    rejects it, the PDF is re-sent with a plain-text caption; if that fails
    too, a "Lettre non envoyée" message is sent. Optional Gmail copy (SMTP

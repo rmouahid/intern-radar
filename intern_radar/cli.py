@@ -29,6 +29,7 @@ from intern_radar.config import (
     load_companies,
     load_profile,
 )
+from intern_radar.conventions import convention_for, visa_fact
 from intern_radar.dashboard.runner import run_status, start_run
 from intern_radar.dashboard.server import make_server, tailscale_ip
 from intern_radar.description import clean_description
@@ -388,10 +389,16 @@ def _letter_service(config_dir: Path, db: Path):
     candidate_path = config_dir / "candidate.json"
 
     def make_writer(job: Job) -> LetterWriter:
-        """Letters use the structured profile when it exists, else the CV."""
+        """Letters use the structured profile when it exists, else the CV;
+        they follow the conventions of the offer's country."""
         window = (profile.window_start, profile.window_end, profile.min_months)
+        scored = store.scored_job(job.id)
+        local = {
+            "convention": convention_for(job.location),
+            "visa": visa_fact(scored.assessment.work_authorisation) if scored else "",
+        }
         if not candidate_path.exists():
-            return LetterWriter(backend, cv.text(), *window)
+            return LetterWriter(backend, cv.text(), *window, **local)
         candidate = load_candidate(candidate_path)
         offer = f"{job.title}\n{clean_description(job.description)}"
         selected = select_items(candidate, offer)
@@ -400,6 +407,7 @@ def _letter_service(config_dir: Path, db: Path):
             candidate_text(candidate, selected),
             *window,
             reference_text=candidate_text(candidate),
+            **local,
         )
 
     mail = (

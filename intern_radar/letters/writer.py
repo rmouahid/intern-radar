@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Any
 
+from intern_radar.conventions import CONVENTIONS, Convention, letter_formulas
 from intern_radar.description import clean_description
 from intern_radar.letters.checks import (
     blacklisted,
@@ -26,8 +27,8 @@ MAX_EDITS = 20
 PARAGRAPHS: dict[str, Any] = {
     "type": "array",
     "items": {"type": "string"},
-    "minItems": 3,
-    "maxItems": 3,
+    "minItems": 4,
+    "maxItems": 4,
 }
 LETTER_SCHEMA: dict[str, Any] = {
     "type": "object",
@@ -86,19 +87,26 @@ Description:
 </offer>
 
 {window}
+{visa}
+
+Country conventions ({region}): spelling {spelling}. {notes}
 
 Letter rules:
-- Language: English, unless the offer is written in Spanish or French; then
-  use that language.
-- About 300 words in exactly 3 paragraphs.
-- Paragraph 1: why this company and this role, citing one concrete element
-  of the offer.
-- Paragraph 2: two or three projects or experiences from the CV, each tied
-  explicitly to a mission or requirement of the offer.
-- Paragraph 3: the availability above and one short, sober closing sentence.
+- Language: English, unless the offer is written in French, German or
+  Spanish; then use that language.
+- {min_words} to {max_words} words in exactly 4 paragraphs:
+  1. Hook (2-3 sentences): the role and the company, and why this candidate
+     now, citing one concrete element of the offer.
+  2. Proof (4-5 sentences): one or two achievements from the CV aligned with
+     the offer's needs, with their stack, scale and measured results.
+  3. Fit (3-4 sentences): what the candidate knows about the company
+     (product, challenges stated in the offer) and what they want to bring.
+     Explain what the CV shows; do not list it again.
+  4. Closing (2 sentences): the availability above, the right-to-work fact
+     above in one sentence when there is one, and a proposal to talk in an
+     interview.
 - Never invent a skill, tool, number, employer, school or experience that
-  is not in the CV.
-- No filler, no cliches, no em dashes.
+  is not in the CV. No filler, no superlatives, no cliches, no em dashes.
 
 Keyword rules: list the 10 to 15 most important keywords (skills, tools,
 technologies, concepts) of the offer. Each keyword is 1 to 3 words, written
@@ -107,9 +115,8 @@ Set in_cv to true when the CV mentions the keyword or clearly demonstrates it
 (for example, a RAG project demonstrates information retrieval). Return an
 empty list when the offer has no description.
 
-Return the greeting (e.g. "Dear Hiring Team,"), the 3 paragraphs, the
-closing (e.g. "Sincerely,") without the candidate's name, the language as an
-ISO code, and the keywords."""
+Return the greeting, the 4 paragraphs, the closing without the candidate's
+name, the language as an ISO code, and the keywords."""
 
 EDIT_RULES = """Return only edits: each edit replaces an exact substring of
 the letter ("before", copied character for character) with new text
@@ -172,7 +179,7 @@ def _paragraphs(result: dict[str, Any]) -> tuple[str, ...]:
     paragraphs = result.get("paragraphs")
     if (
         not isinstance(paragraphs, list)
-        or len(paragraphs) != 3
+        or len(paragraphs) != 4
         or not all(isinstance(p, str) and p.strip() for p in paragraphs)
     ):
         raise LLMError("LLM returned an invalid letter")
@@ -230,12 +237,18 @@ class LetterWriter:
         window_end: date,
         min_months: int,
         reference_text: str | None = None,
+        convention: Convention = CONVENTIONS["international"],
+        visa: str = "",
     ) -> None:
         """`cv_text` is shown to the LLM; `reference_text` (the whole profile
-        when only selected items are shown) backs the fact and keyword checks."""
+        when only selected items are shown) backs the fact and keyword checks.
+        `convention` is the offer country's; `visa` the right-to-work fact to
+        state in the closing paragraph ("" in the EU/EEA/Switzerland)."""
         self._backend = backend
         self._cv = cv_text
         self._reference = reference_text or cv_text
+        self._convention = convention
+        self._visa = visa
         self._window = (
             f"The candidate is available for an internship of at least "
             f"{min_months} months between {window_start:%B} {window_start.year} "
@@ -313,14 +326,23 @@ class LetterWriter:
                 description=clean_description(job.description)[:DESCRIPTION_LIMIT]
                 or "not provided",
                 window=self._window,
+                visa=f"Right-to-work fact: {self._visa}" if self._visa else "",
+                region=self._convention.region,
+                spelling=self._convention.spelling,
+                notes=self._convention.notes,
+                min_words=self._convention.letter_words[0],
+                max_words=self._convention.letter_words[1],
             ),
             LETTER_SCHEMA,
         )
+        language = str(result.get("language") or "en").lower()[:2]
+        # Salutation and closing follow the country's usage, not the model.
+        greeting, closing = letter_formulas(self._convention, language)
         letter = Letter(
-            language=str(result.get("language") or "en"),
-            greeting=str(result.get("greeting") or "Dear Hiring Team,"),
+            language=language,
+            greeting=greeting,
             paragraphs=_paragraphs(result),
-            closing=str(result.get("closing") or "Sincerely,"),
+            closing=closing,
         )
         return letter, _keywords(result)
 

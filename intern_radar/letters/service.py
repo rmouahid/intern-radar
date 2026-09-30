@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from intern_radar.config import Contact
+from intern_radar.conventions import convention_for
 from intern_radar.letters.cv import CvError
 from intern_radar.letters.delivery import DeliveryError, GmailSender
 from intern_radar.letters.pdf import file_name, render
@@ -163,11 +164,11 @@ class LetterService:
 
     def _generate(self, job: Job, now: datetime) -> Path:
         letter, report = self._make_writer(job).write(job)
-        pdf, dropped, pages = render(letter, job, self._contact, now.date())
-        last_name = self._contact.name.split()[-1]
+        convention = convention_for(job.location)
+        pdf, dropped, pages = render(letter, job, self._contact, now.date(), convention)
         # One folder per job: two offers can share company and title.
         folder = hashlib.sha1(job.id.encode()).hexdigest()[:10]
-        path = self._out_dir / folder / file_name(last_name, job.company, job.title)
+        path = self._out_dir / folder / file_name(self._contact.name)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(pdf)
         data = {

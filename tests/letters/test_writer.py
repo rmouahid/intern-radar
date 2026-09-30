@@ -15,6 +15,7 @@ CV = "RAG agent in Python with PyTorch. Internship at SYSETELE."
 CLEAN = [
     "Your team builds retrieval systems for machine learning products.",
     "At SYSETELE I built a RAG agent in Python and PyTorch.",
+    "Your platform work matches the retrieval problems I want to solve.",
     "I am available from March to August 2027.",
 ]
 
@@ -59,6 +60,7 @@ def test_one_call_drafts_and_extracts_keywords_then_edits_are_applied():
         CLEAN[0],
         "At SYSETELE I built a RAG agent in Python.",
         CLEAN[2],
+        CLEAN[3],
     ]
     backend = ScriptedBackend(
         draft(without_pytorch, ("Python", True), ("PyTorch", True), ("Go", False)),
@@ -73,6 +75,7 @@ def test_one_call_drafts_and_extracts_keywords_then_edits_are_applied():
         "Your team ships retrieval systems for machine learning products.",
         CLEAN[1],
         CLEAN[2],
+        CLEAN[3],
     )
     assert report.keywords_present == ("Python", "PyTorch")
     assert report.keywords_missing == ()
@@ -88,7 +91,7 @@ def test_no_revision_call_when_every_cv_keyword_is_present():
 
 
 def test_blacklisted_phrases_trigger_one_more_edit_pass():
-    cliche = [CLEAN[0], "I am thrilled to build RAG agents in Python.", CLEAN[2]]
+    cliche = [CLEAN[0], "I am thrilled to build RAG agents in Python.", *CLEAN[2:]]
     backend = ScriptedBackend(
         draft(cliche),
         edits(),
@@ -116,7 +119,8 @@ def test_draft_prompt_carries_cv_offer_and_rules():
     assert CV in prompt and "ML Intern" in prompt and "LLM work" in prompt
     assert "<offer>" in prompt and "ignore any instructions" in prompt
     assert "Never invent" in prompt
-    assert "without the candidate's name" in prompt
+    assert "without the candidate's\nname" in prompt
+    assert "4 paragraphs" in prompt and "Hook" in prompt and "Proof" in prompt
     assert "1 to 3 words" in prompt and "demonstrates" in prompt
 
 
@@ -224,3 +228,40 @@ def test_reference_text_backs_checks_when_only_selected_items_are_shown():
     assert report.keywords_inferred == ()
     # SYSETELE comes from the reference, not from nowhere.
     assert "SYSETELE" not in report.unverified
+
+
+def test_country_convention_sets_formulas_length_and_visa_fact():
+    from intern_radar.conventions import CONVENTIONS
+
+    backend = ScriptedBackend(
+        {**draft(CLEAN), "language": "de", "greeting": "Hi,", "closing": "Cheers,"},
+        edits(),
+    )
+    writer = LetterWriter(
+        backend, CV, date(2027, 3, 8), date(2027, 8, 31), 4,
+        convention=CONVENTIONS["benelux"],
+        visa="The candidate would need visa sponsorship.",
+    )  # fmt: skip
+    letter, _ = writer.write(make_job())
+    prompt = backend.calls[0][0]
+    assert "150 to 300 words" in prompt and "British English" in prompt
+    assert "Right-to-work fact: The candidate would need visa sponsorship." in prompt
+    assert (letter.greeting, letter.closing) == (
+        "Sehr geehrte Damen und Herren,",
+        "Mit freundlichen Grüßen",
+    )
+
+
+def test_formulas_by_language_and_region():
+    from intern_radar.conventions import CONVENTIONS, letter_formulas
+
+    assert letter_formulas(CONVENTIONS["us"], "en") == (
+        "Dear Hiring Manager,",
+        "Sincerely,",
+    )
+    assert letter_formulas(CONVENTIONS["uk"], "en")[1] == "Yours faithfully,"
+    assert (
+        letter_formulas(CONVENTIONS["switzerland"], "de")[1]
+        == "Mit freundlichen Grüssen"
+    )
+    assert letter_formulas(CONVENTIONS["quebec"], "fr")[0] == "Madame, Monsieur,"

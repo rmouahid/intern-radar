@@ -68,7 +68,7 @@ def test_generates_stores_and_delivers(tmp_path):
     mail = Recorder()
     service, store, documents, notifier = build(tmp_path, mail=mail)
     path = service.handle("j1\n")
-    assert path.name == "Mouahid_CoverLetter_Acme_ML-Intern.pdf"
+    assert path.name == "Rayan_Mouahid_CoverLetter.pdf"
     assert path.read_bytes().startswith(b"%PDF")
     stored_path, report = store.letter("j1")
     assert stored_path == str(path) and report["ai_changes"] == 4
@@ -148,7 +148,7 @@ def test_same_company_and_title_do_not_share_a_file(tmp_path):
     service, _, _, _ = build(tmp_path, jobs=jobs)
     first, second = service.handle("a"), service.handle("b")
     assert first != second
-    assert first.name == second.name == "Mouahid_CoverLetter_Acme_ML-Intern.pdf"
+    assert first.name == second.name == "Rayan_Mouahid_CoverLetter.pdf"
 
 
 def test_caption_matches_the_approved_layout():
