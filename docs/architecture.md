@@ -46,7 +46,7 @@ tests).
 
 Module rules:
 
-- **Pure core**: `prefilter`, `ranking`, `letters/checks` and the message
+- **Pure core**: `prefilter`, `grouping`, `ranking`, `letters/checks` and the message
   formatters have no I/O and are tested exhaustively.
 - **Adapters at the edge**: `sources/*`, `scorer.ClaudeCliBackend`,
   `telegram.TelegramClient`, `letters/delivery.GmailSender` and
@@ -77,7 +77,8 @@ sites use. Adzuna covers the rest through an official API.
 ### D2 — Rules before the LLM
 
 A pure pre-filter keeps internship titles (whole-word regex) and drops
-France-only locations and duplicates before any LLM call; adapters also
+France-only locations and duplicates before any LLM call, and scores one
+posting per group of per-country copies (`grouping.py`); adapters also
 skip already-known ids before fetching details.
 
 - *Why*: the LLM is the slow and costly stage (~9 s per offer). A single

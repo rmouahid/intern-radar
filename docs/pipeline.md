@@ -55,7 +55,8 @@ Job lifecycle (`jobs.status` plus timestamps):
 ```
 fetched ─┬─ pre-filter fails ─────────────► rejected   (description dropped)
          ├─ Adzuna copy of an ATS offer ──► duplicate  (description dropped)
-         └─ passes ─► pending ─┬─ LLM answer ─► scored ─┬─ score NULL  → excluded, never sent
+         └─ passes ─► pending ─┬─ group already scored ─► scored (inherited, same dates)
+                               ├─ LLM answer ─► scored ─┬─ score NULL  → excluded, never sent
                                │                        ├─ ≥ 7.5       → notified_at
                                │                        └─ 5.5–7.5     → digested_at
                                └─ 3 answers without it ─► stays pending, no longer retried
@@ -106,11 +107,35 @@ collection ~2 min.
 
 - Title: `\b(interns?|internships?|co-?ops?|stagiaires?|trainees?|placements?)\b`
   (whole words, so *Internal*/*International* do not match).
-- Location: rejected only when every place listed is French (separators
-  `; , | / & and or`; neutral parts such as *Remote*, *EU*, *Île-de-France*
-  are ignored; "excluding France" is not French).
+- Location: rejected only when every place listed is French. Places are
+  separated by `; | / & and or`; inside a place, commas separate city,
+  region and country. A place naming France through its country
+  (*France*, ISO `FR`/`FRA`) or a French region is French whatever its city
+  (`Clichy, Ile-de-France, FRA`). Without such a marker each comma part
+  counts on its own (`Paris, London` passes); neutral parts such as
+  *Remote*, *EU*, *Île-de-France* are ignored; "excluding France" is not
+  French.
 - Adzuna offers whose company and title match an ATS offer are stored as
   `duplicate`.
+
+### 3.2b Posting groups (`grouping.py`, pure)
+
+Large companies publish one internship per country (*SDE Intern - Germany*,
+*SDE Intern - UK*). `group_key(company, title)` lower-cases the title, strips
+trailing place suffixes (`- Germany`, `, Singapore`, `(Remote)`, from a list
+of ~70 countries and regions) and punctuation; it is stored in
+`jobs.group_key` (indexed, back-filled on first open of an older database).
+
+- Scoring: `Store.pending()` returns one job per group; after each run, and
+  before selecting a batch, `inherit_group_assessments()` copies the scored
+  member's assessment, score, `notified_at` and `digested_at` to the pending
+  members. A country added later is therefore never announced again.
+- Notifications: members due together are sent as one message whose
+  location line lists up to 5 distinct places, each linked to its own offer
+  when the URLs differ (`+N` beyond). The digest shows one entry per group.
+- Measured on the production database: 1,162 scored jobs form 972 groups,
+  i.e. **190 LLM assessments (16 %) avoidable**.
+- Not grouped: different companies, reworded titles.
 
 ### 3.3 LLM scoring (`scorer.py`)
 
@@ -150,7 +175,8 @@ Thresholds: ≥ 7.5 immediate, 5.5–7.5 digest (both configurable).
   capped: 80/200/100/300/500 characters), buttons *Voir l'offre* (only for
   `http(s)` URLs) and *Lettre de motivation* (`callback_data = L:<rowid>`,
   within Telegram's 64-byte limit).
-- Digest: ≤ 15 offers (keeps the rendered text under 4,096), silent.
+- Posting groups: one message per group, locations joined (§3.2b).
+- Digest: ≤ 15 groups (keeps the rendered text under 4,096), silent.
 - Alerts (silent): a source failing for 3 consecutive days, the LLM failing
   for 1 day; each alerted once per streak.
 - Delivery semantics: an offer is marked `notified_at` only after Telegram
@@ -158,7 +184,7 @@ Thresholds: ≥ 7.5 immediate, 5.5–7.5 digest (both configurable).
   the notification step and everything is retried next run. Permanent
   rejections (4xx other than 429) are logged, marked and skipped so that one
   bad message cannot block later ones. At most `max_immediate_per_run` (10)
-  offers per run.
+  posting groups per run.
 
 ### 3.6 Cover letters (`letters/`)
 
@@ -335,7 +361,7 @@ Observations and levers:
 ```bash
 systemctl list-timers 'intern-radar*'
 systemctl status intern-radar-letters
-journalctl -u intern-radar-run -n 50            # last run: fetched=… scored=… errors=…
+journalctl -u intern-radar-run -n 50            # last run: fetched=… scored=… errors=… grouped=…
 tail -f logs/intern-radar.log                   # all components (logrotate weekly, 8 kept)
 poetry run intern-radar check-sources           # which feeds answer
 poetry run intern-radar run --dry-run           # full pass, in-memory DB, prints messages
