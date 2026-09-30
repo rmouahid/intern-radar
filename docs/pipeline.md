@@ -437,10 +437,24 @@ Projections (current configuration):
 Observations and levers:
 
 - Scoring output is ~83 % reasoning (6.5–7.4 k of 7.9–8.9 k tokens per
-  batch). `--effort low` had no effect on haiku in the same measurement, so
-  `llm_effort` stays unset; reducing reasoning for scoring would need
-  another model/effort combination and a quality check against the
-  run-to-run variance above.
+  batch). `--effort low` has no effect on haiku; `MAX_THINKING_TOKENS` in
+  the CLI environment does. Measured on 2026-09-30 (50 stored offers, 15 of
+  them notified or digested, 3 runs per mode; the capped mode ran later on
+  a partly different sample, 24 offers in common):
+
+  | Mode | Output / batch (reasoning) | API-equiv. / batch | Latency | Final band agreement, run-to-run | vs default |
+  |---|---|---|---|---|---|
+  | default | 8,861 (7,251) | $0.053 | 91 s | 0.78–0.89 | — |
+  | `MAX_THINKING_TOKENS=2048` | 5,488 (3,849) | $0.040 | 57 s | 0.65 | 0.63 |
+  | `MAX_THINKING_TOKENS=0` | 1,672 (0) | $0.017 | 20 s | 0.83 | 0.79 (0.60 on the common 24) |
+
+  Without reasoning, `dates_fit` drifts to `fits` (agreement with the
+  default 0.53 vs 0.73 run-to-run): 12-week summer internships and 12-month
+  placements are judged compatible with a March–August window, giving 9
+  immediate offers instead of 5 on the sample. The 2,048 cap saves 23 %
+  and makes decisions less stable. **Decision: keep the default
+  reasoning**; the cost is instead reduced upstream (rule-based filters,
+  posting groups, description cleanup).
 - Descriptions are cleaned of boilerplate (−25 % on average, §3.3b), then
   truncated at 3,000 characters for scoring and 6,000 for letters; lowering
   the limits reduces input linearly.
