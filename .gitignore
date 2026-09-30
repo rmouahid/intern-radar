@@ -7,6 +7,10 @@ __pycache__/
 
 # Personal configuration (profile, CV summary, ntfy topic)
 config/profile.yaml
+config/career.md
+config/career/
+config/candidate.json
+config/candidate.json.bak
 
 # Runtime data
 data/

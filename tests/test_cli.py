@@ -167,3 +167,45 @@ def test_rescore_applies_the_profile_weights(config_dir):
     store = Store(str(db))
     assert [s.score for s in store.scored(0)] == [7.5]
     store.close()
+
+
+class ProfileBackend:
+    answers = []
+
+    def __init__(self, model, timeout):
+        self.model = model
+
+    def complete(self, prompt, schema):
+        return ProfileBackend.answers.pop(0)
+
+
+def test_generate_profile_saves_warns_and_diffs(config_dir, monkeypatch):
+    from tests.test_candidate import profile_dict
+
+    (config_dir / "career.md").write_text("Python at Acme. Docker. Jul-Aug 2025.")
+    monkeypatch.setattr(cli, "ClaudeCliBackend", ProfileBackend)
+    second = profile_dict(projects=[])
+    ProfileBackend.answers = [profile_dict(), second]
+
+    first = runner.invoke(cli.app, ["generate-profile"])
+    assert first.exit_code == 0, first.output
+    assert "1 education, 1 experiences, 1 projects" in first.output
+    assert "warning: skill not written as such" not in first.output
+    assert (config_dir / "candidate.json").exists()
+
+    again = runner.invoke(cli.app, ["generate-profile"])
+    assert "- proj-vector" in again.output
+    assert (config_dir / "candidate.json.bak").exists()
+
+
+def test_generate_profile_dry_run_and_missing_dossier(config_dir, monkeypatch):
+    from tests.test_candidate import profile_dict
+
+    missing = runner.invoke(cli.app, ["generate-profile"])
+    assert missing.exit_code == 2
+    (config_dir / "career.md").write_text("dossier")
+    monkeypatch.setattr(cli, "ClaudeCliBackend", ProfileBackend)
+    ProfileBackend.answers = [profile_dict()]
+    result = runner.invoke(cli.app, ["generate-profile", "--dry-run"])
+    assert result.exit_code == 0
+    assert not (config_dir / "candidate.json").exists()

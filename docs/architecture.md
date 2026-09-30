@@ -46,7 +46,7 @@ tests).
 
 Module rules:
 
-- **Pure core**: `prefilter`, `grouping`, `description`, `ranking`, `letters/checks` and the message
+- **Pure core**: `prefilter`, `grouping`, `description`, `candidate` (parsing, checks), `ranking`, `letters/checks` and the message
   formatters have no I/O and are tested exhaustively.
 - **Adapters at the edge**: `sources/*`, `scorer.ClaudeCliBackend`,
   `telegram.TelegramClient`, `letters/delivery.GmailSender` and

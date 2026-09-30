@@ -7,6 +7,16 @@ import httpx
 import typer
 
 from intern_radar import ranking
+from intern_radar.candidate import (
+    CandidateError,
+    check_candidate,
+    diff,
+    generate,
+    load_candidate,
+    read_dossier,
+    save_candidate,
+    summarise,
+)
 from intern_radar.config import (
     ConfigError,
     Profile,
@@ -23,7 +33,7 @@ from intern_radar.models import Company
 from intern_radar.notifier import ConsoleNotifier, NotifyError, TelegramNotifier
 from intern_radar.pipeline import Pipeline
 from intern_radar.promotion import Promoter
-from intern_radar.scorer import ClaudeCliBackend, Scorer
+from intern_radar.scorer import ClaudeCliBackend, LLMError, Scorer
 from intern_radar.sources import SOURCE_NAMES, build_sources
 from intern_radar.store import Store
 from intern_radar.telegram import TelegramClient
@@ -171,6 +181,45 @@ def rescore(config_dir: Path = CONFIG_DIR, db: Path = DB_PATH) -> None:
     finally:
         store.close()
     typer.echo(f"rescored={changed} due_immediate={due}")
+
+
+@app.command("generate-profile")
+def generate_profile(
+    config_dir: Path = CONFIG_DIR,
+    dry_run: bool = typer.Option(False, "--dry-run", help="Print, do not save."),
+) -> None:
+    """Build config/candidate.json from config/career.md (one LLM call)."""
+    profile, _ = _load(config_dir)
+    path = config_dir / "candidate.json"
+    try:
+        dossier = read_dossier(config_dir / "career.md", config_dir / "career")
+    except CandidateError as exc:
+        typer.echo(f"Configuration error: {exc}", err=True)
+        raise typer.Exit(2) from exc
+    previous = None
+    if path.exists():
+        try:
+            previous = load_candidate(path)
+        except CandidateError as exc:
+            typer.echo(f"Previous profile ignored: {exc}", err=True)
+    backend = ClaudeCliBackend(model=profile.profile_model, timeout=900)
+    try:
+        candidate = generate(backend, dossier, previous)
+    except LLMError as exc:
+        typer.echo(f"Profile not generated: {exc}", err=True)
+        raise typer.Exit(1) from exc
+    typer.echo(summarise(candidate))
+    for warning in check_candidate(candidate, dossier):
+        typer.echo(f"warning: {warning}")
+    if previous is not None:
+        for line in diff(previous, candidate) or ["no change"]:
+            typer.echo(line)
+    if dry_run:
+        return
+    if path.exists():
+        path.replace(path.with_suffix(".json.bak"))
+    save_candidate(candidate, path)
+    typer.echo(f"saved {path}")
 
 
 @app.command("check-sources")
