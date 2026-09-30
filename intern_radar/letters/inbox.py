@@ -29,7 +29,8 @@ class ButtonRequests:
     """Handles button taps from the candidate's chat.
 
     `L:<ref>` writes a cover letter; `P:<ref>` promotes a digest offer to a
-    full notification (only when a promoter is given).
+    full notification and `C:<ref>` writes a tailored CV (each only when its
+    handler is given).
     """
 
     def __init__(
@@ -39,12 +40,14 @@ class ButtonRequests:
         service: Any,
         chat_id: int,
         promoter: Any | None = None,
+        resumes: Any | None = None,
     ) -> None:
         self._telegram = telegram
         self._store = store
         self._service = service
         self._chat_id = chat_id
         self._promoter = promoter
+        self._resumes = resumes
 
     def __call__(self, callback: dict) -> None:
         chat = ((callback.get("message") or {}).get("chat") or {}).get("id")
@@ -54,7 +57,9 @@ class ButtonRequests:
             return
         data = str(callback.get("data") or "")
         action, ref = data[:2], data[2:]
-        known = ("L:", "P:") if self._promoter is not None else ("L:",)
+        known = ["L:"]
+        known += ["P:"] if self._promoter is not None else []
+        known += ["C:"] if self._resumes is not None else []
         if action not in known or not ref.isdigit():
             self._answer(callback, "Action inconnue")
             return
@@ -63,6 +68,13 @@ class ButtonRequests:
             self._answer(callback, "🔔 Offre envoyée" if found else "Offre introuvable")
             return
         job = self._store.job_by_ref(int(ref))
+        if action == "C:":
+            if job is None:
+                self._answer(callback, "Offre introuvable")
+                return
+            self._answer(callback, "⏳ CV en préparation…")
+            self._resumes.handle(job.id)
+            return
         if job is None:
             self._answer(callback, "Offre introuvable")
             return

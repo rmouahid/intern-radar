@@ -49,6 +49,12 @@ CREATE TABLE IF NOT EXISTS letters (
     created_at TEXT NOT NULL,
     report TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS resumes (
+    job_id TEXT PRIMARY KEY,
+    path TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    report TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS chances (
     job_id TEXT PRIMARY KEY,
     percent INTEGER NOT NULL,
@@ -373,6 +379,27 @@ class Store:
     def letters_since(self, since: datetime) -> int:
         row = self._db.execute(
             "SELECT count(*) AS n FROM letters WHERE created_at >= ?",
+            (since.isoformat(),),
+        ).fetchone()
+        return row["n"]
+
+    def save_resume(self, job_id: str, path: str, report: dict, now: datetime) -> None:
+        with self._db:
+            self._db.execute(
+                "INSERT OR REPLACE INTO resumes (job_id, path, created_at, report)"
+                " VALUES (?, ?, ?, ?)",
+                (job_id, path, now.isoformat(), json.dumps(report)),
+            )
+
+    def resume(self, job_id: str) -> tuple[str, dict] | None:
+        row = self._db.execute(
+            "SELECT path, report FROM resumes WHERE job_id = ?", (job_id,)
+        ).fetchone()
+        return (row["path"], json.loads(row["report"])) if row else None
+
+    def resumes_since(self, since: datetime) -> int:
+        row = self._db.execute(
+            "SELECT count(*) AS n FROM resumes WHERE created_at >= ?",
             (since.isoformat(),),
         ).fetchone()
         return row["n"]

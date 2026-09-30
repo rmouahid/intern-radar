@@ -81,6 +81,9 @@ Letters are enabled (button shown, commands usable) when `cv_url` and
 | `profile_model` | string | `sonnet` | model for `generate-profile` |
 | `chance_model` | string | `sonnet` | model for interview-chance estimates (needs `candidate.json`) |
 | `chance_effort` | string | `low` | `--effort` for interview-chance estimates |
+| `resume_model` | string | `sonnet` | model for tailored CVs (needs `candidate.json`) |
+| `resume_effort` | string | `low` | `--effort` for tailored CVs |
+| `max_resumes_per_day` | int | `10` | new tailored CVs per 24 h; re-sending a stored one is free |
 
 ## Candidate profile (career.md → candidate.json)
 

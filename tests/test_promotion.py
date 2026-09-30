@@ -80,3 +80,13 @@ def test_promotion_includes_the_interview_chance():
     )
     promoter.promote(store.job_ref("other"))
     assert "Chance d'entretien : 30 %" in notifier.sent[0].html
+
+
+def test_promotion_offers_the_cv_button_when_enabled():
+    store, notifier, _ = setup()
+    Promoter(store, notifier, True, clock=lambda: NOW, resumes=True).promote(
+        store.job_ref("other")
+    )
+    labels = [b.label for row in notifier.sent[0].buttons for b in row]
+    assert labels[-1] == "📄 CV adapté"
+    assert notifier.sent[0].buttons[0][-1].callback == f"C:{store.job_ref('other')}"

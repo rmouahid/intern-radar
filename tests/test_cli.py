@@ -88,7 +88,7 @@ def test_run_dry_run_uses_console_notifier_and_memory_db(config_dir, monkeypatch
 
     class FakePipeline:
         def __init__(
-            self, companies, sources, store, scorer, notifier, profile, chance
+            self, companies, sources, store, scorer, notifier, profile, chance, resumes
         ):
             built["chance"] = chance
             built["notifier"] = type(notifier).__name__

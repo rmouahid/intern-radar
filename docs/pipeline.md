@@ -340,6 +340,34 @@ Triggered by a button tap:
 Any exception while writing a letter sends "❌ Lettre non générée" with the
 reason; the listener never stops on a bad tap (the offset still advances).
 
+### 3.7 Tailored CVs (`resume/`)
+
+Available once `config/candidate.json` and `contact` exist: immediate and
+promoted notifications get a *📄 CV adapté* button (`callback_data =
+C:<rowid>`), handled by the listener.
+
+1. Stored CV present → re-sent, no LLM call; daily cap
+   `max_resumes_per_day` (10).
+2. One LLM call (`resume_model` sonnet, `resume_effort` low) returns
+   **content only**: headline, summary, up to 5 items by id with 2–4
+   reworded bullets (≤ 25 words), skill groups.
+3. Fact check in Python: unknown item ids are ignored; a bullet containing a
+   proper noun or number absent from its own item is dropped (an item left
+   empty falls back to its recorded actions); skills are restricted to the
+   profile's skills; an unsupported headline is removed and an unsupported
+   summary replaced by the profile summary.
+4. Layout (`fpdf2`, A4, Helvetica, left-aligned real text for ATS):
+   header, headline, summary, education (copied from the profile),
+   experience, projects, skills, languages. **Exactly one page**: the font
+   shrinks (10 → 9 pt), then the last bullets, then the last items are
+   removed; the caption reports what was dropped.
+5. Delivery: `data/cvs/<hash>/<Name>_CV_<Company>_<Title>.pdf` as a Telegram
+   document with a caption (items shown, bullets dropped by the fact check
+   or to fit).
+
+Measured on the NVIDIA *Deep Learning* offer with the production profile:
+8–9 s, one page, no bullet dropped.
+
 ## 4. Reliability — failure modes
 
 | Failure | Detection | Behaviour | Recovery |

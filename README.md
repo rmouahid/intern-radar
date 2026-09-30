@@ -20,12 +20,14 @@ letter as a PDF on demand from the notification itself.
 - **Telegram delivery** with inline buttons, a silent evening digest whose
   offers can be promoted to full notifications in one tap, and health
   alerts, no inbound port on the server.
+- **Tailored one-page CVs** in ~10 s, one tap, every bullet traced back to
+  the structured candidate profile.
 - **Cover letters in ~25 s**: one tap → draft from CV facts only, ATS keyword
   check, anti-cliché pass, fidelity check, one-page PDF in the chat.
 - **Built to run unattended** on a 1 vCPU / 2 GB VPS under systemd, with
   failure isolation at every level and measured LLM costs (~$0.39/day in
   API-equivalent quota at steady state).
-- **340 offline tests**, CI on every pull request.
+- **381 offline tests**, CI on every pull request.
 
 ## Why
 
