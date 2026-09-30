@@ -101,6 +101,7 @@ def format_immediate(
     letter_callback: str | None = None,
     siblings: Sequence[ScoredJob] = (),
     chance: Chance | None = None,
+    resume_callback: str | None = None,
 ) -> Message:
     """Notification for one posting; `siblings` are its copies in other places."""
     job, assessment = scored.job, scored.assessment
@@ -129,6 +130,8 @@ def format_immediate(
         buttons.append(Button("🔗 Voir l'offre", url=job.url))
     if letter_callback:
         buttons.append(Button("✍️ Lettre de motivation", callback=letter_callback))
+    if resume_callback:
+        buttons.append(Button("📄 CV adapté", callback=resume_callback))
     return Message("\n".join(lines), (tuple(buttons),) if buttons else ())
 
 

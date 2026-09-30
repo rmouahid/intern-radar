@@ -37,6 +37,7 @@ from intern_radar.models import Company, Job
 from intern_radar.notifier import ConsoleNotifier, NotifyError, TelegramNotifier
 from intern_radar.pipeline import Pipeline
 from intern_radar.promotion import Promoter
+from intern_radar.resume.service import ResumeService
 from intern_radar.scorer import ClaudeCliBackend, LLMError, Scorer
 from intern_radar.sources import SOURCE_NAMES, build_sources
 from intern_radar.store import Store
@@ -50,6 +51,7 @@ app = typer.Typer(
 LOG_PATH = Path("logs/intern-radar.log")
 CV_CACHE = Path("data/cv-cache.json")
 LETTERS_DIR = Path("data/letters")
+RESUMES_DIR = Path("data/cvs")
 CONFIG_DIR = typer.Option(Path("config"), "--config-dir", help="Configuration dir.")
 DB_PATH = typer.Option(Path("data/intern-radar.db"), "--db", help="SQLite file.")
 DRY_RUN = typer.Option(False, "--dry-run", help="Print instead of notifying.")
@@ -133,6 +135,7 @@ def _pipeline(
         notifier,
         profile,
         chance=_chance(config_dir, profile, store),
+        resumes=bool(profile.contact and (config_dir / "candidate.json").exists()),
     )
     return pipeline, store, client
 
@@ -344,20 +347,41 @@ def letter(job_id: str, config_dir: Path = CONFIG_DIR, db: Path = DB_PATH) -> No
     typer.echo(str(path))
 
 
+def _resume_service(
+    config_dir: Path, profile: Profile, store: Store, telegram: TelegramClient
+) -> ResumeService | None:
+    """Tailored CVs, available once a candidate profile and a contact exist."""
+    path = config_dir / "candidate.json"
+    if profile.contact is None or not path.exists():
+        return None
+    return ResumeService(
+        store,
+        lambda: load_candidate(path),
+        ClaudeCliBackend(model=profile.resume_model, effort=profile.resume_effort),
+        profile.contact,
+        RESUMES_DIR,
+        telegram,
+        TelegramNotifier(telegram),
+        profile.max_resumes_per_day,
+    )
+
+
 @app.command()
 def listen(config_dir: Path = CONFIG_DIR, db: Path = DB_PATH) -> None:
     """Wait for letter button taps on Telegram (runs forever)."""
     _setup_logging()
     service, store, client, profile, telegram = _letter_service(config_dir, db)
     try:
+        resumes = _resume_service(config_dir, profile, store, telegram)
         promoter = Promoter(
             store,
             TelegramNotifier(telegram),
             letters=True,
             chance=_chance(config_dir, profile, store),
+            resumes=resumes is not None,
         )
         requests = ButtonRequests(
-            telegram, store, service, profile.telegram_chat_id, promoter
+            telegram, store, service, profile.telegram_chat_id, promoter, resumes
         )
         run_listener(TelegramUpdates(telegram), requests, store)
     finally:

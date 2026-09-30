@@ -77,6 +77,9 @@ class Profile:
     profile_model: str = "sonnet"
     chance_model: str = "sonnet"
     chance_effort: str | None = "low"
+    resume_model: str = "sonnet"
+    resume_effort: str | None = "low"
+    max_resumes_per_day: int = 10
     max_letters_per_day: int = 10
     contact: Contact | None = None
     extra_excluded_title_words: tuple[str, ...] = ()

@@ -58,6 +58,7 @@ class Pipeline:
         profile: Profile,
         clock: Callable[[], datetime] = utcnow,
         chance: Callable[[ScoredJob], Chance | None] | None = None,
+        resumes: bool = False,
     ) -> None:
         self._companies = companies
         self._sources = sources
@@ -67,6 +68,7 @@ class Pipeline:
         self._profile = profile
         self._clock = clock
         self._chance = chance
+        self._resumes = resumes
 
     def run(self) -> RunReport:
         report = RunReport()
@@ -167,7 +169,8 @@ class Pipeline:
             ref = self._store.job_ref(lead.job.id) if letters else None
             callback = f"L:{ref}" if ref is not None else None
             chance = self._chance(lead) if self._chance else None
-            message = format_immediate(lead, callback, siblings, chance)
+            cv = f"C:{ref}" if ref is not None and self._resumes else None
+            message = format_immediate(lead, callback, siblings, chance, cv)
             outcome = self._send(message, report)
             if outcome == FAILED:
                 return False

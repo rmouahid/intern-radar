@@ -84,6 +84,19 @@ def test_promotion_taps_are_routed_to_the_promoter():
     assert service.handled == []
 
 
+def test_cv_taps_are_routed_to_the_resume_service():
+    store, telegram, service, _ = setup()
+    resumes = FakeService()
+    requests = ButtonRequests(telegram, store, service, CHAT, None, resumes)
+    requests(callback(f"C:{store.job_ref('job-1')}", cid="a"))
+    requests(callback("C:999", cid="b"))
+    assert resumes.handled == ["job-1"] and service.handled == []
+    assert telegram.answers == [
+        ("a", "⏳ CV en préparation…"),
+        ("b", "Offre introuvable"),
+    ]
+
+
 def test_promotion_taps_without_promoter_are_unknown_actions():
     _, telegram, _, requests = setup()
     requests(callback("P:1"))
