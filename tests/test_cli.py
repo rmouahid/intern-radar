@@ -133,7 +133,7 @@ def test_listen_wires_the_telegram_listener(config_dir, monkeypatch):
     monkeypatch.setattr(cli, "run_listener", fake_listener)
     result = runner.invoke(cli.app, ["listen"])
     assert result.exit_code == 0
-    assert seen == {"updates": "TelegramUpdates", "on_callback": "LetterRequests"}
+    assert seen == {"updates": "TelegramUpdates", "on_callback": "ButtonRequests"}
 
 
 def test_letter_command_prints_the_pdf_path(config_dir, monkeypatch):

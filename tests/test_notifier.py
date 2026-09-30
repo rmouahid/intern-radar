@@ -181,3 +181,32 @@ def test_digest_shows_one_entry_per_posting_group():
     message = format_digest([de, uk, other])
     assert "Récap du soir — 2 offres" in message.html
     assert "📍 Berlin · London   ⭐ 7.0 / 10" in visible(message.html)
+
+
+def test_digest_numbers_offers_and_attaches_promotion_buttons():
+    jobs = [scored(f"j{i}", 7.0 - i / 10, title=f"Intern {i}") for i in range(7)]
+    refs = {f"j{i}": 100 + i for i in range(7)}
+    message = format_digest(jobs, refs)
+    assert "<b>1. Acme</b> · niveau A" in message.html
+    assert "<b>7. Acme</b> · niveau A" in message.html
+    rows = [[(b.label, b.callback) for b in row] for row in message.buttons]
+    assert rows == [
+        [(f"🔔 {n}", f"P:{99 + n}") for n in range(1, 6)],
+        [("🔔 6", "P:105"), ("🔔 7", "P:106")],
+    ]
+
+
+def test_digest_buttons_use_the_group_lead_and_cover_shown_offers_only():
+    de = scored("de", 7.0, title="SDE Intern - Germany")
+    uk = scored("uk", 7.0, title="SDE Intern - UK")
+    many = [scored(f"x{i}", 6.0, title=f"Intern {i}") for i in range(20)]
+    refs = {job.job.id: n for n, job in enumerate([de, uk, *many], start=1)}
+    message = format_digest([de, uk, *many], refs)
+    callbacks = [b.callback for row in message.buttons for b in row]
+    assert callbacks[0] == "P:1" and "P:2" not in callbacks
+    assert len(callbacks) == 15
+    assert len(visible(message.html)) < 4096
+
+
+def test_digest_without_refs_has_no_buttons():
+    assert format_digest([scored("a", 7.0)]).buttons == ()

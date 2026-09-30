@@ -134,6 +134,22 @@ class Store:
         row = self._db.execute("SELECT * FROM jobs WHERE rowid = ?", (ref,)).fetchone()
         return _row_to_job(row) if row else None
 
+    def group_by_ref(self, ref: int) -> list[ScoredJob]:
+        """The scored job `ref` first, then the other scored members of its group."""
+        lead = self._db.execute(
+            "SELECT * FROM jobs WHERE rowid = ? AND status = 'scored'"
+            " AND assessment IS NOT NULL",
+            (ref,),
+        ).fetchone()
+        if lead is None:
+            return []
+        others = self._db.execute(
+            "SELECT * FROM jobs WHERE group_key = ? AND id != ? AND status = 'scored'"
+            " AND assessment IS NOT NULL ORDER BY id",
+            (lead["group_key"], lead["id"]),
+        ).fetchall()
+        return [_row_to_scored(row) for row in (lead, *others)]
+
     def has_similar(self, company: str, title: str) -> bool:
         row = self._db.execute(
             "SELECT 1 FROM jobs WHERE company = ? AND lower(title) = lower(?)"

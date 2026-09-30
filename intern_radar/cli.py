@@ -16,12 +16,13 @@ from intern_radar.config import (
 from intern_radar.http import make_client
 from intern_radar.letters.cv import CvSource
 from intern_radar.letters.delivery import GmailSender
-from intern_radar.letters.inbox import LetterRequests, TelegramUpdates, run_listener
+from intern_radar.letters.inbox import ButtonRequests, TelegramUpdates, run_listener
 from intern_radar.letters.service import LetterService
 from intern_radar.letters.writer import LetterWriter
 from intern_radar.models import Company
 from intern_radar.notifier import ConsoleNotifier, NotifyError, TelegramNotifier
 from intern_radar.pipeline import Pipeline
+from intern_radar.promotion import Promoter
 from intern_radar.scorer import ClaudeCliBackend, Scorer
 from intern_radar.sources import SOURCE_NAMES, build_sources
 from intern_radar.store import Store
@@ -262,7 +263,10 @@ def listen(config_dir: Path = CONFIG_DIR, db: Path = DB_PATH) -> None:
     _setup_logging()
     service, store, client, profile, telegram = _letter_service(config_dir, db)
     try:
-        requests = LetterRequests(telegram, store, service, profile.telegram_chat_id)
+        promoter = Promoter(store, TelegramNotifier(telegram), letters=True)
+        requests = ButtonRequests(
+            telegram, store, service, profile.telegram_chat_id, promoter
+        )
         run_listener(TelegramUpdates(telegram), requests, store)
     finally:
         store.close()

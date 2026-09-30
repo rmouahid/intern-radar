@@ -380,3 +380,27 @@ def test_immediate_cap_counts_posting_groups():
     pipeline.run()
     assert len(notifier.sent) == 1
     assert len(store.due_immediate(0)) == 2  # the other group waits for next run
+
+
+def test_digest_carries_promotion_buttons_when_the_listener_runs():
+    def digest_with(**profile):
+        scorer = FakeScorer(
+            {"mid": make_assessment(ai_relevance=7, dates_fit="unknown")}
+        )
+        notifier = FakeNotifier()
+        pipeline, store, _ = build(
+            {"fake": FakeSource([make_job(id="mid", tier="B")])},
+            scorer,
+            notifier,
+            **profile,
+        )
+        pipeline.run()
+        pipeline.digest()
+        return notifier.sent[-1], store
+
+    plain, _ = digest_with()
+    assert plain.buttons == ()
+    message, store = digest_with(
+        cv_url="https://cv", contact=Contact("A B", "P", "1", "e", "l", "g")
+    )
+    assert message.buttons[0][0].callback == f"P:{store.job_ref('mid')}"

@@ -1,7 +1,7 @@
 """Telegram notifications and their HTML formatting."""
 
 import html
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -11,6 +11,7 @@ from intern_radar.telegram import Button, TelegramClient, TelegramError
 
 MAX_DIGEST_LINES = 15
 MAX_GROUP_LOCATIONS = 5
+BUTTONS_PER_ROW = 5
 SEPARATOR = "━" * 16
 DATES_LABELS = {
     "fits": "Dates compatibles",
@@ -123,13 +124,19 @@ def format_immediate(
     return Message("\n".join(lines), (tuple(buttons),) if buttons else ())
 
 
-def format_digest(jobs: list[ScoredJob]) -> Message:
+def format_digest(
+    jobs: list[ScoredJob], refs: Mapping[str, int] | None = None
+) -> Message:
+    """Evening digest; with `refs` (job id → store ref) entries are numbered
+    and a "🔔 n" button per entry promotes it to a full notification."""
     groups = group_scored(jobs)
+    shown = groups[:MAX_DIGEST_LINES]
+    number = (lambda n: f"{n}. ") if refs else (lambda n: "")
     blocks = [
-        f"<b>{e(s.job.company)}</b> · niveau {s.job.tier}\n"
+        f"<b>{number(n)}{e(s.job.company)}</b> · niveau {s.job.tier}\n"
         f'<a href="{e(s.job.url)}">{e(s.job.title[:80])}</a>\n'
         f"📍 {_locations(group, 40)}   ⭐ {s.score:.1f} / 10"
-        for s, group in ((group[0], group) for group in groups[:MAX_DIGEST_LINES])
+        for n, (s, group) in enumerate(((g[0], g) for g in shown), start=1)
     ]
     if len(groups) > MAX_DIGEST_LINES:
         extra = len(groups) - MAX_DIGEST_LINES
@@ -137,7 +144,17 @@ def format_digest(jobs: list[ScoredJob]) -> Message:
     noun = "offre" if len(groups) == 1 else "offres"
     header = f"📋 <b>Récap du soir — {len(groups)} {noun}</b>\n{SEPARATOR}"
     body = "\n\n".join(blocks)
-    return Message(f"{header}\n\n{body}\n\n{SEPARATOR}", silent=True)
+    buttons: tuple[tuple[Button, ...], ...] = ()
+    if refs:
+        tap = [
+            Button(f"🔔 {n}", callback=f"P:{refs[group[0].job.id]}")
+            for n, group in enumerate(shown, start=1)
+        ]
+        buttons = tuple(
+            tuple(tap[i : i + BUTTONS_PER_ROW])
+            for i in range(0, len(tap), BUTTONS_PER_ROW)
+        )
+    return Message(f"{header}\n\n{body}\n\n{SEPARATOR}", buttons, silent=True)
 
 
 def format_source_alert(company: str, error: str) -> Message:

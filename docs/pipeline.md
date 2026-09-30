@@ -259,7 +259,15 @@ again as immediate offers.
   `http(s)` URLs) and *Lettre de motivation* (`callback_data = L:<rowid>`,
   within Telegram's 64-byte limit).
 - Posting groups: one message per group, locations joined (§3.2b).
-- Digest: ≤ 15 groups (keeps the rendered text under 4,096), silent.
+- Digest: ≤ 15 groups (keeps the rendered text under 4,096), silent. When
+  letters are configured (the listener runs), entries are numbered and an
+  inline keyboard of `🔔 1` … `🔔 15` buttons (5 per row, `callback_data =
+  P:<rowid>` of the group lead) is attached.
+- Promotion (`promotion.py`): the listener routes `P:` taps to `Promoter`,
+  which sends the offer and its posting group exactly as an immediate
+  notification (with *Voir l'offre* and *Lettre de motivation*) and marks
+  every member `notified_at`. Tapping again re-sends it; unknown or
+  unscored refs are answered "Offre introuvable".
 - Alerts (silent): a source failing for 3 consecutive days, the LLM failing
   for 1 day; each alerted once per streak.
 - Delivery semantics: an offer is marked `notified_at` only after Telegram

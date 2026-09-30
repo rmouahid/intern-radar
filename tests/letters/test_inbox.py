@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 from intern_radar.letters.inbox import (
     LAST_UPDATE_KEY,
-    LetterRequests,
+    ButtonRequests,
     TelegramUpdates,
     run_listener,
 )
@@ -52,7 +52,17 @@ def setup():
     store = Store(":memory:")
     store.add(make_job(id="job-1"), "pending", NOW)
     telegram, service = FakeTelegram(), FakeService()
-    return store, telegram, service, LetterRequests(telegram, store, service, CHAT)
+    return store, telegram, service, ButtonRequests(telegram, store, service, CHAT)
+
+
+class FakePromoter:
+    def __init__(self, known):
+        self.known = known
+        self.refs = []
+
+    def promote(self, ref):
+        self.refs.append(ref)
+        return ref in self.known
 
 
 def test_tap_answers_then_writes_the_letter():
@@ -60,6 +70,24 @@ def test_tap_answers_then_writes_the_letter():
     requests(callback(f"L:{store.job_ref('job-1')}"))
     assert telegram.answers == [("c1", "⏳ Lettre en préparation…")]
     assert service.handled == ["job-1"]
+
+
+def test_promotion_taps_are_routed_to_the_promoter():
+    store = Store(":memory:")
+    telegram, service = FakeTelegram(), FakeService()
+    promoter = FakePromoter(known={5})
+    requests = ButtonRequests(telegram, store, service, CHAT, promoter)
+    requests(callback("P:5", cid="a"))
+    requests(callback("P:6", cid="b"))
+    assert promoter.refs == [5, 6]
+    assert telegram.answers == [("a", "🔔 Offre envoyée"), ("b", "Offre introuvable")]
+    assert service.handled == []
+
+
+def test_promotion_taps_without_promoter_are_unknown_actions():
+    _, telegram, _, requests = setup()
+    requests(callback("P:1"))
+    assert telegram.answers == [("c1", "Action inconnue")]
 
 
 def test_callbacks_from_other_chats_are_ignored():
