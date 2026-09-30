@@ -81,3 +81,33 @@ def test_locations_mixing_france_with_other_places_pass(location):
 def test_french_city_with_region_or_remote_is_still_france_only():
     assert is_france_only("Paris, Île-de-France, France")
     assert is_france_only("Remote, France")
+
+
+@pytest.mark.parametrize(
+    "location",
+    [
+        "Clichy, Ile-de-France, FRA",
+        "Paris, FR",
+        "Sophia Antipolis, Provence-Alpes-Côte d'Azur, France",
+        "Villeurbanne, Auvergne-Rhone-Alpes",
+        "Massy, Île-de-France, FRA; Clichy, Ile-de-France, FRA",
+    ],
+)
+def test_country_or_region_marks_the_whole_place_as_french(location):
+    assert is_france_only(location)
+
+
+@pytest.mark.parametrize(
+    "location",
+    [
+        "Clichy, Ile-de-France, FRA; London, England, GBR",
+        "Frankfurt, DEU",
+        "Frankfurt am Main, Hesse",
+        "EMEA",
+        "Remote",
+        "Paris, France and London, UK",
+        "Remote, EU (excluding France)",
+    ],
+)
+def test_places_outside_france_are_not_france_only(location):
+    assert not is_france_only(location)
