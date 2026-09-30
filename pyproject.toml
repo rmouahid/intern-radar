@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "intern-radar"
-version = "0.1.0"
-description = "Watches top AI/tech career pages for internships, scores them with an LLM and notifies through ntfy"
+version = "0.2.0"
+description = "Watches top AI/tech career pages for internships, scores them with an LLM and notifies through Telegram"
 authors = ["rmouahid"]
 license = "MIT"
 readme = "README.md"
