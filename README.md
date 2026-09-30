@@ -12,17 +12,20 @@ letter as a PDF on demand from the notification itself.
 
 - **9 source adapters** (Greenhouse, Lever, Ashby, Workable, SmartRecruiters,
   Workday, Amazon, Microsoft, Adzuna), polite by design (≥ 1 s per host).
-- **Rules first, LLM second**: a pure pre-filter removes noise for free; the
-  LLM returns a strict JSON assessment; the final score is computed in
-  Python, deterministic and testable.
-- **Telegram delivery** with inline buttons, a silent evening digest and
-  health alerts, no inbound port on the server.
+- **Rules first, LLM second**: a pure pre-filter removes noise for free
+  (France-only, out-of-scope fields, past cycles, bachelor-only titles),
+  per-country copies of a posting are scored once, descriptions are
+  stripped of boilerplate; the LLM returns a strict JSON assessment; the
+  final score is computed in Python, deterministic and testable.
+- **Telegram delivery** with inline buttons, a silent evening digest whose
+  offers can be promoted to full notifications in one tap, and health
+  alerts, no inbound port on the server.
 - **Cover letters in ~25 s**: one tap → draft from CV facts only, ATS keyword
   check, anti-cliché pass, fidelity check, one-page PDF in the chat.
 - **Built to run unattended** on a 1 vCPU / 2 GB VPS under systemd, with
   failure isolation at every level and measured LLM costs (~$0.39/day in
   API-equivalent quota at steady state).
-- **216 offline tests**, CI on every pull request.
+- **340 offline tests**, CI on every pull request.
 
 ## Why
 
@@ -129,7 +132,7 @@ poetry run intern-radar digest               # evening digest
 poetry run intern-radar list --min-score 6   # stored offers, best first
 poetry run intern-radar rescore              # recompute scores after a weights change
 poetry run intern-radar letter <job_id>      # write (or re-send) one letter
-poetry run intern-radar listen               # wait for letter button taps
+poetry run intern-radar listen               # wait for letter and 🔔 button taps
 ```
 
 ## Deployment

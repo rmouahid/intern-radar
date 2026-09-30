@@ -78,7 +78,10 @@ class Pipeline:
         jobs = self._store.due_digest(thresholds.digest, thresholds.immediate)
         if not jobs:
             return 0
-        self._notifier.send(format_digest(jobs))
+        refs = None
+        if self._profile.cv_url and self._profile.contact:  # the listener runs
+            refs = {s.job.id: self._store.job_ref(s.job.id) for s in jobs}
+        self._notifier.send(format_digest(jobs, refs))
         self._store.mark_digested([s.job.id for s in jobs], self._clock())
         return len(jobs)
 

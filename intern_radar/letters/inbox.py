@@ -25,14 +25,26 @@ class TelegramUpdates:
             yield update["update_id"], update.get("callback_query")
 
 
-class LetterRequests:
-    """Turns a button tap from the candidate's chat into a letter."""
+class ButtonRequests:
+    """Handles button taps from the candidate's chat.
 
-    def __init__(self, telegram: Any, store: Store, service: Any, chat_id: int) -> None:
+    `L:<ref>` writes a cover letter; `P:<ref>` promotes a digest offer to a
+    full notification (only when a promoter is given).
+    """
+
+    def __init__(
+        self,
+        telegram: Any,
+        store: Store,
+        service: Any,
+        chat_id: int,
+        promoter: Any | None = None,
+    ) -> None:
         self._telegram = telegram
         self._store = store
         self._service = service
         self._chat_id = chat_id
+        self._promoter = promoter
 
     def __call__(self, callback: dict) -> None:
         chat = ((callback.get("message") or {}).get("chat") or {}).get("id")
@@ -41,10 +53,16 @@ class LetterRequests:
             log.warning("ignored a button tap from another chat")
             return
         data = str(callback.get("data") or "")
-        if not (data.startswith("L:") and data[2:].isdigit()):
+        action, ref = data[:2], data[2:]
+        known = ("L:", "P:") if self._promoter is not None else ("L:",)
+        if action not in known or not ref.isdigit():
             self._answer(callback, "Action inconnue")
             return
-        job = self._store.job_by_ref(int(data[2:]))
+        if action == "P:":
+            found = self._promoter.promote(int(ref))
+            self._answer(callback, "🔔 Offre envoyée" if found else "Offre introuvable")
+            return
+        job = self._store.job_by_ref(int(ref))
         if job is None:
             self._answer(callback, "Offre introuvable")
             return
