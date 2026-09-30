@@ -42,8 +42,8 @@ Runtime data lives in `data/` (gitignored): `intern-radar.db` (SQLite),
 | `max_immediate_per_run` | int | `10` | immediate notifications (posting groups) per run |
 | `visa_penalties` | mapping | `{free: 0, programme: 0.5, sponsorship_stated: 0, uncertain: 1, unlikely: 3}` | points removed from the final score per work-authorisation value |
 | `extra_excluded_title_words` | list of words | `[]` | extra out-of-scope title words, added to the built-in list (§3.2 of pipeline.md) |
-| `weights.tier` | float | `0.5` | weight of the company tier (S=10, A=8, B=6, unlisted=4) |
-| `weights.relevance` | float | `0.3` | weight of the LLM's AI relevance (0–10) |
+| `weights.tier` | float | `0.3` | weight of the company tier (S=10, A=8, B=6, unlisted=4) |
+| `weights.relevance` | float | `0.5` | weight of the LLM's AI relevance (0–10) |
 | `weights.dates` | float | `0.2` | weight of the dates fit (fits=10, unknown=6, too short=4) |
 | `thresholds.immediate` | float | `7.5` | score for an immediate notification |
 | `thresholds.digest` | float | `5.5` | score for the evening digest |

@@ -39,8 +39,8 @@ offer into a ready-to-review application in one tap.
 ```
  ┌─────────────┐   ┌─────────────┐   ┌──────────────┐   ┌─────────────┐   ┌───────────┐
  │  COLLECT     │ → │ PRE-FILTER  │ → │ LLM TRIAGE   │ → │ RANK        │ → │ NOTIFY    │
- │ 9 adapters   │   │ title, loc, │   │ JSON schema, │   │ tier·0.5 +  │   │ Telegram  │
- │ 66 companies │   │ duplicates  │   │ 10 per call  │   │ AI·0.3 +    │   │ + digest  │
+ │ 9 adapters   │   │ title, loc, │   │ JSON schema, │   │ AI·0.5 +    │   │ Telegram  │
+ │ 66 companies │   │ duplicates  │   │ 10 per call  │   │ tier·0.3 +  │   │ + digest  │
  └─────────────┘   └─────────────┘   └──────────────┘   │ dates·0.2   │   └─────┬─────┘
    every 2 h, 08:00–22:00 Europe/Paris (systemd timers)  └─────────────┘         │
                                                                      tap "✍️ Lettre"
@@ -127,6 +127,7 @@ Every setting is described in [docs/configuration.md](docs/configuration.md).
 poetry run intern-radar run                  # collect, triage, notify
 poetry run intern-radar digest               # evening digest
 poetry run intern-radar list --min-score 6   # stored offers, best first
+poetry run intern-radar rescore              # recompute scores after a weights change
 poetry run intern-radar letter <job_id>      # write (or re-send) one letter
 poetry run intern-radar listen               # wait for letter button taps
 ```

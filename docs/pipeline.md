@@ -228,7 +228,7 @@ is unchanged, and the letter fact check still uses the raw text.
 excluded (score NULL) if: not an internship, dates incompatible, PhD only,
                           undergraduate only,
                           language other than EN/ES/FR, AI relevance < 6
-score = 0.5·tier + 0.3·relevance + 0.2·dates      (tier S10 A8 B6 unlisted4;
+score = 0.3·tier + 0.5·relevance + 0.2·dates      (tier S10 A8 B6 unlisted4;
                                                    dates fits10 unknown6 short4)
       − 2 if local students only                   rounded to 0.1
       − visa penalty: free 0, programme 0.5, sponsorship_stated 0,
@@ -236,6 +236,18 @@ score = 0.5·tier + 0.3·relevance + 0.2·dates      (tier S10 A8 B6 unlisted4;
 ```
 
 Thresholds: ≥ 7.5 immediate, 5.5–7.5 digest (both configurable).
+
+Weights were 0.5/0.3/0.2 until 2026-09-30: company tier dominated, so a
+tier-B offer with unknown dates capped at 7.2 and could never be notified
+(Snowflake *Software Engineer Intern (AI / ML)*, relevance 9 → 6.9), while a
+tier-S offer passed with a middling relevance. Replaying the stored
+assessments since the initial backlog: same number of immediate offers (2),
+but the undergraduate-only Amazon programme is replaced by the Snowflake one.
+
+`intern-radar rescore` recomputes every stored score from its stored
+assessment after a change of weights, penalties or `min_relevance` (no LLM
+call). Offers already notified or already sent in a digest are never sent
+again as immediate offers.
 
 ### 3.5 Notifications (`notifier.py`, `telegram.py`)
 

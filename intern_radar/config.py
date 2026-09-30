@@ -17,8 +17,10 @@ class ConfigError(Exception):
 
 @dataclass(frozen=True)
 class Weights:
-    tier: float = 0.5
-    relevance: float = 0.3
+    # AI relevance outweighs company tier: with 0.5/0.3/0.2 a tier-B offer
+    # with unknown dates capped at 7.2, below the immediate threshold.
+    tier: float = 0.3
+    relevance: float = 0.5
     dates: float = 0.2
 
 

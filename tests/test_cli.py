@@ -147,3 +147,23 @@ def test_letter_command_prints_the_pdf_path(config_dir, monkeypatch):
     result = runner.invoke(cli.app, ["letter", "job-1"])
     assert result.exit_code == 0
     assert "job-1.pdf" in result.output
+
+
+def test_rescore_applies_the_profile_weights(config_dir):
+    db = config_dir.parent / "data" / "intern-radar.db"
+    db.parent.mkdir()
+    store = Store(str(db))
+    now = datetime(2026, 9, 24, tzinfo=UTC)
+    store.add(make_job(id="a", tier="B"), "pending", now)
+    store.save_assessment(
+        "a", make_assessment(ai_relevance=9, dates_fit="unknown"), 6.9
+    )
+    store.close()
+
+    result = runner.invoke(cli.app, ["rescore"])
+
+    assert result.exit_code == 0, result.output
+    assert "rescored=1 due_immediate=1" in result.output
+    store = Store(str(db))
+    assert [s.score for s in store.scored(0)] == [7.5]
+    store.close()
