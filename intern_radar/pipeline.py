@@ -22,6 +22,7 @@ from intern_radar.notifier import (
 from intern_radar.scorer import LLMError, Scorer
 from intern_radar.sources.base import Source
 from intern_radar.store import Store
+from intern_radar.tracking import format_reminder, tracking_row
 
 log = logging.getLogger(__name__)
 
@@ -59,6 +60,7 @@ class Pipeline:
         clock: Callable[[], datetime] = utcnow,
         chance: Callable[[ScoredJob], Chance | None] | None = None,
         resumes: bool = False,
+        tracking: bool = False,
     ) -> None:
         self._companies = companies
         self._sources = sources
@@ -69,6 +71,7 @@ class Pipeline:
         self._clock = clock
         self._chance = chance
         self._resumes = resumes
+        self._tracking = tracking
 
     def run(self) -> RunReport:
         report = RunReport()
@@ -89,6 +92,29 @@ class Pipeline:
         self._notifier.send(format_digest(jobs, refs))
         self._store.mark_digested([s.job.id for s in jobs], self._clock())
         return len(jobs)
+
+    def remind(self, after_days: int) -> int:
+        """One reminder per application without news for `after_days`."""
+        now = self._clock()
+        sent = 0
+        for job, applied_at in self._store.due_reminders(
+            now - timedelta(days=after_days)
+        ):
+            ref = self._store.job_ref(job.id)
+            days = (
+                (now - datetime.fromisoformat(applied_at)).days
+                if applied_at
+                else after_days
+            )
+            status = self._store.application_status(job.id)
+            message = Message(
+                format_reminder(job.company, job.title, days),
+                (tracking_row(status, ref),) if ref is not None else (),
+            )
+            self._notifier.send(message)
+            self._store.mark_reminded(job.id, now)
+            sent += 1
+        return sent
 
     def _collect(self, report: RunReport) -> None:
         now = self._clock()
@@ -166,11 +192,12 @@ class Pipeline:
         groups = group_scored(due)[: self._profile.max_immediate_per_run]
         letters = bool(self._profile.cv_url and self._profile.contact)
         for lead, *siblings in groups:
-            ref = self._store.job_ref(lead.job.id) if letters else None
-            callback = f"L:{ref}" if ref is not None else None
+            ref = self._store.job_ref(lead.job.id)
+            callback = f"L:{ref}" if letters else None
             chance = self._chance(lead) if self._chance else None
-            cv = f"C:{ref}" if ref is not None and self._resumes else None
-            message = format_immediate(lead, callback, siblings, chance, cv)
+            cv = f"C:{ref}" if self._resumes else None
+            track = ref if self._tracking else None
+            message = format_immediate(lead, callback, siblings, chance, cv, track)
             outcome = self._send(message, report)
             if outcome == FAILED:
                 return False

@@ -87,6 +87,19 @@ class TelegramClient:
             timeout=DOCUMENT_TIMEOUT,
         )
 
+    def edit_reply_markup(
+        self, message_id: int | None, keyboard: list[list[dict[str, Any]]]
+    ) -> None:
+        """Replace the inline keyboard of one of the bot's messages."""
+        self._call(
+            "editMessageReplyMarkup",
+            json={
+                "chat_id": self.chat_id,
+                "message_id": message_id,
+                "reply_markup": {"inline_keyboard": keyboard},
+            },
+        )
+
     def answer_callback(self, callback_id: str, text: str) -> None:
         self._call(
             "answerCallbackQuery",

@@ -20,6 +20,8 @@ letter as a PDF on demand from the notification itself.
 - **Telegram delivery** with inline buttons, a silent evening digest whose
   offers can be promoted to full notifications in one tap, and health
   alerts, no inbound port on the server.
+- **Application tracking** from the same messages (applied, interview,
+  offer, rejected, no answer) with a reminder after 14 days without news.
 - **Tailored one-page CVs** in ~10 s, one tap, every bullet traced back to
   the structured candidate profile.
 - **Cover letters in ~25 s**: one tap → draft from CV facts only, ATS keyword
@@ -27,7 +29,7 @@ letter as a PDF on demand from the notification itself.
 - **Built to run unattended** on a 1 vCPU / 2 GB VPS under systemd, with
   failure isolation at every level and measured LLM costs (~$0.39/day in
   API-equivalent quota at steady state).
-- **381 offline tests**, CI on every pull request.
+- **398 offline tests**, CI on every pull request.
 
 ## Why
 
@@ -133,6 +135,7 @@ poetry run intern-radar run                  # collect, triage, notify
 poetry run intern-radar digest               # evening digest
 poetry run intern-radar list --min-score 6   # stored offers, best first
 poetry run intern-radar rescore              # recompute scores after a weights change
+poetry run intern-radar applications         # tracked applications
 poetry run intern-radar letter <job_id>      # write (or re-send) one letter
 poetry run intern-radar listen               # wait for letter and 🔔 button taps
 ```

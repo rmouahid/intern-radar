@@ -20,6 +20,7 @@ class Promoter:
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
         chance: Callable[[ScoredJob], Chance | None] | None = None,
         resumes: bool = False,
+        tracking: bool = False,
     ) -> None:
         self._store = store
         self._notifier = notifier
@@ -27,6 +28,7 @@ class Promoter:
         self._clock = clock
         self._chance = chance
         self._resumes = resumes
+        self._tracking = tracking
 
     def promote(self, ref: int) -> bool:
         """False when `ref` is not a scored offer. Sending again is allowed."""
@@ -37,7 +39,10 @@ class Promoter:
         callback = f"L:{ref}" if self._letters else None
         chance = self._chance(lead) if self._chance else None
         cv = f"C:{ref}" if self._resumes else None
-        self._notifier.send(format_immediate(lead, callback, siblings, chance, cv))
+        track = ref if self._tracking else None
+        self._notifier.send(
+            format_immediate(lead, callback, siblings, chance, cv, track)
+        )
         now = self._clock()
         for member in members:
             self._store.mark_notified(member.job.id, now)
