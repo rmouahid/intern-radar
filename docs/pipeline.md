@@ -129,6 +129,14 @@ collection ~2 min.
   would have been rejected, 43 % of those with an AI relevance ≤ 3, and
   none of the offers ever notified or digested. Counted as
   `out_of_scope=N` in the run summary.
+- Recruiting cycle: a title whose years are all before the window start
+  year (`2026 SDE Intern`, `Fall 2026`) is rejected; `2026-2027`,
+  `Summer 2027`, `Class of 2029` and titles without a year are kept.
+  Replayed: 47 scored offers, 4 of them notified or digested.
+- Degree level: titles naming only bachelor's / undergraduate students
+  (`Intern, Bachelor’s`, `Undergrad Intern`) are rejected unless they also
+  name master's, graduate, MS or PhD students; descriptions stating it are
+  handled by the LLM (`undergrad_only`, §3.3).
 - Adzuna offers whose company and title match an ATS offer are stored as
   `duplicate`.
 
@@ -160,6 +168,13 @@ of ~70 countries and regions) and punctuation; it is stored in
 - Batches of 10 jobs; descriptions cleaned (§3.3b) then truncated to 3,000
   characters; jobs are numbered 1..n in the prompt (long source ids were
   mangled by the model).
+- Eligibility enum: `ok`, `phd_only`, `undergrad_only`,
+  `local_students_only`, `unknown`. `undergrad_only` is defined for a
+  master's-level candidate: only bachelor's students named, or master's
+  explicitly excluded ("Bachelor's or Master's" and silence do not count).
+  Checked on 20 stored offers: 10/10 bachelor-only postings classified
+  `undergrad_only` (one via a Portuguese *bacharelado* requirement), no
+  master's-level posting misclassified.
 - Every item is validated (types, enums, 0–10 range); invalid or missing
   items stay `pending` and count an attempt; after 3 attempts the job is no
   longer retried.
@@ -205,6 +220,7 @@ is unchanged, and the letter fact check still uses the raw text.
 
 ```
 excluded (score NULL) if: not an internship, dates incompatible, PhD only,
+                          undergraduate only,
                           language other than EN/ES/FR, AI relevance < 6
 score = 0.5·tier + 0.3·relevance + 0.2·dates      (tier S10 A8 B6 unlisted4;
                                                    dates fits10 unknown6 short4)

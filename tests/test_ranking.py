@@ -13,6 +13,7 @@ W = Weights()
         {"is_internship": False},
         {"dates_fit": "incompatible"},
         {"eligibility": "phd_only"},
+        {"eligibility": "undergrad_only"},
         {"language_ok": False},
     ],
 )

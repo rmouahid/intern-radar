@@ -54,6 +54,25 @@ IN_SCOPE_RE = re.compile(
 )
 
 
+UNDERGRAD_RE = re.compile(r"\b(undergrad(uate)?s?|bachelor(['’]?s)?)\b", re.IGNORECASE)
+GRADUATE_RE = re.compile(
+    r"\b(masters?|master['’]s|ms|msc|m\.s\.|graduate|postgraduate|phd|mba)\b",
+    re.IGNORECASE,
+)
+YEAR_RE = re.compile(r"\b(20\d\d)\b")
+
+
+def is_past_cycle(title: str, window_year: int) -> bool:
+    """True when every year the title names is before the internship window."""
+    years = [int(year) for year in YEAR_RE.findall(title)]
+    return bool(years) and all(year < window_year for year in years)
+
+
+def is_undergrad_only_title(title: str) -> bool:
+    """True for titles reserved to bachelor's students ("Intern, Bachelor's")."""
+    return bool(UNDERGRAD_RE.search(title)) and not GRADUATE_RE.search(title)
+
+
 def is_internship_title(title: str) -> bool:
     return bool(TITLE_RE.search(title))
 
@@ -116,9 +135,13 @@ def is_france_only(location: str) -> bool:
     return bool(french) and not others
 
 
-def passes(job: Job, extra_excluded: tuple[str, ...] = ()) -> bool:
+def passes(
+    job: Job, extra_excluded: tuple[str, ...] = (), window_year: int | None = None
+) -> bool:
     return (
         is_internship_title(job.title)
+        and not (window_year and is_past_cycle(job.title, window_year))
+        and not is_undergrad_only_title(job.title)
         and not is_out_of_scope(job.title, extra_excluded)
         and not is_france_only(job.location)
     )

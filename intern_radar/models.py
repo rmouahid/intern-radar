@@ -5,7 +5,9 @@ from typing import Any, Literal
 
 Tier = Literal["S", "A", "B", "unlisted"]
 DatesFit = Literal["fits", "too_short_extendable", "incompatible", "unknown"]
-Eligibility = Literal["ok", "phd_only", "local_students_only", "unknown"]
+Eligibility = Literal[
+    "ok", "phd_only", "undergrad_only", "local_students_only", "unknown"
+]
 
 TIERS: tuple[str, ...] = ("S", "A", "B", "unlisted")
 DATES_FIT_VALUES: tuple[str, ...] = (
@@ -17,6 +19,7 @@ DATES_FIT_VALUES: tuple[str, ...] = (
 ELIGIBILITY_VALUES: tuple[str, ...] = (
     "ok",
     "phd_only",
+    "undergrad_only",
     "local_students_only",
     "unknown",
 )

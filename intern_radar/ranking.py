@@ -12,7 +12,7 @@ def is_excluded(assessment: Assessment) -> bool:
     return (
         not assessment.is_internship
         or assessment.dates_fit == "incompatible"
-        or assessment.eligibility == "phd_only"
+        or assessment.eligibility in ("phd_only", "undergrad_only")
         or not assessment.language_ok
     )
 
