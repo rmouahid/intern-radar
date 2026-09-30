@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Any
 
+from intern_radar.description import clean_description
 from intern_radar.letters.checks import (
     blacklisted,
     keyword_coverage,
@@ -300,7 +301,8 @@ class LetterWriter:
                 company=job.company,
                 title=job.title,
                 location=job.location or "not stated",
-                description=job.description[:DESCRIPTION_LIMIT] or "not provided",
+                description=clean_description(job.description)[:DESCRIPTION_LIMIT]
+                or "not provided",
                 window=self._window,
             ),
             LETTER_SCHEMA,

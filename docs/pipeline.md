@@ -157,8 +157,9 @@ of ~70 countries and regions) and punctuation; it is stored in
   --tools "" --no-session-persistence --strict-mcp-config`. No tools and no
   MCP servers: a prompt injection in a posting can only change the answer,
   never execute anything.
-- Batches of 10 jobs; descriptions truncated to 3,000 characters; jobs are
-  numbered 1..n in the prompt (long source ids were mangled by the model).
+- Batches of 10 jobs; descriptions cleaned (§3.3b) then truncated to 3,000
+  characters; jobs are numbered 1..n in the prompt (long source ids were
+  mangled by the model).
 - Every item is validated (types, enums, 0–10 range); invalid or missing
   items stay `pending` and count an attempt; after 3 attempts the job is no
   longer retried.
@@ -168,6 +169,37 @@ of ~70 countries and regions) and punctuation; it is stored in
   `api_error_status`, `subtype` and `result`.
 - Caps per run: `max_llm_batches_per_run` (5) × 10 jobs. The backlog is
   ordered tier S → A → B → unlisted, newest first.
+
+### 3.3b Description cleanup (`description.py`, pure)
+
+Descriptions often open with the company presentation and end with
+benefits, pay and legal notices, so the 3,000-character scoring window
+missed the responsibilities, requirements and dates. `clean_description()`
+is applied to every LLM prompt (scoring and letter draft); the stored text
+is unchanged, and the letter fact check still uses the raw text.
+
+- Short heading lines (≤ 70 characters, emoji and trailing `:`/`?`
+  ignored) open a section. *Company description, About us / About <name>,
+  Who we are, Benefits, Perks, What we offer, What's in it for you, Pay
+  range, Salary, EEO, Accommodations, Privacy, Disclaimer, How to apply…*
+  are dropped until the next role heading (*Job description, The role,
+  Responsibilities, What you'll do, Requirements, Qualifications, About the
+  role…*). Unknown headings never end a section; anything unrecognised is
+  kept.
+- Legal lines are dropped wherever they appear (equal opportunity,
+  accommodation, applicant privacy, pay range, E-Verify…), plus the opening
+  paragraph Amazon repeats on every posting. Lines mentioning a duration or
+  period (*12 weeks*, *summer*, *start date*, month names) are kept even
+  inside a dropped section; sections about the team or the programme
+  (*About the team*, *About the X Internship*) belong to the role.
+- Blank and repeated lines are collapsed; an empty result falls back to the
+  original text.
+- Measured on the 1,083 stored descriptions: average length 4,835 → 3,637
+  characters (−25 %), offers above the 3,000-character window 845 → 660.
+- Quality check (30 stored offers, 12 of them notified or digested, scored
+  again with raw and with cleaned text): agreement with the stored
+  assessment is equal or better with cleaned text — internship 30/30 vs
+  30/30, dates 25 vs 24, eligibility 22 vs 17, relevance within ±1 21 vs 21.
 
 ### 3.4 Ranking (`ranking.py`, pure)
 
@@ -364,8 +396,9 @@ Observations and levers:
   `llm_effort` stays unset; reducing reasoning for scoring would need
   another model/effort combination and a quality check against the
   run-to-run variance above.
-- Descriptions are truncated at 3,000 characters for scoring and 6,000 for
-  letters; lowering them reduces input linearly.
+- Descriptions are cleaned of boilerplate (−25 % on average, §3.3b), then
+  truncated at 3,000 characters for scoring and 6,000 for letters; lowering
+  the limits reduces input linearly.
 - A second tap on the same offer costs nothing (stored letter).
 - Cost per notified offer depends on the pass rate: with the current
   filters about 7 offers per 100 scored reached the immediate band.
