@@ -23,6 +23,7 @@ DATES_LABELS = {
 }
 WORK_AUTHORISATION_LABELS = {
     "free": "Pas de visa (UE/EEE/Suisse)",
+    "self_arranged": "Visa sans sponsoring (obtenu par toi)",
     "programme": "Visa stagiaire standard",
     "sponsorship_stated": "Sponsoring annoncé",
     "uncertain": "Visa incertain",

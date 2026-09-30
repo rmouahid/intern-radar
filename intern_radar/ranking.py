@@ -1,11 +1,32 @@
 """Deterministic final score computed from the LLM assessment."""
 
+from dataclasses import replace
+
 from intern_radar.config import VisaPenalties, Weights
+from intern_radar.countries import FREE_MOVEMENT, mentions_any
 from intern_radar.models import Assessment, Tier
 
 TIER_POINTS = {"S": 10, "A": 8, "B": 6, "unlisted": 4}
 DATES_POINTS = {"fits": 10, "unknown": 6, "too_short_extendable": 4}
 LOCAL_STUDENTS_PENALTY = 2
+
+
+def with_rule_based_visa(
+    assessment: Assessment, location: str, countries: tuple[str, ...]
+) -> Assessment:
+    """Work authorisation fixed by rules rather than by the LLM.
+
+    Offers in the EU, the EEA or Switzerland are `free`; offers in a country
+    where the candidate obtains a visa without a sponsor are `self_arranged`.
+    Also corrects assessments stored before the field existed ("uncertain").
+    """
+    if assessment.work_authorisation == "free":
+        return assessment
+    if mentions_any(location, FREE_MOVEMENT):
+        return replace(assessment, work_authorisation="free")
+    if countries and mentions_any(location, countries):
+        return replace(assessment, work_authorisation="self_arranged")
+    return assessment
 
 
 def is_excluded(assessment: Assessment) -> bool:

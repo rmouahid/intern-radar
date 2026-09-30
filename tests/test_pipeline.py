@@ -516,3 +516,14 @@ def test_offer_age_limit_can_be_disabled():
     scorer = FakeScorer({"old": make_assessment(ai_relevance=9)})
     pipeline, _, _ = build({"fake": FakeSource([job])}, scorer, max_offer_age_days=0)
     assert pipeline.run().stale == 0 and scorer.batches == [["old"]]
+
+
+def test_offers_in_self_sponsored_countries_are_not_penalised():
+    job = make_job(id="ca", tier="A", title="ML Intern", location="Toronto, CAN")
+    scorer = FakeScorer({"ca": make_assessment(work_authorisation="unlikely")})
+    pipeline, store, _ = build(
+        {"fake": FakeSource([job])}, scorer, self_sponsored_countries=("Canada",)
+    )
+    pipeline.run()
+    [scored] = store.scored(0)
+    assert scored.assessment.work_authorisation == "self_arranged"

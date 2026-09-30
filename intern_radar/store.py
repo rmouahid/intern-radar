@@ -274,8 +274,15 @@ class Store:
         )
         return [_row_to_scored(row) for row in rows]
 
-    def rescore(self, score: Callable[[Job, Assessment], float | None]) -> int:
+    def rescore(
+        self,
+        score: Callable[[Job, Assessment], float | None],
+        adjust: Callable[[Job, Assessment], Assessment] | None = None,
+    ) -> int:
         """Recompute every stored final score; returns how many changed.
+
+        `adjust` may first rewrite the stored assessment (deterministic
+        overrides that depend on the profile); rewritten ones are saved.
 
         Notification and digest dates are kept, and offers already sent in a
         digest are not due as immediate ones, so nothing is sent twice.
@@ -286,12 +293,22 @@ class Store:
         updates = []
         for row in rows:
             scored = _row_to_scored(row)
-            new = score(scored.job, scored.assessment)
-            if new != scored.score:
-                updates.append((new, row["id"]))
+            assessment = scored.assessment
+            if adjust is not None:
+                assessment = adjust(scored.job, assessment)
+            new = score(scored.job, assessment)
+            if new != scored.score or assessment != scored.assessment:
+                updates.append((new, json.dumps(asdict(assessment)), row["id"]))
         with self._db:
-            self._db.executemany("UPDATE jobs SET score = ? WHERE id = ?", updates)
+            self._db.executemany(
+                "UPDATE jobs SET score = ?, assessment = ? WHERE id = ?", updates
+            )
         return len(updates)
+
+    def clear_chances(self) -> int:
+        """Forget stored interview-chance estimates (recomputed on demand)."""
+        with self._db:
+            return self._db.execute("DELETE FROM chances").rowcount
 
     def mark_notified(self, job_id: str, now: datetime) -> None:
         with self._db:

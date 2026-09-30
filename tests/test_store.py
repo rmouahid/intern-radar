@@ -283,3 +283,21 @@ def test_rescore_recomputes_every_scored_job_without_resending(store):
     # "a" was already in a digest: it is not sent again as an immediate offer.
     assert [s.job.id for s in store.due_immediate(7.5)] == ["b", "x"]
     assert store.rescore(lambda job, assessment: 8.0) == 0
+
+
+def test_rescore_can_rewrite_assessments_and_chances_can_be_cleared(store):
+    from dataclasses import replace
+
+    from intern_radar.chance import Chance
+
+    store.add(make_job(id="ca", location="Toronto"), "pending", NOW)
+    store.save_assessment("ca", make_assessment(work_authorisation="unlikely"), 5.0)
+    store.save_chance("ca", Chance(3, ((False, "x"),)))
+    changed = store.rescore(
+        lambda job, a: 7.0 if a.work_authorisation == "self_arranged" else 5.0,
+        adjust=lambda job, a: replace(a, work_authorisation="self_arranged"),
+    )
+    [scored] = store.scored(0)
+    assert changed == 1 and scored.score == 7.0
+    assert scored.assessment.work_authorisation == "self_arranged"
+    assert store.clear_chances() == 1 and store.chance("ca") is None

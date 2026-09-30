@@ -46,6 +46,7 @@ class VisaPenalties:
     """Points removed from the final score per work-authorisation value."""
 
     free: float = 0.0
+    self_arranged: float = 0.0  # the candidate gets the visa without a sponsor
     programme: float = 0.5
     sponsorship_stated: float = 0.0
     uncertain: float = 1.0
@@ -82,6 +83,9 @@ class Profile:
     max_resumes_per_day: int = 10
     reminder_days: int = 14
     max_offer_age_days: int = 60  # older offers are rejected; 0 disables
+    # Countries where the candidate obtains work authorisation without an
+    # employer sponsor (e.g. working holiday visas).
+    self_sponsored_countries: tuple[str, ...] = ()
     dashboard_host: str | None = None  # default: the Tailscale address
     dashboard_port: int = 8787
     max_letters_per_day: int = 10
@@ -176,6 +180,12 @@ def load_profile(path: Path) -> Profile:
     ):
         raise ConfigError(f"{path}: extra_excluded_title_words must be a list of words")
     values["extra_excluded_title_words"] = tuple(word.strip() for word in extra)
+    countries = data.get("self_sponsored_countries", [])
+    if not isinstance(countries, list) or not all(
+        isinstance(c, str) and c.strip() for c in countries
+    ):
+        raise ConfigError(f"{path}: self_sponsored_countries must be a list of names")
+    values["self_sponsored_countries"] = tuple(c.strip() for c in countries)
     if "contact" in data:
         values["contact"] = _build(Contact, data["contact"], "contact")
     return Profile(**values)

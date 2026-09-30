@@ -126,7 +126,13 @@ def _chance(config_dir: Path, profile: Profile, store: Store) -> CachedChance | 
         effort=profile.chance_effort,
         on_usage=_recorder(store, "chance"),
     )
-    return CachedChance(store, ChanceEstimator(backend, candidate, window))
+    estimator = ChanceEstimator(
+        backend,
+        candidate,
+        window,
+        self_sponsored=profile.self_sponsored_countries,
+    )
+    return CachedChance(store, estimator)
 
 
 def _pipeline(
@@ -234,12 +240,17 @@ def rescore(config_dir: Path = CONFIG_DIR, db: Path = DB_PATH) -> None:
                 profile.weights,
                 profile.thresholds.min_relevance,
                 profile.visa_penalties,
-            )
+            ),
+            adjust=lambda job, assessment: ranking.with_rule_based_visa(
+                assessment, job.location, profile.self_sponsored_countries
+            ),
         )
+        # Estimates depend on the profile and the method: recompute on demand.
+        cleared = store.clear_chances()
         due = len(store.due_immediate(profile.thresholds.immediate))
     finally:
         store.close()
-    typer.echo(f"rescored={changed} due_immediate={due}")
+    typer.echo(f"rescored={changed} due_immediate={due} chances_cleared={cleared}")
 
 
 @app.command("generate-profile")
