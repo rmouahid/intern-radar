@@ -10,6 +10,9 @@ message naming the key.
 | `config/companies.yaml` | yes | watched companies and how to reach their feeds |
 | `config/profile.yaml` | **no** (gitignored) | candidate, schedule limits, secrets |
 | `config/profile.example.yaml` | yes | documented template for `profile.yaml` |
+| `config/career.md` (+ `config/career/`) | **no** | long-form career dossier, input of `generate-profile` |
+| `config/career.example.md` | yes | fictional template for the dossier |
+| `config/candidate.json` | **no** | structured candidate profile generated from the dossier |
 
 Runtime data lives in `data/` (gitignored): `intern-radar.db` (SQLite),
 `cv-cache.json`, `letters/`. Logs go to `logs/intern-radar.log`.
@@ -75,6 +78,35 @@ Letters are enabled (button shown, commands usable) when `cv_url` and
 | `max_letters_per_day` | int | `10` | new letters per 24 h; re-sending a stored letter is free |
 | `letters_email` | e-mail | unset | Gmail address that sends and receives the copy |
 | `smtp_app_password` | string | unset | Gmail app password (secret); e-mail is skipped when unset |
+| `profile_model` | string | `sonnet` | model for `generate-profile` |
+
+## Candidate profile (career.md → candidate.json)
+
+A one-page CV follows strict conventions and leaves out most of what makes
+a letter specific. Write instead a **career dossier** in
+`config/career.md`, as long as needed (start from
+`config/career.example.md`): education, every experience and project with
+its context, what you did, measured results, tools, languages, extras.
+Optional extra documents (internship or project reports) can be dropped in
+`config/career/`: `.md` and `.txt` are read as is; `.pdf`, `.docx`, `.pptx`
+and `.html` need the optional converter (`poetry install -E documents`,
+MarkItDown).
+
+`intern-radar generate-profile` sends the dossier to the LLM once and writes
+`config/candidate.json`:
+
+- `education[]`, `experiences[]`, `projects[]` — each with a stable `id`
+  (`edu-…`, `exp-…`, `proj-…`), dates, context, actions, results, skills
+  and keywords;
+- `skills[]` — name, category and the ids of the items that evidence it;
+- `languages[]`, `summary`, `extras[]`.
+
+The prompt forbids inference; the command then prints warnings for skills
+without evidence, skills not written as such in the dossier and result
+numbers absent from it. When a profile already exists, its ids are reused,
+a diff (`+`, `-`, `~` per item, `+ skill`, `- skill`) is printed and the
+previous file is kept as `candidate.json.bak`. `--dry-run` prints without
+saving. The file stays human-editable; it is validated when loaded.
 
 ### Example
 
@@ -148,3 +180,5 @@ poetry run intern-radar check-sources   # OK / FAIL / NONE per company, exit 1 o
 | `check-sources` | `--config-dir` |
 | `letter JOB_ID` | `--config-dir`, `--db` |
 | `listen` | `--config-dir`, `--db` |
+| `rescore` | `--config-dir`, `--db` |
+| `generate-profile` | `--config-dir`, `--dry-run` |

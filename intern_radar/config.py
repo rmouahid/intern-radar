@@ -74,6 +74,7 @@ class Profile:
     smtp_app_password: str | None = None
     letter_model: str = "sonnet"
     letter_effort: str | None = "low"
+    profile_model: str = "sonnet"
     max_letters_per_day: int = 10
     contact: Contact | None = None
     extra_excluded_title_words: tuple[str, ...] = ()
