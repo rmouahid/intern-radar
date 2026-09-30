@@ -71,7 +71,7 @@ sites use. Adzuna covers the rest through an official API.
 
 - *Rejected*: HTML scraping (brittle, heavier), LinkedIn/Indeed scraping
   (terms of service, account risk), browser automation (does not fit 2 GB).
-- *Trade-off*: companies without a usable feed (19 of 66) are only seen
+- *Trade-off*: companies without a usable feed (34 of 116) are only seen
   through Adzuna. Each is marked `source: none` so coverage is explicit.
 
 ### D2 — Rules before the LLM

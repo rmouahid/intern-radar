@@ -72,8 +72,10 @@ are the bulk). Growth follows new postings (~30/day), i.e. well under
 
 ### 3.1 Collection (`intern_radar/sources/`)
 
-66 companies in `config/companies.yaml` (tiers: 8 S, 29 A, 28 B, plus the
-Adzuna catch-all). 46 have a live feed, 19 have none and rely on Adzuna.
+116 companies in `config/companies.yaml` (tiers: 8 S, 50 A, 58 B, plus the
+Adzuna catch-all). 82 have a live feed, 34 have none and rely on Adzuna
+(list widened on 2026-09-30 with AI labs and startups, AI infrastructure,
+quant firms, fintechs and hardware groups, each board probed first).
 
 Adzuna is targeted at those companies: each fetch asks, per country (12),
 for `what=intern` offers of the last 14 days mentioning the names and aliases
@@ -474,7 +476,7 @@ Delivery guarantees:
 
 Coverage:
 
-- 19 watched companies (Google, Meta, Apple, Mistral, Goldman, Citadel…)
+- 34 watched companies (Google, Meta, Apple, Mistral, Goldman, Citadel…)
   have no public feed and are only visible through Adzuna, which needs keys
   and only sees what aggregators index.
 - Workday searches are relevance-sorted and capped at 100 results per

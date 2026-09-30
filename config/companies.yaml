@@ -29,6 +29,21 @@
 - {name: Intel, tier: A, source: workday, host: intel.wd1.myworkdayjobs.com, tenant: intel, site: External}
 - {name: Samsung, tier: A, source: workday, host: sec.wd3.myworkdayjobs.com, tenant: sec, site: Samsung_Careers}
 
+- {name: Together AI, tier: A, source: greenhouse, board: togetherai}
+- {name: Cursor, tier: A, source: ashby, org: cursor, aliases: [Anysphere]}
+- {name: Harvey, tier: A, source: ashby, org: harvey}
+- {name: Sierra, tier: A, source: ashby, org: sierra}
+- {name: Glean, tier: A, source: greenhouse, board: gleanwork}
+- {name: LangChain, tier: A, source: ashby, org: langchain}
+- {name: Cerebras, tier: A, source: ashby, org: cerebras, aliases: [Cerebras Systems]}
+- {name: CoreWeave, tier: A, source: greenhouse, board: coreweave, aliases: [Weights & Biases, Weights and Biases]}
+- {name: Isomorphic Labs, tier: A, source: greenhouse, board: isomorphiclabs}
+- {name: Character.AI, tier: A, source: ashby, org: character}
+- {name: Notion, tier: A, source: ashby, org: notion}
+- {name: Netflix, tier: A, source: none}
+- {name: AMD, tier: A, source: none, aliases: [Advanced Micro Devices]}
+- {name: Arm, tier: A, source: none, aliases: [Arm Limited, Arm Holdings]}
+
 # Tier A — finance and quant
 - {name: Jane Street, tier: A, source: greenhouse, board: janestreet}
 - {name: Citadel, tier: A, source: none, aliases: [Citadel Securities]}
@@ -41,6 +56,14 @@
 - {name: XTX Markets, tier: A, source: greenhouse, board: xtxmarketstechnologies}
 - {name: Citi, tier: A, source: workday, host: citi.wd5.myworkdayjobs.com, tenant: citi, site: "2"}
 - {name: BlackRock, tier: A, source: workday, host: blackrock.wd1.myworkdayjobs.com, tenant: blackrock, site: BlackRock_Professional}
+
+- {name: Jump Trading, tier: A, source: greenhouse, board: jumptrading}
+- {name: Hudson River Trading, tier: A, source: greenhouse, board: wehrtyou, aliases: [HRT]}
+- {name: Optiver, tier: A, source: greenhouse, board: optiverus}
+- {name: Tower Research Capital, tier: A, source: greenhouse, board: towerresearchcapital, aliases: [Tower Research]}
+- {name: Squarepoint Capital, tier: A, source: greenhouse, board: squarepointcapital, aliases: [Squarepoint]}
+- {name: G-Research, tier: A, source: none, aliases: [G Research]}
+- {name: SIG, tier: A, source: none, aliases: [Susquehanna, Susquehanna International Group]}
 
 # Tier A — consulting
 - {name: McKinsey, tier: A, source: none, aliases: [QuantumBlack]}
@@ -78,4 +101,36 @@
 
 # Catch-all
 # Adzuna: queried at most every 6 h to stay within the free API quota.
+# Tier B — added 2026-09-30 (AI startups, AI infrastructure, fintech, hardware)
+- {name: Runway, tier: B, source: ashby, org: runway, aliases: [RunwayML]}
+- {name: Poolside, tier: B, source: ashby, org: poolside}
+- {name: Aleph Alpha, tier: B, source: ashby, org: alephalpha}
+- {name: PolyAI, tier: B, source: greenhouse, board: polyai}
+- {name: Graphcore, tier: B, source: greenhouse, board: graphcore}
+- {name: Anyscale, tier: B, source: ashby, org: anyscale}
+- {name: Replit, tier: B, source: ashby, org: replit}
+- {name: Faculty, tier: B, source: ashby, org: faculty, aliases: [Faculty AI]}
+- {name: Tractable, tier: B, source: ashby, org: tractable}
+- {name: Photoroom, tier: B, source: ashby, org: photoroom}
+- {name: Pinecone, tier: B, source: ashby, org: pinecone}
+- {name: Weaviate, tier: B, source: ashby, org: weaviate}
+- {name: Zilliz, tier: B, source: lever, site: zilliz}
+- {name: Vercel, tier: B, source: greenhouse, board: vercel}
+- {name: Monzo, tier: B, source: greenhouse, board: monzo}
+- {name: Wise, tier: B, source: greenhouse, board: wise}
+- {name: Adyen, tier: B, source: greenhouse, board: adyen}
+- {name: N26, tier: B, source: greenhouse, board: n26}
+- {name: Cleo, tier: B, source: greenhouse, board: cleo, aliases: [Cleo AI]}
+- {name: Thales, tier: B, source: workday, host: thales.wd3.myworkdayjobs.com, tenant: thales, site: Careers}
+- {name: Qdrant, tier: B, source: none}
+- {name: InstaDeep, tier: B, source: none}
+- {name: Groq, tier: B, source: none}
+- {name: Black Forest Labs, tier: B, source: none}
+- {name: Sakana AI, tier: B, source: none}
+- {name: Klarna, tier: B, source: none}
+- {name: Revolut, tier: B, source: none}
+- {name: Booking.com, tier: B, source: none, aliases: [Booking Holdings]}
+- {name: SAP, tier: B, source: none, aliases: [SAP SE]}
+- {name: ASML, tier: B, source: none}
+
 - {name: Adzuna, tier: unlisted, source: adzuna, min_interval_hours: 6}
