@@ -82,7 +82,7 @@ def test_format_digest_matches_the_approved_layout():
 
 def test_digest_stays_under_the_telegram_limit():
     jobs = [
-        scored(f"j{i}", 6.0, title="Machine Learning Intern " * 10, location="X" * 90)
+        scored(f"j{i}", 6.0, title=f"ML Intern {i} " * 10, location="X" * 90)
         for i in range(45)
     ]
     message = format_digest(jobs)
@@ -144,3 +144,40 @@ def test_permanent_telegram_errors_are_flagged():
     with pytest.raises(NotifyError) as info:
         notifier.send(Message("x"))
     assert info.value.permanent is True
+
+
+def test_immediate_lists_every_location_of_the_posting_group():
+    de = scored("de", location="Berlin, DEU", url="https://jobs/de")
+    uk = scored("uk", location="London, GBR", url="https://jobs/uk")
+    message = format_immediate(de, "L:1", siblings=[uk])
+    assert (
+        '📍  <a href="https://jobs/de">Berlin, DEU</a>'
+        ' · <a href="https://jobs/uk">London, GBR</a>'
+    ) in message.html
+
+
+def test_group_locations_are_deduplicated_and_capped():
+    lead = scored("0", location="City 0")
+    others = [scored(str(i), location=f"City {i}") for i in range(1, 8)]
+    others.append(scored("dup", location="City 1"))
+    line = next(
+        line
+        for line in format_immediate(lead, siblings=others).html.split("\n")
+        if line.startswith("📍")
+    )
+    assert visible(line) == "📍  City 0 · City 1 · City 2 · City 3 · City 4 · +3"
+
+
+def test_single_location_group_keeps_plain_text():
+    job = scored("a", location="Paris or Zurich")
+    twin = scored("b", location="Paris or Zurich")
+    assert "📍  Paris or Zurich\n" in format_immediate(job, siblings=[twin]).html
+
+
+def test_digest_shows_one_entry_per_posting_group():
+    de = scored("de", 7.0, title="SDE Intern - Germany", location="Berlin")
+    uk = scored("uk", 7.0, title="SDE Intern - UK", location="London")
+    other = scored("x", 6.0, title="Data Intern", location="Madrid")
+    message = format_digest([de, uk, other])
+    assert "Récap du soir — 2 offres" in message.html
+    assert "📍 Berlin · London   ⭐ 7.0 / 10" in visible(message.html)

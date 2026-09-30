@@ -5,6 +5,7 @@ import sqlite3
 from dataclasses import asdict
 from datetime import datetime, timedelta
 
+from intern_radar.grouping import group_key
 from intern_radar.models import Assessment, Job, ScoredJob
 
 MAX_ATTEMPTS = 3
@@ -26,7 +27,8 @@ CREATE TABLE IF NOT EXISTS jobs (
     assessment TEXT,
     score REAL,
     notified_at TEXT,
-    digested_at TEXT
+    digested_at TEXT,
+    group_key TEXT
 );
 CREATE TABLE IF NOT EXISTS source_health (
     company TEXT PRIMARY KEY,
@@ -78,6 +80,23 @@ class Store:
         self._db = sqlite3.connect(path)
         self._db.row_factory = sqlite3.Row
         self._db.executescript(SCHEMA)
+        self._migrate()
+
+    def _migrate(self) -> None:
+        columns = {row["name"] for row in self._db.execute("PRAGMA table_info(jobs)")}
+        with self._db:
+            if "group_key" not in columns:
+                self._db.execute("ALTER TABLE jobs ADD COLUMN group_key TEXT")
+            rows = self._db.execute(
+                "SELECT id, company, title FROM jobs WHERE group_key IS NULL"
+            ).fetchall()
+            self._db.executemany(
+                "UPDATE jobs SET group_key = ? WHERE id = ?",
+                [(group_key(r["company"], r["title"]), r["id"]) for r in rows],
+            )
+            self._db.execute(
+                "CREATE INDEX IF NOT EXISTS jobs_group_key ON jobs (group_key)"
+            )
 
     def close(self) -> None:
         self._db.close()
@@ -94,8 +113,9 @@ class Store:
         with self._db:
             self._db.execute(
                 f"INSERT OR IGNORE INTO jobs ({', '.join(JOB_COLUMNS)}, first_seen,"
-                f" status) VALUES ({', '.join('?' * (len(JOB_COLUMNS) + 2))})",
-                [*values, now.isoformat(), status],
+                f" status, group_key)"
+                f" VALUES ({', '.join('?' * (len(JOB_COLUMNS) + 3))})",
+                [*values, now.isoformat(), status, group_key(job.company, job.title)],
             )
 
     def get_job(self, job_id: str) -> Job | None:
@@ -122,18 +142,56 @@ class Store:
         return row is not None
 
     def pending(self, limit: int | None = None) -> list[Job]:
+        """Jobs to score, one per posting group; the others inherit its result."""
         # Top tiers first, newest first: the first run finds hundreds of offers
         # and the LLM only scores a few batches per run.
-        sql = (
+        rows = self._db.execute(
             "SELECT * FROM jobs WHERE status = 'pending' AND attempts < ?"
             " ORDER BY CASE tier WHEN 'S' THEN 0 WHEN 'A' THEN 1 WHEN 'B' THEN 2"
-            " ELSE 3 END, first_seen DESC, id"
+            " ELSE 3 END, first_seen DESC, id",
+            (MAX_ATTEMPTS,),
         )
-        params: list[object] = [MAX_ATTEMPTS]
-        if limit is not None:
-            sql += " LIMIT ?"
-            params.append(limit)
-        return [_row_to_job(row) for row in self._db.execute(sql, params)]
+        jobs: list[Job] = []
+        groups: set[str] = set()
+        for row in rows:
+            if limit is not None and len(jobs) >= limit:
+                break
+            if row["group_key"] not in groups:
+                groups.add(row["group_key"])
+                jobs.append(_row_to_job(row))
+        return jobs
+
+    def inherit_group_assessments(self) -> int:
+        """Copy each scored group member's result to its pending members.
+
+        Notification and digest dates are copied too, so a posting seen in a
+        new country is not announced twice. Returns the number of jobs updated.
+        """
+        rows = self._db.execute(
+            "SELECT p.id, s.assessment, s.score, s.notified_at, s.digested_at"
+            " FROM jobs p JOIN jobs s ON s.group_key = p.group_key"
+            " AND s.status = 'scored' WHERE p.status = 'pending'"
+            " ORDER BY p.id, s.first_seen DESC"
+        ).fetchall()
+        updates: dict[str, tuple] = {}
+        for row in rows:
+            updates.setdefault(
+                row["id"],
+                (
+                    row["assessment"],
+                    row["score"],
+                    row["notified_at"],
+                    row["digested_at"],
+                    row["id"],
+                ),
+            )
+        with self._db:
+            self._db.executemany(
+                "UPDATE jobs SET status = 'scored', assessment = ?, score = ?,"
+                " notified_at = ?, digested_at = ? WHERE id = ?",
+                list(updates.values()),
+            )
+        return len(updates)
 
     def record_attempt(self, job_ids: list[str]) -> None:
         with self._db:
@@ -152,11 +210,13 @@ class Store:
                 (json.dumps(asdict(assessment)), score, job_id),
             )
 
-    def due_immediate(self, threshold: float, limit: int) -> list[ScoredJob]:
+    def due_immediate(
+        self, threshold: float, limit: int | None = None
+    ) -> list[ScoredJob]:
         rows = self._db.execute(
             "SELECT * FROM jobs WHERE status = 'scored' AND score >= ?"
             " AND notified_at IS NULL ORDER BY score DESC, id LIMIT ?",
-            (threshold, limit),
+            (threshold, -1 if limit is None else limit),
         )
         return [_row_to_scored(row) for row in rows]
 

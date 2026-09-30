@@ -160,3 +160,84 @@ def test_job_refs_are_short_and_reversible(store):
     assert store.job_by_ref(ref).id == long_id
     assert store.job_ref("missing") is None
     assert store.job_by_ref(999999) is None
+
+
+def test_pending_returns_one_job_per_posting_group(store):
+    store.add(make_job(id="de", title="SDE Intern - Germany"), "pending", NOW)
+    store.add(make_job(id="uk", title="SDE Intern - UK"), "pending", NOW)
+    store.add(make_job(id="ml", title="ML Intern"), "pending", NOW)
+    assert sorted(job.id for job in store.pending()) == ["de", "ml"]
+    assert len(store.pending(limit=1)) == 1
+
+
+def test_pending_members_inherit_the_group_assessment_and_state(store):
+    store.add(make_job(id="de", title="SDE Intern - Germany"), "pending", NOW)
+    store.save_assessment("de", make_assessment(ai_relevance=9), 8.4)
+    store.mark_notified("de", NOW)
+    store.add(make_job(id="uk", title="SDE Intern - UK"), "pending", NOW)
+    store.add(make_job(id="other", title="ML Intern"), "pending", NOW)
+
+    assert store.inherit_group_assessments() == 1
+    assert store.inherit_group_assessments() == 0
+
+    assert [job.id for job in store.pending()] == ["other"]
+    assert store.due_immediate(7.5) == []  # the group was already notified
+    [uk] = [s for s in store.scored(min_score=0) if s.job.id == "uk"]
+    assert (uk.score, uk.assessment.ai_relevance) == (8.4, 9)
+
+
+def test_excluded_groups_are_inherited_too(store):
+    store.add(make_job(id="de", title="SDE Intern - Germany"), "pending", NOW)
+    store.save_assessment("de", make_assessment(is_internship=False), None)
+    store.add(make_job(id="uk", title="SDE Intern - UK"), "pending", NOW)
+    assert store.inherit_group_assessments() == 1
+    assert store.pending() == []
+
+
+def test_due_immediate_without_limit_returns_every_member(store):
+    for job_id, title in (("de", "SDE Intern - Germany"), ("uk", "SDE Intern - UK")):
+        store.add(make_job(id=job_id, title=title), "pending", NOW)
+        store.save_assessment(job_id, make_assessment(), 8.0)
+    assert len(store.due_immediate(7.5)) == 2
+
+
+def test_existing_database_gets_group_keys(tmp_path):
+    path = tmp_path / "old.db"
+    old = Store(str(path))
+    old.add(make_job(id="de", title="SDE Intern - Germany"), "pending", NOW)
+    old._db.execute("UPDATE jobs SET group_key = NULL")
+    old._db.commit()
+    old.close()
+
+    reopened = Store(str(path))
+    reopened.add(make_job(id="uk", title="SDE Intern - UK"), "pending", NOW)
+    assert [job.id for job in reopened.pending()] == ["de"]
+    reopened.close()
+
+
+def test_database_without_group_key_column_is_migrated(tmp_path):
+    import sqlite3
+
+    path = tmp_path / "v1.db"
+    db = sqlite3.connect(path)
+    db.execute(
+        "CREATE TABLE jobs (id TEXT PRIMARY KEY, company TEXT NOT NULL,"
+        " tier TEXT NOT NULL, title TEXT NOT NULL, location TEXT NOT NULL,"
+        " url TEXT NOT NULL, description TEXT NOT NULL, source TEXT NOT NULL,"
+        " posted_at TEXT, first_seen TEXT NOT NULL, status TEXT NOT NULL,"
+        " attempts INTEGER NOT NULL DEFAULT 0, assessment TEXT, score REAL,"
+        " notified_at TEXT, digested_at TEXT)"
+    )
+    db.execute(
+        "INSERT INTO jobs (id, company, tier, title, location, url, description,"
+        " source, first_seen, status) VALUES ('de', 'Acme', 'A',"
+        " 'SDE Intern - Germany', 'Berlin', 'https://x', 'd', 'greenhouse',"
+        " '2026-09-24', 'pending')"
+    )
+    db.commit()
+    db.close()
+
+    store = Store(str(path))
+    store.add(make_job(id="uk", title="SDE Intern - UK"), "pending", NOW)
+    assert len(store.pending()) == 1  # "de" and "uk" are one posting
+    store.close()

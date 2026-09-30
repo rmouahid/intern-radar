@@ -1,14 +1,16 @@
 """Telegram notifications and their HTML formatting."""
 
 import html
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol
 
+from intern_radar.grouping import group_scored
 from intern_radar.models import ScoredJob
 from intern_radar.telegram import Button, TelegramClient, TelegramError
 
 MAX_DIGEST_LINES = 15
+MAX_GROUP_LOCATIONS = 5
 SEPARATOR = "━" * 16
 DATES_LABELS = {
     "fits": "Dates compatibles",
@@ -66,14 +68,39 @@ class ConsoleNotifier:
         self._write(f"{message.html}\n{labels}\n")
 
 
-def format_immediate(scored: ScoredJob, letter_callback: str | None = None) -> Message:
+def _locations(members: Sequence[ScoredJob], width: int) -> str:
+    """Distinct locations of a posting group, each linked to its own offer."""
+    urls: dict[str, str] = {}
+    for member in members:
+        urls.setdefault(
+            member.job.location[:width] or "Lieu non précisé", member.job.url
+        )
+    link = len(set(urls.values())) > 1
+    parts = [
+        f'<a href="{e(url)}">{e(location)}</a>'
+        if link and url.startswith(("https://", "http://"))
+        else e(location)
+        for location, url in list(urls.items())[:MAX_GROUP_LOCATIONS]
+    ]
+    if len(urls) > MAX_GROUP_LOCATIONS:
+        parts.append(f"+{len(urls) - MAX_GROUP_LOCATIONS}")
+    return " · ".join(parts)
+
+
+def format_immediate(
+    scored: ScoredJob,
+    letter_callback: str | None = None,
+    siblings: Sequence[ScoredJob] = (),
+) -> Message:
+    """Notification for one posting; `siblings` are its copies in other places."""
     job, assessment = scored.job, scored.assessment
+    width = 60 if siblings else 100
     # Source and LLM fields are unbounded; Telegram rejects texts over 4096.
     lines = [
         f"🔥 <b>{e(job.company[:80])} · niveau {job.tier}</b>",
         f"<b>{e(job.title[:200])}</b>",
         SEPARATOR,
-        f"📍  {e(job.location[:100] or 'Lieu non précisé')}",
+        f"📍  {_locations([scored, *siblings], width)}",
         f"⭐  {scored.score:.1f} / 10",
         f"📅  {DATES_LABELS[assessment.dates_fit]}",
         f"🛂  {e(assessment.visa_note[:300])}",
@@ -89,16 +116,18 @@ def format_immediate(scored: ScoredJob, letter_callback: str | None = None) -> M
 
 
 def format_digest(jobs: list[ScoredJob]) -> Message:
+    groups = group_scored(jobs)
     blocks = [
         f"<b>{e(s.job.company)}</b> · niveau {s.job.tier}\n"
         f'<a href="{e(s.job.url)}">{e(s.job.title[:80])}</a>\n'
-        f"📍 {e(s.job.location[:40] or 'Lieu non précisé')}   ⭐ {s.score:.1f} / 10"
-        for s in jobs[:MAX_DIGEST_LINES]
+        f"📍 {_locations(group, 40)}   ⭐ {s.score:.1f} / 10"
+        for s, group in ((group[0], group) for group in groups[:MAX_DIGEST_LINES])
     ]
-    if len(jobs) > MAX_DIGEST_LINES:
-        blocks.append(f"… et {len(jobs) - MAX_DIGEST_LINES} autres (intern-radar list)")
-    noun = "offre" if len(jobs) == 1 else "offres"
-    header = f"📋 <b>Récap du soir — {len(jobs)} {noun}</b>\n{SEPARATOR}"
+    if len(groups) > MAX_DIGEST_LINES:
+        extra = len(groups) - MAX_DIGEST_LINES
+        blocks.append(f"… et {extra} autres (intern-radar list)")
+    noun = "offre" if len(groups) == 1 else "offres"
+    header = f"📋 <b>Récap du soir — {len(groups)} {noun}</b>\n{SEPARATOR}"
     body = "\n\n".join(blocks)
     return Message(f"{header}\n\n{body}\n\n{SEPARATOR}", silent=True)
 
