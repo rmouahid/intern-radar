@@ -204,3 +204,24 @@ def test_prompt_and_schema_know_undergrad_only():
     make_scorer(backend).assess([make_job()])
     assert '"undergrad_only"' in backend.prompts[0]
     assert "master's" in backend.prompts[0]
+
+
+def test_usage_is_reported_after_a_successful_call():
+    seen = []
+    envelope = {
+        "structured_output": {"assessments": []},
+        "usage": {
+            "input_tokens": 10,
+            "cache_creation_input_tokens": 100,
+            "cache_read_input_tokens": 1000,
+            "output_tokens": 50,
+        },
+        "total_cost_usd": 0.012,
+        "duration_ms": 4200,
+    }
+    runner = FakeRunner(stdout=json.dumps(envelope))
+    backend = ClaudeCliBackend(runner=runner, on_usage=seen.append)
+    backend.complete("prompt", {})
+    assert seen == [
+        {"model": "haiku", "input": 1110, "output": 50, "cost": 0.012, "seconds": 4.2}
+    ]

@@ -5,6 +5,7 @@ import sqlite3
 from collections.abc import Callable
 from dataclasses import asdict
 from datetime import datetime, timedelta
+from typing import Any
 
 from intern_radar.chance import Chance
 from intern_radar.grouping import group_key
@@ -48,6 +49,16 @@ CREATE TABLE IF NOT EXISTS letters (
     path TEXT NOT NULL,
     created_at TEXT NOT NULL,
     report TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS llm_usage (
+    id INTEGER PRIMARY KEY,
+    at TEXT NOT NULL,
+    purpose TEXT NOT NULL,
+    model TEXT NOT NULL,
+    input INTEGER NOT NULL,
+    output INTEGER NOT NULL,
+    cost REAL NOT NULL,
+    seconds REAL NOT NULL
 );
 CREATE TABLE IF NOT EXISTS applications (
     job_id TEXT PRIMARY KEY,
@@ -389,6 +400,24 @@ class Store:
             (since.isoformat(),),
         ).fetchone()
         return row["n"]
+
+    def record_llm_usage(
+        self, purpose: str, usage: dict[str, Any], now: datetime
+    ) -> None:
+        with self._db:
+            self._db.execute(
+                "INSERT INTO llm_usage (at, purpose, model, input, output, cost,"
+                " seconds) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (
+                    now.isoformat(),
+                    purpose,
+                    usage["model"],
+                    usage["input"],
+                    usage["output"],
+                    usage["cost"],
+                    usage["seconds"],
+                ),
+            )
 
     def application_status(self, job_id: str) -> str | None:
         row = self._db.execute(

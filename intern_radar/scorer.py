@@ -119,11 +119,13 @@ class ClaudeCliBackend:
         effort: str | None = None,
         timeout: int = 600,
         runner: Callable[..., subprocess.CompletedProcess] = subprocess.run,
+        on_usage: Callable[[dict[str, Any]], None] | None = None,
     ) -> None:
         self._model = model
         self._effort = effort
         self._timeout = timeout
         self._runner = runner
+        self._on_usage = on_usage
 
     def complete(self, prompt: str, schema: dict[str, Any]) -> dict[str, Any]:
         command = [
@@ -165,7 +167,29 @@ class ClaudeCliBackend:
         if envelope.get("is_error") or not isinstance(output, dict):
             detail = str(envelope.get("result", ""))[:300]
             raise LLMError(f"claude CLI returned no structured output: {detail}")
+        if self._on_usage is not None:
+            self._on_usage(_usage(envelope, self._model))
         return output
+
+
+def _usage(envelope: dict[str, Any], model: str) -> dict[str, Any]:
+    """Tokens, cost and duration of one call, from the CLI's JSON envelope."""
+    usage = envelope.get("usage") or {}
+    tokens_in = sum(
+        int(usage.get(key) or 0)
+        for key in (
+            "input_tokens",
+            "cache_creation_input_tokens",
+            "cache_read_input_tokens",
+        )
+    )
+    return {
+        "model": model,
+        "input": tokens_in,
+        "output": int(usage.get("output_tokens") or 0),
+        "cost": float(envelope.get("total_cost_usd") or 0.0),
+        "seconds": round(float(envelope.get("duration_ms") or 0) / 1000, 1),
+    }
 
 
 def _failure_detail(stdout: str) -> str:

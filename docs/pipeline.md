@@ -31,8 +31,10 @@ intern-radar is a single-user batch pipeline plus one long-running listener:
 | `intern-radar-run` | oneshot | `intern-radar run` | 08,10,…,22:00 Europe/Paris, `Persistent=true` |
 | `intern-radar-digest` | oneshot | `intern-radar digest` | 21:00 Europe/Paris, ordered after `run` |
 | `intern-radar-letters` | simple, `Restart=always` | `intern-radar listen` | always on |
+| `intern-radar-dashboard` | simple, `Restart=always` | `intern-radar dashboard` | always on, Tailscale address only |
 
-All outbound; no inbound port is opened. External dependencies: public job
+All outbound except the dashboard, which listens on the Tailscale address
+only (never on a public interface). External dependencies: public job
 board APIs, Adzuna (optional key), the `claude` CLI (headless, user
 subscription), the Telegram Bot API, Gmail SMTP (optional), the CV PDF export
 of a Google Doc.
@@ -394,6 +396,28 @@ machine is pure and tested:
   Pas de réponse* buttons, then marks it reminded.
 - `intern-radar applications` lists the tracker (status, last update,
   application date, link).
+
+### 3.9 Dashboard (`dashboard/`)
+
+`intern-radar dashboard` serves one read-only page at
+`http://<tailscale-ip>:8787/` (`dashboard_host`, `dashboard_port`; the host
+defaults to `tailscale ip -4` and the command refuses to start without it).
+Standard library HTTP server, server-rendered HTML, inline SVG charts, no
+JavaScript, no new dependency; the SQLite file is opened read-only per
+request (`mode=ro`), so the page can never change data. `/healthz` answers
+`ok`.
+
+Sections: key figures (offers seen, scored, immediate, digest, applications,
+interviews, offers, LLM cost over 7 days), weekly funnel by cohort (seen →
+pre-filter → scored → sent → applied → interview) with a bar chart, score
+histogram with the digest and immediate thresholds, applications, sources
+(offers per company, last new offer, current failure streak) and LLM usage
+per day and purpose.
+
+LLM usage comes from a new `llm_usage` table: `ClaudeCliBackend(on_usage=…)`
+records model, input tokens (fresh + cache), output tokens, API-equivalent
+cost and duration of every successful call, tagged `scoring`, `letter`,
+`chance` or `cv`.
 
 ## 4. Reliability — failure modes
 

@@ -81,6 +81,8 @@ class Profile:
     resume_effort: str | None = "low"
     max_resumes_per_day: int = 10
     reminder_days: int = 14
+    dashboard_host: str | None = None  # default: the Tailscale address
+    dashboard_port: int = 8787
     max_letters_per_day: int = 10
     contact: Contact | None = None
     extra_excluded_title_words: tuple[str, ...] = ()
