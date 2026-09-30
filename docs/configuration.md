@@ -79,6 +79,8 @@ Letters are enabled (button shown, commands usable) when `cv_url` and
 | `letters_email` | e-mail | unset | Gmail address that sends and receives the copy |
 | `smtp_app_password` | string | unset | Gmail app password (secret); e-mail is skipped when unset |
 | `profile_model` | string | `sonnet` | model for `generate-profile` |
+| `chance_model` | string | `sonnet` | model for interview-chance estimates (needs `candidate.json`) |
+| `chance_effort` | string | `low` | `--effort` for interview-chance estimates |
 
 ## Candidate profile (career.md → candidate.json)
 

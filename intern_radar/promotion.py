@@ -3,6 +3,8 @@
 from collections.abc import Callable
 from datetime import UTC, datetime
 
+from intern_radar.chance import Chance
+from intern_radar.models import ScoredJob
 from intern_radar.notifier import Notifier, format_immediate
 from intern_radar.store import Store
 
@@ -16,11 +18,13 @@ class Promoter:
         notifier: Notifier,
         letters: bool,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
+        chance: Callable[[ScoredJob], Chance | None] | None = None,
     ) -> None:
         self._store = store
         self._notifier = notifier
         self._letters = letters
         self._clock = clock
+        self._chance = chance
 
     def promote(self, ref: int) -> bool:
         """False when `ref` is not a scored offer. Sending again is allowed."""
@@ -29,7 +33,8 @@ class Promoter:
             return False
         lead, *siblings = members
         callback = f"L:{ref}" if self._letters else None
-        self._notifier.send(format_immediate(lead, callback, siblings))
+        chance = self._chance(lead) if self._chance else None
+        self._notifier.send(format_immediate(lead, callback, siblings, chance))
         now = self._clock()
         for member in members:
             self._store.mark_notified(member.job.id, now)

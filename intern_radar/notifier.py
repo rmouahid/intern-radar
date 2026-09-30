@@ -5,6 +5,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Protocol
 
+from intern_radar.chance import Chance
 from intern_radar.grouping import group_scored
 from intern_radar.models import ScoredJob
 from intern_radar.telegram import Button, TelegramClient, TelegramError
@@ -99,6 +100,7 @@ def format_immediate(
     scored: ScoredJob,
     letter_callback: str | None = None,
     siblings: Sequence[ScoredJob] = (),
+    chance: Chance | None = None,
 ) -> Message:
     """Notification for one posting; `siblings` are its copies in other places."""
     job, assessment = scored.job, scored.assessment
@@ -116,6 +118,12 @@ def format_immediate(
         SEPARATOR,
         f"<i>{e(assessment.summary[:500])}</i>",
     ]
+    if chance is not None:
+        lines += [SEPARATOR, f"🎯  <b>Chance d'entretien : {chance.percent} %</b>"]
+        lines += [
+            f"  {'✅' if positive else '⚠️'} {e(text[:200])}"
+            for positive, text in chance.reasons
+        ]
     buttons = []
     if job.url.startswith(("https://", "http://")):
         buttons.append(Button("🔗 Voir l'offre", url=job.url))

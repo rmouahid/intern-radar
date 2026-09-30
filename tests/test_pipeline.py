@@ -404,3 +404,30 @@ def test_digest_carries_promotion_buttons_when_the_listener_runs():
         cv_url="https://cv", contact=Contact("A B", "P", "1", "e", "l", "g")
     )
     assert message.buttons[0][0].callback == f"P:{store.job_ref('mid')}"
+
+
+def test_immediate_notifications_carry_the_interview_chance():
+    from intern_radar.chance import Chance
+
+    asked = []
+
+    def chance(scored):
+        asked.append(scored.job.id)
+        return Chance(15, ((True, "Profil RAG"),))
+
+    scorer = FakeScorer({"good": make_assessment(ai_relevance=9)})
+    notifier = FakeNotifier()
+    store = Store(":memory:")
+    pipeline = Pipeline(
+        [ACME],
+        {"fake": FakeSource([make_job(id="good", tier="S")])},
+        store,
+        scorer,
+        notifier,
+        make_profile(),
+        Clock(),
+        chance=chance,
+    )
+    pipeline.run()
+    assert asked == ["good"]
+    assert "Chance d'entretien : 15 %" in notifier.sent[0].html

@@ -263,6 +263,17 @@ again as immediate offers.
   letters are configured (the listener runs), entries are numbered and an
   inline keyboard of `🔔 1` … `🔔 15` buttons (5 per row, `callback_data =
   P:<rowid>` of the group lead) is attached.
+- Interview chance (`chance.py`): when `config/candidate.json` exists,
+  every immediate or promoted notification ends with
+  `🎯 Chance d'entretien : N %` and 1–3 reasons (✅ / ⚠️, French, ≤ 15
+  words). One LLM call per offer (`chance_model` sonnet, `chance_effort`
+  low) at notification time, never during bulk scoring; the prompt starts
+  from a base rate for the programme and company, then adjusts for profile
+  fit (4 selected items), eligibility, work authorisation, language and
+  offer age. Stored in the `chances` table and reused on re-send; a failure
+  only omits the line. Measured: ~$0.025–0.04 API-equivalent and 4–6 s per
+  estimate (e.g. NVIDIA *Deep Learning*, Santa Clara: 3 %). It is an
+  estimate until application outcomes (#42) allow calibration.
 - Promotion (`promotion.py`): the listener routes `P:` taps to `Promoter`,
   which sends the offer and its posting group exactly as an immediate
   notification (with *Voir l'offre* and *Lettre de motivation*) and marks

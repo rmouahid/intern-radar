@@ -6,6 +6,7 @@ from collections.abc import Callable
 from dataclasses import asdict
 from datetime import datetime, timedelta
 
+from intern_radar.chance import Chance
 from intern_radar.grouping import group_key
 from intern_radar.models import Assessment, Job, ScoredJob
 
@@ -47,6 +48,12 @@ CREATE TABLE IF NOT EXISTS letters (
     path TEXT NOT NULL,
     created_at TEXT NOT NULL,
     report TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS chances (
+    job_id TEXT PRIMARY KEY,
+    percent INTEGER NOT NULL,
+    reasons TEXT NOT NULL,
+    created_at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS meta (
     key TEXT PRIMARY KEY,
@@ -369,6 +376,23 @@ class Store:
             (since.isoformat(),),
         ).fetchone()
         return row["n"]
+
+    def chance(self, job_id: str) -> Chance | None:
+        row = self._db.execute(
+            "SELECT percent, reasons FROM chances WHERE job_id = ?", (job_id,)
+        ).fetchone()
+        if row is None:
+            return None
+        reasons = tuple((bool(p), str(t)) for p, t in json.loads(row["reasons"]))
+        return Chance(row["percent"], reasons)
+
+    def save_chance(self, job_id: str, chance: Chance) -> None:
+        with self._db:
+            self._db.execute(
+                "INSERT OR REPLACE INTO chances (job_id, percent, reasons, created_at)"
+                " VALUES (?, ?, ?, datetime('now'))",
+                (job_id, chance.percent, json.dumps(chance.reasons)),
+            )
 
     def get_meta(self, key: str) -> str | None:
         row = self._db.execute(
