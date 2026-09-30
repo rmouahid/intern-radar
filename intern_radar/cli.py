@@ -110,7 +110,7 @@ def run(
     typer.echo(
         f"fetched={report.fetched} new={report.new} candidates={report.candidates}"
         f" scored={report.scored} notified={report.notified}"
-        f" errors={len(report.errors)}"
+        f" errors={len(report.errors)} grouped={report.grouped}"
     )
 
 

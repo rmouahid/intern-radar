@@ -1,5 +1,6 @@
 """Builders for test objects with sensible defaults."""
 
+import zlib
 from collections.abc import Callable
 from datetime import date
 from typing import Any
@@ -24,6 +25,9 @@ def make_job(**overrides: Any) -> Job:
         "posted_at": "2026-09-20",
     }
     values.update(overrides)
+    if "title" not in overrides:
+        # Distinct titles keep distinct jobs out of the same posting group.
+        values["title"] = f"Machine Learning Intern {zlib.crc32(values['id'].encode())}"
     return Job(**values)
 
 

@@ -7,6 +7,7 @@ from datetime import UTC, datetime, timedelta
 
 from intern_radar import prefilter, ranking
 from intern_radar.config import Profile
+from intern_radar.grouping import group_scored
 from intern_radar.models import Company
 from intern_radar.notifier import (
     Message,
@@ -40,6 +41,7 @@ class RunReport:
     candidates: int = 0
     scored: int = 0
     notified: int = 0
+    grouped: int = 0  # jobs that reused the result of their posting group
     errors: list[str] = field(default_factory=list)
 
 
@@ -115,6 +117,7 @@ class Pipeline:
 
     def _score(self, report: RunReport) -> None:
         now = self._clock()
+        report.grouped += self._store.inherit_group_assessments()
         limit = BATCH_SIZE * self._profile.max_llm_batches_per_run
         pending = self._store.pending(limit=limit)
         for start in range(0, len(pending), BATCH_SIZE):
@@ -141,22 +144,23 @@ class Pipeline:
                 )
                 self._store.save_assessment(job.id, assessment, score)
                 report.scored += 1
+        report.grouped += self._store.inherit_group_assessments()
 
     def _notify(self, report: RunReport) -> bool:
         now = self._clock()
-        due = self._store.due_immediate(
-            self._profile.thresholds.immediate,
-            limit=self._profile.max_immediate_per_run,
-        )
+        due = self._store.due_immediate(self._profile.thresholds.immediate)
+        groups = group_scored(due)[: self._profile.max_immediate_per_run]
         letters = bool(self._profile.cv_url and self._profile.contact)
-        for scored in due:
-            ref = self._store.job_ref(scored.job.id) if letters else None
+        for lead, *siblings in groups:
+            ref = self._store.job_ref(lead.job.id) if letters else None
             callback = f"L:{ref}" if ref is not None else None
-            outcome = self._send(format_immediate(scored, callback), report)
+            message = format_immediate(lead, callback, siblings)
+            outcome = self._send(message, report)
             if outcome == FAILED:
                 return False
             # A rejected offer is marked too: it would block every later run.
-            self._store.mark_notified(scored.job.id, now)
+            for member in (lead, *siblings):
+                self._store.mark_notified(member.job.id, now)
             report.notified += outcome == SENT
         return True
 

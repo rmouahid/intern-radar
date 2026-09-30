@@ -315,3 +315,53 @@ def test_a_permanently_rejected_offer_does_not_block_the_others():
     assert [first_line(m) for m in notifier.sent] == ["🔥 <b>Acme · niveau A</b>"]
     assert report.notified == 1
     assert store.due_immediate(7.5, limit=10) == []
+
+
+def test_posting_group_is_scored_once_and_notified_once():
+    jobs = [
+        make_job(id="de", tier="S", title="SDE Intern - Germany", location="Berlin"),
+        make_job(id="uk", tier="S", title="SDE Intern - UK", location="London"),
+    ]
+    scorer = FakeScorer({"de": make_assessment(ai_relevance=9)})
+    notifier = FakeNotifier()
+    pipeline, store, _ = build({"fake": FakeSource(jobs)}, scorer, notifier)
+
+    report = pipeline.run()
+
+    assert scorer.batches == [["de"]]
+    assert (report.scored, report.grouped, report.notified) == (1, 1, 1)
+    assert "Berlin" in notifier.sent[0].html and "London" in notifier.sent[0].html
+    assert store.due_immediate(0) == []
+
+
+def test_new_country_of_a_notified_posting_is_not_notified_again():
+    de = make_job(id="de", tier="S", title="SDE Intern - Germany", location="Berlin")
+    source = FakeSource([de])
+    scorer = FakeScorer({"de": make_assessment(ai_relevance=9)})
+    notifier = FakeNotifier()
+    pipeline, _, _ = build({"fake": source}, scorer, notifier)
+    pipeline.run()
+
+    source.jobs.append(
+        make_job(id="uk", tier="S", title="SDE Intern - UK", location="London")
+    )
+    report = pipeline.run()
+
+    assert (report.scored, report.grouped, report.notified) == (0, 1, 0)
+    assert len(notifier.sent) == 1 and scorer.batches == [["de"]]
+
+
+def test_immediate_cap_counts_posting_groups():
+    jobs = [
+        make_job(id=f"{c}{i}", tier="S", title=f"Intern {c} - {country}")
+        for c in "ab"
+        for i, country in enumerate(("Germany", "UK"))
+    ]
+    scorer = FakeScorer({job.id: make_assessment(ai_relevance=9) for job in jobs})
+    notifier = FakeNotifier()
+    pipeline, store, _ = build(
+        {"fake": FakeSource(jobs)}, scorer, notifier, max_immediate_per_run=1
+    )
+    pipeline.run()
+    assert len(notifier.sent) == 1
+    assert len(store.due_immediate(0)) == 2  # the other group waits for next run
