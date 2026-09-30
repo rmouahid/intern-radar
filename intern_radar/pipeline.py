@@ -6,9 +6,10 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 
 from intern_radar import prefilter, ranking
+from intern_radar.chance import Chance
 from intern_radar.config import Profile
 from intern_radar.grouping import group_scored
-from intern_radar.models import Company
+from intern_radar.models import Company, ScoredJob
 from intern_radar.notifier import (
     Message,
     Notifier,
@@ -56,6 +57,7 @@ class Pipeline:
         notifier: Notifier,
         profile: Profile,
         clock: Callable[[], datetime] = utcnow,
+        chance: Callable[[ScoredJob], Chance | None] | None = None,
     ) -> None:
         self._companies = companies
         self._sources = sources
@@ -64,6 +66,7 @@ class Pipeline:
         self._notifier = notifier
         self._profile = profile
         self._clock = clock
+        self._chance = chance
 
     def run(self) -> RunReport:
         report = RunReport()
@@ -163,7 +166,8 @@ class Pipeline:
         for lead, *siblings in groups:
             ref = self._store.job_ref(lead.job.id) if letters else None
             callback = f"L:{ref}" if ref is not None else None
-            message = format_immediate(lead, callback, siblings)
+            chance = self._chance(lead) if self._chance else None
+            message = format_immediate(lead, callback, siblings, chance)
             outcome = self._send(message, report)
             if outcome == FAILED:
                 return False

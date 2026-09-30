@@ -19,6 +19,7 @@ from intern_radar.candidate import (
     select_items,
     summarise,
 )
+from intern_radar.chance import CachedChance, ChanceEstimator
 from intern_radar.config import (
     ConfigError,
     Profile,
@@ -89,6 +90,24 @@ def _open_store(db: Path, dry_run: bool) -> Store:
     return Store(str(db))
 
 
+def _chance(config_dir: Path, profile: Profile, store: Store) -> CachedChance | None:
+    """Interview-chance estimates, available once a candidate profile exists."""
+    path = config_dir / "candidate.json"
+    if not path.exists():
+        return None
+    try:
+        candidate = load_candidate(path)
+    except CandidateError as exc:
+        logging.getLogger(__name__).warning("no interview chance: %s", exc)
+        return None
+    window = (
+        f"{profile.min_months}+ months between {profile.window_start:%B %Y}"
+        f" and {profile.window_end:%B %Y}"
+    )
+    backend = ClaudeCliBackend(model=profile.chance_model, effort=profile.chance_effort)
+    return CachedChance(store, ChanceEstimator(backend, candidate, window))
+
+
 def _pipeline(
     config_dir: Path, db: Path, dry_run: bool
 ) -> tuple[Pipeline, Store, httpx.Client]:
@@ -106,7 +125,15 @@ def _pipeline(
         ConsoleNotifier() if dry_run else TelegramNotifier(_telegram(profile, client))
     )
     sources = build_sources(client, companies, profile)
-    pipeline = Pipeline(companies, sources, store, scorer, notifier, profile)
+    pipeline = Pipeline(
+        companies,
+        sources,
+        store,
+        scorer,
+        notifier,
+        profile,
+        chance=_chance(config_dir, profile, store),
+    )
     return pipeline, store, client
 
 
@@ -323,7 +350,12 @@ def listen(config_dir: Path = CONFIG_DIR, db: Path = DB_PATH) -> None:
     _setup_logging()
     service, store, client, profile, telegram = _letter_service(config_dir, db)
     try:
-        promoter = Promoter(store, TelegramNotifier(telegram), letters=True)
+        promoter = Promoter(
+            store,
+            TelegramNotifier(telegram),
+            letters=True,
+            chance=_chance(config_dir, profile, store),
+        )
         requests = ButtonRequests(
             telegram, store, service, profile.telegram_chat_id, promoter
         )

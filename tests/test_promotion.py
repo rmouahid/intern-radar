@@ -65,3 +65,18 @@ def test_no_letter_button_when_letters_are_disabled():
     promoter.promote(store.job_ref("other"))
     labels = [button.label for row in notifier.sent[0].buttons for button in row]
     assert labels == ["🔗 Voir l'offre"]
+
+
+def test_promotion_includes_the_interview_chance():
+    from intern_radar.chance import Chance
+
+    store, notifier, _ = setup()
+    promoter = Promoter(
+        store,
+        notifier,
+        True,
+        clock=lambda: NOW,
+        chance=lambda s: Chance(30, ((True, "x"),)),
+    )
+    promoter.promote(store.job_ref("other"))
+    assert "Chance d'entretien : 30 %" in notifier.sent[0].html
