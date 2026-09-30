@@ -101,6 +101,14 @@ def test_blacklisted_phrases_trigger_one_more_edit_pass():
     assert report.blacklist_left == ()
 
 
+def test_draft_prompt_uses_the_cleaned_description():
+    backend = ScriptedBackend(draft(CLEAN), edits())
+    description = "Benefits\nFree lunch.\nRequirements\nPyTorch."
+    make_writer(backend).write(make_job(description=description))
+    prompt = backend.calls[0][0]
+    assert "PyTorch." in prompt and "Free lunch." not in prompt
+
+
 def test_draft_prompt_carries_cv_offer_and_rules():
     backend = ScriptedBackend(draft(CLEAN), edits())
     make_writer(backend).write(make_job(title="ML Intern", description="LLM work"))

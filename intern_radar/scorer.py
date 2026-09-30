@@ -6,6 +6,7 @@ from collections.abc import Callable
 from datetime import date
 from typing import Any, Protocol
 
+from intern_radar.description import clean_description
 from intern_radar.models import (
     DATES_FIT_VALUES,
     ELIGIBILITY_VALUES,
@@ -215,7 +216,7 @@ class Scorer:
             f"Company: {job.company}\n"
             f"Title: {job.title}\n"
             f"Location: {job.location or 'not stated'}\n"
-            f"Description:\n{job.description[:DESCRIPTION_LIMIT]}\n"
+            f"Description:\n{clean_description(job.description)[:DESCRIPTION_LIMIT]}\n"
             for number, job in enumerate(jobs, start=1)
         ]
         return self._header + "\n".join(blocks)

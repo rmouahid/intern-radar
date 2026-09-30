@@ -62,6 +62,14 @@ def test_prompt_contains_profile_window_and_truncated_jobs():
     assert "x" * 3000 in prompt and "x" * 3001 not in prompt
 
 
+def test_prompt_descriptions_are_cleaned_before_truncation():
+    backend = FakeBackend({"assessments": []})
+    text = "About Acme\n" + "We are great. " * 300 + "\nThe Role\nTrain LLM agents."
+    make_scorer(backend).assess([make_job(description=text)])
+    assert "Train LLM agents." in backend.prompts[0]
+    assert "We are great." not in backend.prompts[0]
+
+
 def test_assess_maps_answers_by_job_id():
     backend = FakeBackend({"assessments": [item("2", ai_relevance=3), item("1")]})
     result = make_scorer(backend).assess([make_job(id="j1"), make_job(id="j2")])
