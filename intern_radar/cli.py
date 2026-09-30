@@ -1,7 +1,10 @@
 """Command-line entry point."""
 
 import logging
+from collections.abc import Callable
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import httpx
 import typer
@@ -26,6 +29,7 @@ from intern_radar.config import (
     load_companies,
     load_profile,
 )
+from intern_radar.dashboard.server import make_server, tailscale_ip
 from intern_radar.description import clean_description
 from intern_radar.http import make_client
 from intern_radar.letters.cv import CvSource
@@ -93,6 +97,15 @@ def _open_store(db: Path, dry_run: bool) -> Store:
     return Store(str(db))
 
 
+def _recorder(store: Store, purpose: str) -> Callable[[dict[str, Any]], None]:
+    """Stores the tokens and cost of each LLM call (shown by the dashboard)."""
+
+    def record(usage: dict[str, Any]) -> None:
+        store.record_llm_usage(purpose, usage, datetime.now(UTC))
+
+    return record
+
+
 def _chance(config_dir: Path, profile: Profile, store: Store) -> CachedChance | None:
     """Interview-chance estimates, available once a candidate profile exists."""
     path = config_dir / "candidate.json"
@@ -107,7 +120,11 @@ def _chance(config_dir: Path, profile: Profile, store: Store) -> CachedChance | 
         f"{profile.min_months}+ months between {profile.window_start:%B %Y}"
         f" and {profile.window_end:%B %Y}"
     )
-    backend = ClaudeCliBackend(model=profile.chance_model, effort=profile.chance_effort)
+    backend = ClaudeCliBackend(
+        model=profile.chance_model,
+        effort=profile.chance_effort,
+        on_usage=_recorder(store, "chance"),
+    )
     return CachedChance(store, ChanceEstimator(backend, candidate, window))
 
 
@@ -118,7 +135,11 @@ def _pipeline(
     client = make_client()
     store = _open_store(db, dry_run)
     scorer = Scorer(
-        ClaudeCliBackend(model=profile.llm_model, effort=profile.llm_effort),
+        ClaudeCliBackend(
+            model=profile.llm_model,
+            effort=profile.llm_effort,
+            on_usage=_recorder(store, "scoring"),
+        ),
         profile.candidate_summary,
         profile.window_start,
         profile.window_end,
@@ -260,6 +281,33 @@ def generate_profile(
 
 
 @app.command()
+def dashboard(
+    config_dir: Path = CONFIG_DIR,
+    db: Path = DB_PATH,
+    host: str | None = typer.Option(None, "--host", help="Default: Tailscale IP."),
+    port: int | None = typer.Option(None, "--port"),
+) -> None:
+    """Serve the read-only statistics page on the Tailscale address."""
+    _setup_logging()
+    profile, _ = _load(config_dir)
+    address = host or profile.dashboard_host or tailscale_ip()
+    if not address:
+        typer.echo(
+            "No Tailscale address found: set dashboard_host or pass --host",
+            err=True,
+        )
+        raise typer.Exit(2)
+    Store(str(db)).close()  # creates or migrates the schema once
+    thresholds = (profile.thresholds.digest, profile.thresholds.immediate)
+    server = make_server(str(db), address, port or profile.dashboard_port, thresholds)
+    typer.echo(f"dashboard on http://{address}:{server.server_address[1]}/")
+    try:
+        server.serve_forever()
+    finally:
+        server.server_close()
+
+
+@app.command()
 def applications(db: Path = DB_PATH) -> None:
     """Print tracked applications, most recent update first."""
     store = Store(str(db))
@@ -312,7 +360,11 @@ def _letter_service(config_dir: Path, db: Path):
     client = make_client()
     store = _open_store(db, dry_run=False)
     cv = CvSource(client, profile.cv_url, CV_CACHE)
-    backend = ClaudeCliBackend(model=profile.letter_model, effort=profile.letter_effort)
+    backend = ClaudeCliBackend(
+        model=profile.letter_model,
+        effort=profile.letter_effort,
+        on_usage=_recorder(store, "letter"),
+    )
 
     candidate_path = config_dir / "candidate.json"
 
@@ -376,7 +428,11 @@ def _resume_service(
     return ResumeService(
         store,
         lambda: load_candidate(path),
-        ClaudeCliBackend(model=profile.resume_model, effort=profile.resume_effort),
+        ClaudeCliBackend(
+            model=profile.resume_model,
+            effort=profile.resume_effort,
+            on_usage=_recorder(store, "cv"),
+        ),
         profile.contact,
         RESUMES_DIR,
         telegram,

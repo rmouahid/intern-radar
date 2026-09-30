@@ -83,6 +83,8 @@ Letters are enabled (button shown, commands usable) when `cv_url` and
 | `chance_effort` | string | `low` | `--effort` for interview-chance estimates |
 | `resume_model` | string | `sonnet` | model for tailored CVs (needs `candidate.json`) |
 | `resume_effort` | string | `low` | `--effort` for tailored CVs |
+| `dashboard_host` | string | Tailscale IP | address the dashboard listens on |
+| `dashboard_port` | int | `8787` | dashboard port |
 | `reminder_days` | int | `14` | days without news before an application reminder |
 | `max_resumes_per_day` | int | `10` | new tailored CVs per 24 h; re-sending a stored one is free |
 
@@ -189,3 +191,4 @@ poetry run intern-radar check-sources   # OK / FAIL / NONE per company, exit 1 o
 | `rescore` | `--config-dir`, `--db` |
 | `generate-profile` | `--config-dir`, `--dry-run` |
 | `applications` | `--db` |
+| `dashboard` | `--config-dir`, `--db`, `--host`, `--port` |

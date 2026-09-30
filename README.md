@@ -22,6 +22,8 @@ letter as a PDF on demand from the notification itself.
   alerts, no inbound port on the server.
 - **Application tracking** from the same messages (applied, interview,
   offer, rejected, no answer) with a reminder after 14 days without news.
+- **Private dashboard** over Tailscale: funnel, score distribution, sources
+  health, applications and LLM costs, server-rendered without JavaScript.
 - **Tailored one-page CVs** in ~10 s, one tap, every bullet traced back to
   the structured candidate profile.
 - **Cover letters in ~25 s**: one tap → draft from CV facts only, ATS keyword
@@ -29,7 +31,7 @@ letter as a PDF on demand from the notification itself.
 - **Built to run unattended** on a 1 vCPU / 2 GB VPS under systemd, with
   failure isolation at every level and measured LLM costs (~$0.39/day in
   API-equivalent quota at steady state).
-- **398 offline tests**, CI on every pull request.
+- **408 offline tests**, CI on every pull request.
 
 ## Why
 
@@ -148,6 +150,7 @@ cp deploy/logrotate.conf /etc/logrotate.d/intern-radar
 systemctl daemon-reload
 systemctl enable --now intern-radar-run.timer intern-radar-digest.timer
 systemctl enable --now intern-radar-letters.service
+systemctl enable --now intern-radar-dashboard.service   # Tailscale address only
 ```
 
 Runs every 2 hours from 08:00 to 22:00 and sends the digest at 21:00,
