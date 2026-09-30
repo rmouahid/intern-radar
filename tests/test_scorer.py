@@ -37,6 +37,7 @@ def item(job_id, **overrides):
         "visa_note": "UK: GAE scheme via a sponsor",
         "language_ok": True,
         "summary": "Applied ML on LLM agents.",
+        "work_authorisation": "free",
     }
     values.update(overrides)
     return values
@@ -86,6 +87,7 @@ def test_invalid_items_are_skipped():
                 item("1", dates_fit="maybe"),
                 item("2", is_internship="yes"),
                 item("3", ai_relevance=14),
+                item("5", work_authorisation="maybe"),
                 item("99"),
                 {"job_id": "4"},
             ]

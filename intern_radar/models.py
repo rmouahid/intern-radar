@@ -8,6 +8,9 @@ DatesFit = Literal["fits", "too_short_extendable", "incompatible", "unknown"]
 Eligibility = Literal[
     "ok", "phd_only", "undergrad_only", "local_students_only", "unknown"
 ]
+WorkAuthorisation = Literal[
+    "free", "programme", "sponsorship_stated", "uncertain", "unlikely"
+]
 
 TIERS: tuple[str, ...] = ("S", "A", "B", "unlisted")
 DATES_FIT_VALUES: tuple[str, ...] = (
@@ -22,6 +25,14 @@ ELIGIBILITY_VALUES: tuple[str, ...] = (
     "undergrad_only",
     "local_students_only",
     "unknown",
+)
+
+WORK_AUTHORISATION_VALUES: tuple[str, ...] = (
+    "free",
+    "programme",
+    "sponsorship_stated",
+    "uncertain",
+    "unlikely",
 )
 
 
@@ -61,6 +72,8 @@ class Assessment:
     visa_note: str
     language_ok: bool
     summary: str
+    # Assessments stored before this field existed load as "uncertain".
+    work_authorisation: WorkAuthorisation = "uncertain"
 
 
 @dataclass(frozen=True)

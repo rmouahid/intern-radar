@@ -19,6 +19,7 @@ telegram_chat_id: 123456789              # your chat with the bot
 # adzuna_app_id: your-app-id      # free account on developer.adzuna.com
 # adzuna_app_key: your-app-key
 # weights: {tier: 0.5, relevance: 0.3, dates: 0.2}
+# visa_penalties: {uncertain: 1, unlikely: 3}   # points removed from the score
 # extra_excluded_title_words: [event, retail]   # dropped before scoring
 # thresholds: {immediate: 7.5, digest: 5.5, min_relevance: 6}
 

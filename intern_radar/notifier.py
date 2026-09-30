@@ -18,6 +18,13 @@ DATES_LABELS = {
     "unknown": "Dates non précisées",
     "incompatible": "Dates incompatibles",
 }
+WORK_AUTHORISATION_LABELS = {
+    "free": "Pas de visa (UE/EEE/Suisse)",
+    "programme": "Visa stagiaire standard",
+    "sponsorship_stated": "Sponsoring annoncé",
+    "uncertain": "Visa incertain",
+    "unlikely": "Visa peu probable",
+}
 e = html.escape
 
 
@@ -103,7 +110,8 @@ def format_immediate(
         f"📍  {_locations([scored, *siblings], width)}",
         f"⭐  {scored.score:.1f} / 10",
         f"📅  {DATES_LABELS[assessment.dates_fit]}",
-        f"🛂  {e(assessment.visa_note[:300])}",
+        f"🛂  <b>{WORK_AUTHORISATION_LABELS[assessment.work_authorisation]}</b>"
+        f" · {e(assessment.visa_note[:300])}",
         SEPARATOR,
         f"<i>{e(assessment.summary[:500])}</i>",
     ]

@@ -241,3 +241,24 @@ def test_database_without_group_key_column_is_migrated(tmp_path):
     store.add(make_job(id="uk", title="SDE Intern - UK"), "pending", NOW)
     assert len(store.pending()) == 1  # "de" and "uk" are one posting
     store.close()
+
+
+def test_assessments_stored_before_work_authorisation_load_as_uncertain(store):
+    import json
+
+    store.add(make_job(id="old"), "pending", NOW)
+    legacy = {
+        "is_internship": True,
+        "ai_relevance": 8,
+        "dates_fit": "fits",
+        "eligibility": "ok",
+        "visa_note": "n/a",
+        "language_ok": True,
+        "summary": "s",
+    }
+    store._db.execute(
+        "UPDATE jobs SET status = 'scored', score = 8, assessment = ? WHERE id = 'old'",
+        (json.dumps(legacy),),
+    )
+    [scored] = store.scored(min_score=0)
+    assert scored.assessment.work_authorisation == "uncertain"

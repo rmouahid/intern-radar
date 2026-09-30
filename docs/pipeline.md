@@ -175,6 +175,12 @@ of ~70 countries and regions) and punctuation; it is stored in
   Checked on 20 stored offers: 10/10 bachelor-only postings classified
   `undergrad_only` (one via a Portuguese *bacharelado* requirement), no
   master's-level posting misclassified.
+- Work authorisation enum (French citizen, this location): `free` (EU/EEA/
+  Switzerland), `programme` (standard intern visa: US J-1, UK GAE, Working
+  Holiday…), `sponsorship_stated`, `uncertain`, `unlikely`; `visa_note`
+  keeps the explanation. Assessments stored before the field existed load
+  as `uncertain`. Checked on 10 stored offers from 10 countries: EU → free,
+  US → programme, UK → uncertain, China/Korea → unlikely.
 - Every item is validated (types, enums, 0–10 range); invalid or missing
   items stay `pending` and count an attempt; after 3 attempts the job is no
   longer retried.
@@ -225,6 +231,8 @@ excluded (score NULL) if: not an internship, dates incompatible, PhD only,
 score = 0.5·tier + 0.3·relevance + 0.2·dates      (tier S10 A8 B6 unlisted4;
                                                    dates fits10 unknown6 short4)
       − 2 if local students only                   rounded to 0.1
+      − visa penalty: free 0, programme 0.5, sponsorship_stated 0,
+                      uncertain 1, unlikely 3      (never excludes)
 ```
 
 Thresholds: ≥ 7.5 immediate, 5.5–7.5 digest (both configurable).
@@ -233,7 +241,8 @@ Thresholds: ≥ 7.5 immediate, 5.5–7.5 digest (both configurable).
 
 - HTML messages (only `<b>`, `<i>`, `<a>`; every dynamic value
   `html.escape`d, including `href`), link previews off.
-- Offer: company, title, location, score, dates, visa note, summary (fields
+- Offer: company, title, location, score, dates, work-authorisation label
+  (bold) and visa note, summary (fields
   capped: 80/200/100/300/500 characters), buttons *Voir l'offre* (only for
   `http(s)` URLs) and *Lettre de motivation* (`callback_data = L:<rowid>`,
   within Telegram's 64-byte limit).
