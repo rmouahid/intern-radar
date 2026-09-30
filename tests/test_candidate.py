@@ -219,3 +219,22 @@ def test_read_dossier_errors(tmp_path, monkeypatch):
     monkeypatch.setattr(builtins, "__import__", no_markitdown)
     with pytest.raises(CandidateError, match="-E documents"):
         read_dossier(main, folder)
+
+
+def test_select_items_ranks_by_matching_skills_and_keywords():
+    from intern_radar.candidate import select_items
+
+    candidate = parse_candidate(profile_dict())
+    offer = "Build vector search for retrieval at scale in Python"
+    assert [i.id for i in select_items(candidate, offer)] == [
+        "proj-vector",
+        "exp-acme",
+    ]
+    assert [i.id for i in select_items(candidate, "Docker RAG", limit=1)] == [
+        "exp-acme"
+    ]
+    # No match: profile order is kept.
+    assert [i.id for i in select_items(candidate, "Rust")] == [
+        "exp-acme",
+        "proj-vector",
+    ]

@@ -52,7 +52,7 @@ def build(tmp_path, writer=None, mail=None, max_per_day=10, jobs=None):
     documents, notifier = Recorder(), Recorder()
     service = LetterService(
         store,
-        lambda: writer or FakeWriter(),
+        lambda job: writer or FakeWriter(),
         CONTACT,
         tmp_path / "letters",
         documents,

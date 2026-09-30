@@ -60,3 +60,26 @@ def test_no_cache_and_no_download_raises(tmp_path):
     source = CvSource(mock_client({}), URL, tmp_path / "cv.json", clock=lambda: NOW)
     with pytest.raises(CvError, match="CV"):
         source.text()
+
+
+def test_pdf_text_rejoins_justified_lines():
+    from intern_radar.letters import cv as cv_module
+
+    class Page:
+        def extract_text(self):
+            return "Built a\nRetrieval-Augmented\nGeneration\n(RAG)\nagent.\nNext line"
+
+    class Reader:
+        def __init__(self, stream):
+            self.pages = [Page()]
+
+    import pytest
+
+    monkeypatch = pytest.MonkeyPatch()
+    monkeypatch.setattr(cv_module, "PdfReader", Reader)
+    try:
+        assert cv_module.pdf_text(b"x") == (
+            "Built a\nRetrieval-Augmented\nGeneration (RAG) agent.\nNext line"
+        )
+    finally:
+        monkeypatch.undo()

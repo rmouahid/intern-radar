@@ -9,12 +9,14 @@ import typer
 from intern_radar import ranking
 from intern_radar.candidate import (
     CandidateError,
+    candidate_text,
     check_candidate,
     diff,
     generate,
     load_candidate,
     read_dossier,
     save_candidate,
+    select_items,
     summarise,
 )
 from intern_radar.config import (
@@ -23,13 +25,14 @@ from intern_radar.config import (
     load_companies,
     load_profile,
 )
+from intern_radar.description import clean_description
 from intern_radar.http import make_client
 from intern_radar.letters.cv import CvSource
 from intern_radar.letters.delivery import GmailSender
 from intern_radar.letters.inbox import ButtonRequests, TelegramUpdates, run_listener
 from intern_radar.letters.service import LetterService
 from intern_radar.letters.writer import LetterWriter
-from intern_radar.models import Company
+from intern_radar.models import Company, Job
 from intern_radar.notifier import ConsoleNotifier, NotifyError, TelegramNotifier
 from intern_radar.pipeline import Pipeline
 from intern_radar.promotion import Promoter
@@ -262,13 +265,21 @@ def _letter_service(config_dir: Path, db: Path):
     cv = CvSource(client, profile.cv_url, CV_CACHE)
     backend = ClaudeCliBackend(model=profile.letter_model, effort=profile.letter_effort)
 
-    def make_writer() -> LetterWriter:
+    candidate_path = config_dir / "candidate.json"
+
+    def make_writer(job: Job) -> LetterWriter:
+        """Letters use the structured profile when it exists, else the CV."""
+        window = (profile.window_start, profile.window_end, profile.min_months)
+        if not candidate_path.exists():
+            return LetterWriter(backend, cv.text(), *window)
+        candidate = load_candidate(candidate_path)
+        offer = f"{job.title}\n{clean_description(job.description)}"
+        selected = select_items(candidate, offer)
         return LetterWriter(
             backend,
-            cv.text(),
-            profile.window_start,
-            profile.window_end,
-            profile.min_months,
+            candidate_text(candidate, selected),
+            *window,
+            reference_text=candidate_text(candidate),
         )
 
     mail = (

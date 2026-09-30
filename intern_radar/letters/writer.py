@@ -229,9 +229,13 @@ class LetterWriter:
         window_start: date,
         window_end: date,
         min_months: int,
+        reference_text: str | None = None,
     ) -> None:
+        """`cv_text` is shown to the LLM; `reference_text` (the whole profile
+        when only selected items are shown) backs the fact and keyword checks."""
         self._backend = backend
         self._cv = cv_text
+        self._reference = reference_text or cv_text
         self._window = (
             f"The candidate is available for an internship of at least "
             f"{min_months} months between {window_start:%B} {window_start.year} "
@@ -245,7 +249,12 @@ class LetterWriter:
         if ats_skipped:
             pairs = []
         in_cv = [keyword for keyword, ok in pairs if ok]
-        not_in_cv = tuple(keyword for keyword, ok in pairs if not ok)
+        # A keyword absent from the selected items may be elsewhere in the profile.
+        not_in_cv = tuple(
+            keyword_coverage(
+                self._reference, [keyword for keyword, ok in pairs if not ok]
+            )[1]
+        )
         failed = 0
         _, missing = keyword_coverage(letter.body(), in_cv)
         if missing:
@@ -273,7 +282,7 @@ class LetterWriter:
             left = blacklisted(letter.body())
         present, missing = keyword_coverage(letter.body(), in_cv)
         sources = [
-            self._cv,
+            self._reference,
             job.company,
             job.title,
             job.location,
@@ -288,7 +297,7 @@ class LetterWriter:
             blacklist_left=tuple(left),
             unverified=tuple(unverified_tokens(letter.body(), sources)),
             # Judged "in the CV" by the LLM without appearing in its text.
-            keywords_inferred=tuple(keyword_coverage(self._cv, in_cv)[1]),
+            keywords_inferred=tuple(keyword_coverage(self._reference, in_cv)[1]),
             ats_skipped=ats_skipped,
             edits_failed=failed,
         )

@@ -203,3 +203,24 @@ def test_apply_edits_rejects_bad_edits(edit):
     result, applied, failed = apply_edits(("a dog",), [edit])
     assert result == ("a dog",)
     assert (applied, failed) == (0, 1)
+
+
+def test_reference_text_backs_checks_when_only_selected_items_are_shown():
+    shown = "RAG agent in Python."
+    reference = shown + " Kubernetes cluster at SYSETELE. PyTorch models."
+    backend = ScriptedBackend(
+        draft(CLEAN, ("Kubernetes", False), ("Rust", False), ("PyTorch", True)),
+        edits(),
+    )
+    writer = LetterWriter(
+        backend, shown, date(2027, 3, 8), date(2027, 8, 31), 4, reference_text=reference
+    )
+    _, report = writer.write(make_job(description="Kubernetes, Rust, PyTorch"))
+    assert (
+        shown in backend.calls[0][0] and "Kubernetes cluster" not in backend.calls[0][0]
+    )
+    # Kubernetes is in the profile, just not in the selected items.
+    assert report.keywords_not_in_cv == ("Rust",)
+    assert report.keywords_inferred == ()
+    # SYSETELE comes from the reference, not from nowhere.
+    assert "SYSETELE" not in report.unverified
