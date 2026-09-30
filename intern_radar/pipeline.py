@@ -39,6 +39,7 @@ class RunReport:
     fetched: int = 0
     new: int = 0
     candidates: int = 0
+    out_of_scope: int = 0  # internship titles dropped by the field filter
     scored: int = 0
     notified: int = 0
     grouped: int = 0  # jobs that reused the result of their posting group
@@ -84,6 +85,7 @@ class Pipeline:
     def _collect(self, report: RunReport) -> None:
         now = self._clock()
         known = self._store.known_ids()
+        extra = self._profile.extra_excluded_title_words
         for company in self._companies:
             if company.source == "none":
                 continue
@@ -103,8 +105,11 @@ class Pipeline:
                 if job.id in known:
                     continue
                 known.add(job.id)
-                if not prefilter.passes(job):
+                if not prefilter.passes(job, extra):
                     status = "rejected"
+                    report.out_of_scope += prefilter.is_internship_title(
+                        job.title
+                    ) and prefilter.is_out_of_scope(job.title, extra)
                 elif job.source == "adzuna" and self._store.has_similar(
                     job.company, job.title
                 ):

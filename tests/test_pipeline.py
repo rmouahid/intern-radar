@@ -317,6 +317,21 @@ def test_a_permanently_rejected_offer_does_not_block_the_others():
     assert store.due_immediate(7.5, limit=10) == []
 
 
+def test_out_of_scope_titles_are_rejected_and_counted():
+    jobs = [
+        make_job(id="fin", tier="S", title="Financial Analyst Intern"),
+        make_job(id="evt", tier="S", title="Event Coordinator Intern"),
+        make_job(id="ml", tier="S", title="ML Intern"),
+    ]
+    scorer = FakeScorer({"ml": make_assessment()})
+    pipeline, _, _ = build(
+        {"fake": FakeSource(jobs)}, scorer, extra_excluded_title_words=("event",)
+    )
+    report = pipeline.run()
+    assert (report.candidates, report.out_of_scope) == (1, 2)
+    assert scorer.batches == [["ml"]]
+
+
 def test_posting_group_is_scored_once_and_notified_once():
     jobs = [
         make_job(id="de", tier="S", title="SDE Intern - Germany", location="Berlin"),

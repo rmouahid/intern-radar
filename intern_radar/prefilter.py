@@ -31,8 +31,49 @@ NEUTRAL_RE = re.compile(
 )
 
 
+# Fields outside the target (AI/ML, data, software, research): matched as
+# whole words on the title, before any LLM call. Team names that appear in
+# every title of a company ("Amazon University Talent Acquisition") and
+# technical fields (manufacturing) are deliberately absent.
+OUT_OF_SCOPE_WORDS = (
+    r"finance|financial|accounting|accountant|audit|tax|treasury|controlling"
+    r"|hr|human resources?|people partner|recruiting|recruiter|recruitment"
+    r"|marketing|sales|account representative|account manager|customer success"
+    r"|business development|communications?|media|public relations|legal|law"
+    r"|paralegal|compliance|public policy|government affairs|procurement"
+    r"|purchasing|supply chain|logistics|operations|area manager|facilities"
+    r"|real estate|production planning|health and safety|help desk"
+    r"|qualit[ée]|quality|ux"
+)
+# Any of these keeps the title for the LLM ("Finance Data Science Intern").
+IN_SCOPE_RE = re.compile(
+    r"\b(ai|ml|machine learning|deep learning|data|software|research"
+    r"|scientists?|science|llms?|nlp|vision|robotics|algorithms?|gpus?"
+    r"|quant|quantitative|analytics|optimi[sz]ation|operations research)\b",
+    re.IGNORECASE,
+)
+
+
 def is_internship_title(title: str) -> bool:
     return bool(TITLE_RE.search(title))
+
+
+def _words_re(words: str) -> re.Pattern[str]:
+    return re.compile(rf"\b({words})\b", re.IGNORECASE)
+
+
+OUT_OF_SCOPE_RE = _words_re(OUT_OF_SCOPE_WORDS)
+
+
+def is_out_of_scope(title: str, extra: tuple[str, ...] = ()) -> bool:
+    """True for titles clearly outside AI/ML, data, software or research."""
+    if IN_SCOPE_RE.search(title):
+        return False
+    if OUT_OF_SCOPE_RE.search(title):
+        return True
+    return bool(extra) and bool(
+        _words_re("|".join(map(re.escape, extra))).search(title)
+    )
 
 
 def _excluded(part: str) -> bool:
@@ -75,5 +116,9 @@ def is_france_only(location: str) -> bool:
     return bool(french) and not others
 
 
-def passes(job: Job) -> bool:
-    return is_internship_title(job.title) and not is_france_only(job.location)
+def passes(job: Job, extra_excluded: tuple[str, ...] = ()) -> bool:
+    return (
+        is_internship_title(job.title)
+        and not is_out_of_scope(job.title, extra_excluded)
+        and not is_france_only(job.location)
+    )

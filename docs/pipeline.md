@@ -115,6 +115,20 @@ collection ~2 min.
   counts on its own (`Paris, London` passes); neutral parts such as
   *Remote*, *EU*, *Île-de-France* are ignored; "excluding France" is not
   French.
+- Field: titles clearly outside AI/ML, data, software or research are
+  rejected before scoring (`is_out_of_scope`): finance, accounting, audit,
+  tax, HR, recruiting, marketing, sales, communication, media, legal,
+  compliance, public policy, procurement, supply chain, logistics,
+  operations, quality, UX… (whole words, plus `extra_excluded_title_words`).
+  Any in-scope word (AI, ML, data, software, research, science, NLP,
+  vision, robotics, quant, analytics, GPU…) keeps the title, and titles
+  naming no field (*Intern 2027*) go to the LLM. Team names that appear in
+  every title of a company (*Amazon University Talent Acquisition*) and
+  technical fields (manufacturing) are deliberately not excluded.
+  Replayed on the production database: 363 of 1,162 scored offers (31 %)
+  would have been rejected, 43 % of those with an AI relevance ≤ 3, and
+  none of the offers ever notified or digested. Counted as
+  `out_of_scope=N` in the run summary.
 - Adzuna offers whose company and title match an ATS offer are stored as
   `duplicate`.
 

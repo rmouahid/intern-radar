@@ -39,7 +39,8 @@ Runtime data lives in `data/` (gitignored): `intern-radar.db` (SQLite),
 | `llm_model` | string | `haiku` | model passed to the LLM CLI for triage |
 | `llm_effort` | string | unset | `--effort` for triage; unset keeps the CLI default |
 | `max_llm_batches_per_run` | int | `5` | batches of 10 offers scored per run |
-| `max_immediate_per_run` | int | `10` | immediate notifications per run |
+| `max_immediate_per_run` | int | `10` | immediate notifications (posting groups) per run |
+| `extra_excluded_title_words` | list of words | `[]` | extra out-of-scope title words, added to the built-in list (§3.2 of pipeline.md) |
 | `weights.tier` | float | `0.5` | weight of the company tier (S=10, A=8, B=6, unlisted=4) |
 | `weights.relevance` | float | `0.3` | weight of the LLM's AI relevance (0–10) |
 | `weights.dates` | float | `0.2` | weight of the dates fit (fits=10, unknown=6, too short=4) |

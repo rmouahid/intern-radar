@@ -1,6 +1,11 @@
 import pytest
 
-from intern_radar.prefilter import is_france_only, is_internship_title, passes
+from intern_radar.prefilter import (
+    is_france_only,
+    is_internship_title,
+    is_out_of_scope,
+    passes,
+)
 from tests.factories import make_job
 
 
@@ -111,3 +116,57 @@ def test_country_or_region_marks_the_whole_place_as_french(location):
 )
 def test_places_outside_france_are_not_france_only(location):
     assert not is_france_only(location)
+
+
+@pytest.mark.parametrize(
+    "title",
+    [
+        "Financial Analyst Intern, Accounting",
+        "Operations Human Resources Partner Intern (6 Months) - 2027",
+        "Account Representative Intern 6 months - Spanish Speaker",
+        "Operations & Logistics Internship Piemonte - Talent Pool",
+        "Strategic Finance Intern",
+        "Internship in Communication & Media",
+        "STAGE 2027 - Stagiaire Qualité Supply Chain (ALL GENDER)",
+        "Summer Internship - Tooling & Logistics Engineer",
+        "Public Policy Manager Intern - Q3 2027, EU Public Policy team",
+        "General Marketing Manager Intern 2027",
+        "Recruiting Coordinator Intern",
+        "Customer Success Acct Manager - Erada Internship",
+        "Legal Intern",
+    ],
+)
+def test_out_of_scope_titles_are_dropped(title):
+    assert is_out_of_scope(title)
+    assert not passes(make_job(title=title, location="London, UK"))
+
+
+@pytest.mark.parametrize(
+    "title",
+    [
+        "Machine Learning Intern",
+        "Data & AI Intern - Accenture Internship Program",
+        "Finance Data Science Intern",
+        "ML Operations Intern",
+        "Operations Research Intern",
+        "Marketing Analytics Machine Learning Intern",
+        "Software Engineering Intern, Payments",
+        "Intern 2027",
+        "SOC Design Team Methodology Intern - 2027",
+        "2027 Quantitative Masters Internship Program - Investments",
+        "Research Intern",
+        "Business Analyst Intern, Amazon University Talent Acquisition",
+        "Manufacturing Test Engr Intern, Advanced Manufacturing Engineering",
+        "SWQA Test Development Intern, GPU Communications Libraries - 2027",
+    ],
+)
+def test_in_scope_or_ambiguous_titles_are_kept(title):
+    assert not is_out_of_scope(title)
+
+
+def test_extra_excluded_words_extend_the_list():
+    assert not is_out_of_scope("Event Coordinator Intern")
+    assert is_out_of_scope("Event Coordinator Intern", extra=("event",))
+    assert not is_out_of_scope("Event Data Science Intern", extra=("event",))
+    job = make_job(title="Event Coordinator Intern")
+    assert not passes(job, extra_excluded=("event",))
