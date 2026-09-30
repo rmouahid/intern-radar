@@ -1,6 +1,7 @@
 """Cheap rule-based filter applied before any LLM call."""
 
 import re
+from datetime import date
 
 from intern_radar.models import Job
 
@@ -59,6 +60,22 @@ GRADUATE_RE = re.compile(
     r"\b(masters?|master['’]s|ms|msc|m\.s\.|graduate|postgraduate|phd|mba)\b",
     re.IGNORECASE,
 )
+
+
+def is_stale(posted_at: str | None, today: date, max_age_days: int) -> bool:
+    """True when the offer was first published more than `max_age_days` ago.
+
+    Offers without a date are kept; 0 disables the rule.
+    """
+    if not posted_at or max_age_days <= 0:
+        return False
+    try:
+        published = date.fromisoformat(posted_at[:10])
+    except ValueError:
+        return False
+    return (today - published).days > max_age_days
+
+
 YEAR_RE = re.compile(r"\b(20\d\d)\b")
 
 

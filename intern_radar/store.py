@@ -259,13 +259,18 @@ class Store:
             )
 
     def due_immediate(
-        self, threshold: float, limit: int | None = None
+        self,
+        threshold: float,
+        limit: int | None = None,
+        min_posted: str | None = None,
     ) -> list[ScoredJob]:
+        """`min_posted` (ISO date) skips offers first published before it."""
         rows = self._db.execute(
             "SELECT * FROM jobs WHERE status = 'scored' AND score >= ?"
             " AND notified_at IS NULL AND digested_at IS NULL"
+            " AND (? IS NULL OR posted_at IS NULL OR substr(posted_at, 1, 10) >= ?)"
             " ORDER BY score DESC, id LIMIT ?",
-            (threshold, -1 if limit is None else limit),
+            (threshold, min_posted, min_posted, -1 if limit is None else limit),
         )
         return [_row_to_scored(row) for row in rows]
 
@@ -295,11 +300,15 @@ class Store:
                 (now.isoformat(), job_id),
             )
 
-    def due_digest(self, low: float, high: float) -> list[ScoredJob]:
+    def due_digest(
+        self, low: float, high: float, min_posted: str | None = None
+    ) -> list[ScoredJob]:
         rows = self._db.execute(
             "SELECT * FROM jobs WHERE status = 'scored' AND score >= ?"
-            " AND score < ? AND digested_at IS NULL ORDER BY score DESC, id",
-            (low, high),
+            " AND score < ? AND digested_at IS NULL"
+            " AND (? IS NULL OR posted_at IS NULL OR substr(posted_at, 1, 10) >= ?)"
+            " ORDER BY score DESC, id",
+            (low, high, min_posted, min_posted),
         )
         return [_row_to_scored(row) for row in rows]
 

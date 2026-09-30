@@ -81,6 +81,7 @@ class Profile:
     resume_effort: str | None = "low"
     max_resumes_per_day: int = 10
     reminder_days: int = 14
+    max_offer_age_days: int = 60  # older offers are rejected; 0 disables
     dashboard_host: str | None = None  # default: the Tailscale address
     dashboard_port: int = 8787
     max_letters_per_day: int = 10
