@@ -165,6 +165,12 @@ class Store:
         row = self._db.execute("SELECT * FROM jobs WHERE rowid = ?", (ref,)).fetchone()
         return _row_to_job(row) if row else None
 
+    def scored_job(self, job_id: str) -> ScoredJob | None:
+        row = self._db.execute(
+            "SELECT * FROM jobs WHERE id = ? AND assessment IS NOT NULL", (job_id,)
+        ).fetchone()
+        return _row_to_scored(row) if row else None
+
     def group_by_ref(self, ref: int) -> list[ScoredJob]:
         """The scored job `ref` first, then the other scored members of its group."""
         lead = self._db.execute(
