@@ -86,6 +86,13 @@ def test_load_profile_applies_defaults(tmp_path):
     assert profile.weights == Weights(0.5, 0.3, 0.2)
     assert profile.thresholds == Thresholds(7.5, 5.5, 6)
     assert profile.adzuna_app_id is None
+    assert profile.extra_excluded_title_words == ()
+
+
+def test_load_profile_reads_extra_excluded_title_words(tmp_path):
+    content = PROFILE + "extra_excluded_title_words: [event, ' retail ']\n"
+    profile = load_profile(write(tmp_path, "profile.yaml", content))
+    assert profile.extra_excluded_title_words == ("event", "retail")
 
 
 def test_load_profile_overrides_weights_and_thresholds(tmp_path):
@@ -103,6 +110,8 @@ def test_load_profile_overrides_weights_and_thresholds(tmp_path):
         (PROFILE + "weights: {tiers: 1}\n", "weights"),
         (PROFILE.replace("2027-08-31", "2027-01-01"), "window_start"),
         (PROFILE.replace("2027-03-08", "soon"), "date"),
+        (PROFILE + "extra_excluded_title_words: event\n", "list of words"),
+        (PROFILE + "extra_excluded_title_words: [' ']\n", "list of words"),
     ],
 )
 def test_load_profile_rejects_invalid_content(tmp_path, content, message):

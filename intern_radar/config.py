@@ -62,6 +62,7 @@ class Profile:
     letter_effort: str | None = "low"
     max_letters_per_day: int = 10
     contact: Contact | None = None
+    extra_excluded_title_words: tuple[str, ...] = ()
 
 
 REQUIRED_PROFILE_KEYS = (
@@ -142,6 +143,12 @@ def load_profile(path: Path) -> Profile:
     values = dict(data)
     values["weights"] = _build(Weights, data.get("weights", {}), "weights")
     values["thresholds"] = _build(Thresholds, data.get("thresholds", {}), "thresholds")
+    extra = data.get("extra_excluded_title_words", [])
+    if not isinstance(extra, list) or not all(
+        isinstance(word, str) and word.strip() for word in extra
+    ):
+        raise ConfigError(f"{path}: extra_excluded_title_words must be a list of words")
+    values["extra_excluded_title_words"] = tuple(word.strip() for word in extra)
     if "contact" in data:
         values["contact"] = _build(Contact, data["contact"], "contact")
     return Profile(**values)
