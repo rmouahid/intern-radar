@@ -84,7 +84,7 @@ def test_load_profile_applies_defaults(tmp_path):
     assert profile.window_end == date(2027, 8, 31)
     assert (profile.telegram_token, profile.telegram_chat_id) == ("123:ABC", 42)
     assert profile.llm_model == "haiku"
-    assert profile.weights == Weights(0.5, 0.3, 0.2)
+    assert profile.weights == Weights(0.3, 0.5, 0.2)
     assert profile.thresholds == Thresholds(7.5, 5.5, 6)
     assert profile.adzuna_app_id is None
     assert profile.extra_excluded_title_words == ()
@@ -100,7 +100,7 @@ def test_load_profile_reads_extra_excluded_title_words(tmp_path):
 def test_load_profile_overrides_weights_and_thresholds(tmp_path):
     content = PROFILE + "weights: {tier: 0.6}\nthresholds: {immediate: 8}\n"
     profile = load_profile(write(tmp_path, "profile.yaml", content))
-    assert profile.weights == Weights(0.6, 0.3, 0.2)
+    assert profile.weights == Weights(0.6, 0.5, 0.2)
     assert profile.thresholds == Thresholds(8, 5.5, 6)
 
 
@@ -177,3 +177,7 @@ def test_load_profile_overrides_visa_penalties(tmp_path):
     content = PROFILE + "visa_penalties: {unlikely: 5}\n"
     profile = load_profile(write(tmp_path, "profile.yaml", content))
     assert profile.visa_penalties == VisaPenalties(unlikely=5)
+
+
+def test_default_weights_favour_relevance_over_tier():
+    assert Weights() == Weights(tier=0.3, relevance=0.5, dates=0.2)

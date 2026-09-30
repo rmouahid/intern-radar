@@ -262,3 +262,24 @@ def test_assessments_stored_before_work_authorisation_load_as_uncertain(store):
     )
     [scored] = store.scored(min_score=0)
     assert scored.assessment.work_authorisation == "uncertain"
+
+
+def test_rescore_recomputes_every_scored_job_without_resending(store):
+    for job_id, score in (("a", 7.0), ("b", 6.0), ("x", None)):
+        store.add(make_job(id=job_id), "pending", NOW)
+        store.save_assessment(job_id, make_assessment(), score)
+    store.mark_digested(["a"], NOW)
+    store.add(make_job(id="p"), "pending", NOW)
+
+    changed = store.rescore(lambda job, assessment: 8.0)
+
+    assert changed == 3
+    assert {s.job.id: s.score for s in store.scored(0)} == {
+        "a": 8.0,
+        "b": 8.0,
+        "x": 8.0,
+    }
+    assert store.pending()[0].id == "p"
+    # "a" was already in a digest: it is not sent again as an immediate offer.
+    assert [s.job.id for s in store.due_immediate(7.5)] == ["b", "x"]
+    assert store.rescore(lambda job, assessment: 8.0) == 0

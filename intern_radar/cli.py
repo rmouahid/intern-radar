@@ -6,6 +6,7 @@ from pathlib import Path
 import httpx
 import typer
 
+from intern_radar import ranking
 from intern_radar.config import (
     ConfigError,
     Profile,
@@ -148,6 +149,27 @@ def list_jobs(
             )
     finally:
         store.close()
+
+
+@app.command()
+def rescore(config_dir: Path = CONFIG_DIR, db: Path = DB_PATH) -> None:
+    """Recompute stored scores with the current weights (no LLM call)."""
+    profile, _ = _load(config_dir)
+    store = Store(str(db))
+    try:
+        changed = store.rescore(
+            lambda job, assessment: ranking.final_score(
+                job.tier,
+                assessment,
+                profile.weights,
+                profile.thresholds.min_relevance,
+                profile.visa_penalties,
+            )
+        )
+        due = len(store.due_immediate(profile.thresholds.immediate))
+    finally:
+        store.close()
+    typer.echo(f"rescored={changed} due_immediate={due}")
 
 
 @app.command("check-sources")

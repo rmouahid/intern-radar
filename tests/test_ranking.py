@@ -27,9 +27,18 @@ def test_spec_examples():
     google = make_assessment(ai_relevance=9, dates_fit="fits")
     stripe = make_assessment(ai_relevance=4, dates_fit="unknown")
     unlisted = make_assessment(ai_relevance=9, dates_fit="unknown")
-    assert final_score("S", google, W) == pytest.approx(9.7)
-    assert final_score("A", stripe, W) == pytest.approx(6.4)
-    assert final_score("unlisted", unlisted, W) == pytest.approx(5.9)
+    assert final_score("S", google, W) == pytest.approx(9.5)
+    assert final_score("A", stripe, W) == pytest.approx(5.6)
+    assert final_score("unlisted", unlisted, W) == pytest.approx(6.9)
+
+
+def test_relevant_tier_b_offer_with_unknown_dates_reaches_immediate():
+    # Snowflake "Software Engineer Intern (AI / ML)": 6.9 with the old weights.
+    snowflake = make_assessment(ai_relevance=9, dates_fit="unknown")
+    assert final_score("B", snowflake, W) == pytest.approx(7.5)
+    # A tier-S offer with a middling relevance no longer passes on tier alone.
+    middling = make_assessment(ai_relevance=6, dates_fit="unknown")
+    assert final_score("S", middling, W) < 7.5
 
 
 def test_short_internship_and_local_students_penalty():
@@ -57,7 +66,7 @@ def test_offers_below_the_minimum_ai_relevance_are_excluded():
     finance = make_assessment(ai_relevance=5)
     ml = make_assessment(ai_relevance=6)
     assert final_score("S", finance, W, min_relevance=6) is None
-    assert final_score("S", ml, W, min_relevance=6) == pytest.approx(8.8)
+    assert final_score("S", ml, W, min_relevance=6) == pytest.approx(8.0)
     assert final_score("S", finance, W) is not None
 
 

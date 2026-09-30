@@ -2,6 +2,7 @@
 
 import json
 import sqlite3
+from collections.abc import Callable
 from dataclasses import asdict
 from datetime import datetime, timedelta
 
@@ -215,10 +216,30 @@ class Store:
     ) -> list[ScoredJob]:
         rows = self._db.execute(
             "SELECT * FROM jobs WHERE status = 'scored' AND score >= ?"
-            " AND notified_at IS NULL ORDER BY score DESC, id LIMIT ?",
+            " AND notified_at IS NULL AND digested_at IS NULL"
+            " ORDER BY score DESC, id LIMIT ?",
             (threshold, -1 if limit is None else limit),
         )
         return [_row_to_scored(row) for row in rows]
+
+    def rescore(self, score: Callable[[Job, Assessment], float | None]) -> int:
+        """Recompute every stored final score; returns how many changed.
+
+        Notification and digest dates are kept, and offers already sent in a
+        digest are not due as immediate ones, so nothing is sent twice.
+        """
+        rows = self._db.execute(
+            "SELECT * FROM jobs WHERE status = 'scored' AND assessment IS NOT NULL"
+        ).fetchall()
+        updates = []
+        for row in rows:
+            scored = _row_to_scored(row)
+            new = score(scored.job, scored.assessment)
+            if new != scored.score:
+                updates.append((new, row["id"]))
+        with self._db:
+            self._db.executemany("UPDATE jobs SET score = ? WHERE id = ?", updates)
+        return len(updates)
 
     def mark_notified(self, job_id: str, now: datetime) -> None:
         with self._db:
