@@ -41,7 +41,24 @@ DEFAULT_COUNTRIES = (
 Lookup = dict[str, tuple[str, Tier]]
 MAX_DAYS_OLD = 14
 # Words of company names that match far too many offers on their own.
-GENERIC_WORDS = {"ai", "group", "consulting", "securities", "chase", "labs"}
+GENERIC_WORDS = {
+    "ai",
+    "group",
+    "consulting",
+    "securities",
+    "chase",
+    "labs",
+    "limited",
+    "holdings",
+    "international",
+    "research",
+    "advanced",
+    "micro",
+    "devices",
+    "black",
+    "forest",
+    "two",
+}
 
 
 def search_terms(companies: list[Company]) -> str:
@@ -51,7 +68,7 @@ def search_terms(companies: list[Company]) -> str:
         if company.source != "none":
             continue
         for name in [company.name, *company.params.get("aliases", [])]:
-            for word in re.findall(r"[\w&.]+", name.lower()):
+            for word in re.findall(r"[\w&.-]+", name.lower()):
                 if len(word) > 2 and word not in GENERIC_WORDS:
                     words.setdefault(word)
     return " ".join(words)

@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **An internship radar for AI roles.** intern-radar watches the career
-pages of 66 top AI/tech companies and large groups with strong AI teams,
+pages of 116 top AI/tech companies and large groups with strong AI teams,
 triages every new internship with an LLM against a candidate profile, pushes
 the relevant ones to Telegram, and writes a tailored, fact-checked cover
 letter as a PDF on demand from the notification itself.
@@ -49,7 +49,7 @@ offer into a ready-to-review application in one tap.
  ┌─────────────┐   ┌─────────────┐   ┌──────────────┐   ┌─────────────┐   ┌───────────┐
  │  COLLECT     │ → │ PRE-FILTER  │ → │ LLM TRIAGE   │ → │ RANK        │ → │ NOTIFY    │
  │ 9 adapters   │   │ title, loc, │   │ JSON schema, │   │ AI·0.5 +    │   │ Telegram  │
- │ 66 companies │   │ duplicates  │   │ 10 per call  │   │ tier·0.3 +  │   │ + digest  │
+ │116 companies │   │ duplicates  │   │ 10 per call  │   │ tier·0.3 +  │   │ + digest  │
  └─────────────┘   └─────────────┘   └──────────────┘   │ dates·0.2   │   └─────┬─────┘
    every 2 h, 08:00–22:00 Europe/Paris (systemd timers)  └─────────────┘         │
                                                                      tap "✍️ Lettre"
@@ -210,7 +210,7 @@ docs/                 technical documentation
 
 ## Limitations
 
-19 watched companies (Google, Meta, Apple, Mistral…) publish no usable feed
+34 watched companies (Google, Meta, Apple, Mistral…) publish no usable feed
 and are only reachable through Adzuna. The LLM triage is a filter, not a
 verdict: repeated scoring of the same offers disagrees on about 3 in 10
 categorical judgements, and ~40 % of postings do not state their dates.

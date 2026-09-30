@@ -108,5 +108,7 @@ def test_search_terms_cover_companies_without_feed_only():
         Company("Goldman Sachs", "A", "none", {"aliases": ["GS", "GS Group"]}),
         Company("Stripe", "A", "greenhouse", {}),
         Company("Meta", "S", "none", {"aliases": ["Facebook"]}),
+        Company("G-Research", "A", "none", {"aliases": ["G Research"]}),
+        Company("Arm", "A", "none", {"aliases": ["Arm Holdings"]}),
     ]
-    assert search_terms(companies) == "goldman sachs meta facebook"
+    assert search_terms(companies) == ("goldman sachs meta facebook g-research arm")
