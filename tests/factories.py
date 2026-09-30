@@ -40,6 +40,7 @@ def make_assessment(**overrides: Any) -> Assessment:
         "visa_note": "UK: GAE scheme via a sponsor",
         "language_ok": True,
         "summary": "Applied ML on LLM agents.",
+        "work_authorisation": "free",
     }
     values.update(overrides)
     return Assessment(**values)

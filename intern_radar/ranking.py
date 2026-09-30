@@ -1,6 +1,6 @@
 """Deterministic final score computed from the LLM assessment."""
 
-from intern_radar.config import Weights
+from intern_radar.config import VisaPenalties, Weights
 from intern_radar.models import Assessment, Tier
 
 TIER_POINTS = {"S": 10, "A": 8, "B": 6, "unlisted": 4}
@@ -18,7 +18,11 @@ def is_excluded(assessment: Assessment) -> bool:
 
 
 def final_score(
-    tier: Tier, assessment: Assessment, weights: Weights, min_relevance: int = 0
+    tier: Tier,
+    assessment: Assessment,
+    weights: Weights,
+    min_relevance: int = 0,
+    visa: VisaPenalties = VisaPenalties(),  # noqa: B008 (frozen, never mutated)
 ) -> float | None:
     """Score out of 10, or None when the offer must never be notified.
 
@@ -34,4 +38,5 @@ def final_score(
     )
     if assessment.eligibility == "local_students_only":
         score -= LOCAL_STUDENTS_PENALTY
+    score -= getattr(visa, assessment.work_authorisation)
     return round(max(score, 0.0), 1)

@@ -1,6 +1,6 @@
 import pytest
 
-from intern_radar.config import Weights
+from intern_radar.config import VisaPenalties, Weights
 from intern_radar.ranking import final_score, is_excluded
 from tests.factories import make_assessment
 
@@ -59,3 +59,27 @@ def test_offers_below_the_minimum_ai_relevance_are_excluded():
     assert final_score("S", finance, W, min_relevance=6) is None
     assert final_score("S", ml, W, min_relevance=6) == pytest.approx(8.8)
     assert final_score("S", finance, W) is not None
+
+
+@pytest.mark.parametrize(
+    "authorisation, penalty",
+    [
+        ("free", 0),
+        ("programme", 0.5),
+        ("sponsorship_stated", 0),
+        ("uncertain", 1),
+        ("unlikely", 3),
+    ],
+)
+def test_work_authorisation_penalties(authorisation, penalty):
+    base = final_score("S", make_assessment(work_authorisation="free"), W)
+    score = final_score("S", make_assessment(work_authorisation=authorisation), W)
+    assert score == pytest.approx(base - penalty)
+
+
+def test_visa_penalties_are_configurable_and_never_exclude():
+    unlikely = make_assessment(work_authorisation="unlikely")
+    assert final_score("S", unlikely, W, visa=VisaPenalties(unlikely=0)) == (
+        final_score("S", make_assessment(), W)
+    )
+    assert final_score("S", unlikely, W) is not None

@@ -41,7 +41,7 @@ def test_format_immediate_matches_the_approved_layout():
         "📍  London, UK\n"
         "⭐  9.7 / 10\n"
         "📅  Dates compatibles\n"
-        "🛂  UK: GAE scheme via a sponsor\n"
+        "🛂  <b>Pas de visa (UE/EEE/Suisse)</b> · UK: GAE scheme via a sponsor\n"
         f"{SEP}\n"
         "<i>Applied ML on LLM agents.</i>"
     )

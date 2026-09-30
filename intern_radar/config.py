@@ -40,6 +40,17 @@ class Contact:
 
 
 @dataclass(frozen=True)
+class VisaPenalties:
+    """Points removed from the final score per work-authorisation value."""
+
+    free: float = 0.0
+    programme: float = 0.5
+    sponsorship_stated: float = 0.0
+    uncertain: float = 1.0
+    unlikely: float = 3.0
+
+
+@dataclass(frozen=True)
 class Profile:
     candidate_summary: str
     window_start: date
@@ -55,6 +66,7 @@ class Profile:
     adzuna_app_key: str | None = None
     weights: Weights = field(default_factory=Weights)
     thresholds: Thresholds = field(default_factory=Thresholds)
+    visa_penalties: VisaPenalties = field(default_factory=VisaPenalties)
     cv_url: str | None = None
     letters_email: str | None = None
     smtp_app_password: str | None = None
@@ -143,6 +155,9 @@ def load_profile(path: Path) -> Profile:
     values = dict(data)
     values["weights"] = _build(Weights, data.get("weights", {}), "weights")
     values["thresholds"] = _build(Thresholds, data.get("thresholds", {}), "thresholds")
+    values["visa_penalties"] = _build(
+        VisaPenalties, data.get("visa_penalties", {}), "visa_penalties"
+    )
     extra = data.get("extra_excluded_title_words", [])
     if not isinstance(extra, list) or not all(
         isinstance(word, str) and word.strip() for word in extra

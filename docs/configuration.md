@@ -40,6 +40,7 @@ Runtime data lives in `data/` (gitignored): `intern-radar.db` (SQLite),
 | `llm_effort` | string | unset | `--effort` for triage; unset keeps the CLI default |
 | `max_llm_batches_per_run` | int | `5` | batches of 10 offers scored per run |
 | `max_immediate_per_run` | int | `10` | immediate notifications (posting groups) per run |
+| `visa_penalties` | mapping | `{free: 0, programme: 0.5, sponsorship_stated: 0, uncertain: 1, unlikely: 3}` | points removed from the final score per work-authorisation value |
 | `extra_excluded_title_words` | list of words | `[]` | extra out-of-scope title words, added to the built-in list (§3.2 of pipeline.md) |
 | `weights.tier` | float | `0.5` | weight of the company tier (S=10, A=8, B=6, unlisted=4) |
 | `weights.relevance` | float | `0.3` | weight of the LLM's AI relevance (0–10) |

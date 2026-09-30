@@ -10,6 +10,7 @@ from intern_radar.description import clean_description
 from intern_radar.models import (
     DATES_FIT_VALUES,
     ELIGIBILITY_VALUES,
+    WORK_AUTHORISATION_VALUES,
     Assessment,
     Job,
 )
@@ -33,6 +34,10 @@ ASSESSMENT_SCHEMA: dict[str, Any] = {
                         "enum": list(ELIGIBILITY_VALUES),
                     },
                     "visa_note": {"type": "string"},
+                    "work_authorisation": {
+                        "type": "string",
+                        "enum": list(WORK_AUTHORISATION_VALUES),
+                    },
                     "language_ok": {"type": "boolean"},
                     "summary": {"type": "string"},
                 },
@@ -43,6 +48,7 @@ ASSESSMENT_SCHEMA: dict[str, Any] = {
                     "dates_fit",
                     "eligibility",
                     "visa_note",
+                    "work_authorisation",
                     "language_ok",
                     "summary",
                 ],
@@ -80,6 +86,13 @@ Return one assessment per job below, with the same job_id:
   apply; "unknown" otherwise.
 - visa_note: one short sentence on the work authorisation a French citizen
   needs for this location, or what the posting says about sponsorship.
+- work_authorisation, for a French citizen in this location: "free" (EU,
+  EEA or Switzerland); "programme" (a standard intern visa or programme
+  usually handled for interns: US J-1, UK Government Authorised Exchange,
+  Working Holiday…); "sponsorship_stated" (the posting says it sponsors);
+  "unlikely" (the posting excludes sponsorship or requires existing work
+  authorisation, or interns are rarely sponsored there); "uncertain"
+  otherwise.
 - language_ok: false if the role requires a language other than English,
   Spanish or French.
 - summary: one sentence describing the role.
@@ -177,6 +190,7 @@ def _parse(item: Any) -> Assessment | None:
         relevance = item["ai_relevance"]
         dates_fit, eligibility = item["dates_fit"], item["eligibility"]
         visa_note, summary = item["visa_note"], item["summary"]
+        work_authorisation = item["work_authorisation"]
     except KeyError:
         return None
     if not all(isinstance(value, bool) for value in booleans):
@@ -184,6 +198,8 @@ def _parse(item: Any) -> Assessment | None:
     if not isinstance(relevance, int) or isinstance(relevance, bool):
         return None
     if dates_fit not in DATES_FIT_VALUES or eligibility not in ELIGIBILITY_VALUES:
+        return None
+    if work_authorisation not in WORK_AUTHORISATION_VALUES:
         return None
     return Assessment(
         is_internship=item["is_internship"],
@@ -193,6 +209,7 @@ def _parse(item: Any) -> Assessment | None:
         visa_note=str(visa_note),
         language_ok=item["language_ok"],
         summary=str(summary),
+        work_authorisation=work_authorisation,
     )
 
 

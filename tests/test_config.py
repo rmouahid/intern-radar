@@ -7,6 +7,7 @@ from intern_radar.config import (
     ConfigError,
     Contact,
     Thresholds,
+    VisaPenalties,
     Weights,
     load_companies,
     load_profile,
@@ -87,6 +88,7 @@ def test_load_profile_applies_defaults(tmp_path):
     assert profile.thresholds == Thresholds(7.5, 5.5, 6)
     assert profile.adzuna_app_id is None
     assert profile.extra_excluded_title_words == ()
+    assert profile.visa_penalties == VisaPenalties(0, 0.5, 0, 1, 3)
 
 
 def test_load_profile_reads_extra_excluded_title_words(tmp_path):
@@ -108,6 +110,7 @@ def test_load_profile_overrides_weights_and_thresholds(tmp_path):
         ("min_months: 4", "missing"),
         (PROFILE + "telegram_tokn: typo\n", "unknown key"),
         (PROFILE + "weights: {tiers: 1}\n", "weights"),
+        (PROFILE + "visa_penalties: {china: 1}\n", "visa_penalties"),
         (PROFILE.replace("2027-08-31", "2027-01-01"), "window_start"),
         (PROFILE.replace("2027-03-08", "soon"), "date"),
         (PROFILE + "extra_excluded_title_words: event\n", "list of words"),
@@ -168,3 +171,9 @@ def test_chat_id_must_be_an_integer(tmp_path):
     content = PROFILE.replace("telegram_chat_id: 42", "telegram_chat_id: me")
     with pytest.raises(ConfigError, match="telegram_chat_id"):
         load_profile(write(tmp_path, "profile.yaml", content))
+
+
+def test_load_profile_overrides_visa_penalties(tmp_path):
+    content = PROFILE + "visa_penalties: {unlikely: 5}\n"
+    profile = load_profile(write(tmp_path, "profile.yaml", content))
+    assert profile.visa_penalties == VisaPenalties(unlikely=5)

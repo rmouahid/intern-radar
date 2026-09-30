@@ -146,6 +146,7 @@ class Pipeline:
                     assessment,
                     self._profile.weights,
                     self._profile.thresholds.min_relevance,
+                    self._profile.visa_penalties,
                 )
                 self._store.save_assessment(job.id, assessment, score)
                 report.scored += 1
