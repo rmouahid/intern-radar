@@ -383,27 +383,48 @@ Available once `config/candidate.json` and `contact` exist: immediate and
 promoted notifications get a *📄 CV adapté* button (`callback_data =
 C:<rowid>`), handled by the listener.
 
+**Country conventions** (`conventions.py`, from the candidate's private
+writing guide `config/writing-guide.md`): the region is detected from the
+offer location (US, Canada, Québec, UK, Ireland, DACH, Switzerland, Benelux,
+Nordics, Norway, Poland, Italy, Southern/Eastern Europe, Australia/NZ,
+Singapore, India, Japan, China, Gulf; international default). Each region
+sets the paper (Letter in North America, A4 elsewhere), the page limit (1
+for internships in North America, the UK, Ireland…, 2 in DACH, AU/NZ, the
+Gulf), the spelling (American, Canadian, British, Australian, Swiss German),
+the date style (`Sep 2024` or `09/2024`), the section order and titles
+(Summary, Personal statement or Profile; education first for students in
+North America; German titles for German CVs), the tabular Lebenslauf layout
+in DACH, the right-to-work or nationality line, "Referees available on
+request" (AU/NZ, Norway, Gulf) and the GDPR consent clause (Poland, Italy).
+
 1. Stored CV present → re-sent, no LLM call; daily cap
    `max_resumes_per_day` (10).
-2. One LLM call (`resume_model` sonnet, `resume_effort` low) returns
-   **content only**: headline, summary, up to 5 items by id with 2–4
-   reworded bullets (≤ 25 words), skill groups.
-3. Fact check in Python: unknown item ids are ignored; a bullet containing a
-   proper noun or number absent from its own item is dropped (an item left
-   empty falls back to its recorded actions); skills are restricted to the
-   profile's skills; an unsupported headline is removed and an unsupported
-   summary replaced by the profile summary.
-4. Layout (`fpdf2`, A4, Helvetica, left-aligned real text for ATS):
-   header, headline, summary, education (copied from the profile),
-   experience, projects, skills, languages. **Exactly one page**: the font
-   shrinks (10 → 9 pt), then the last bullets, then the last items are
-   removed; the caption reports what was dropped.
-5. Delivery: `data/cvs/<hash>/<Name>_CV_<Company>_<Title>.pdf` as a Telegram
-   document with a caption (items shown, bullets dropped by the fact check
-   or to fit).
+2. One LLM call (`resume_model` sonnet, `resume_effort` low) with the
+   region's rules returns **content only**: language (en/fr/de, the
+   offer's), headline, summary, up to 3 experiences (3–5 bullets) and up
+   to 3 projects (1–3 bullets), grouped skills (languages, frameworks, AI
+   and data, cloud and DevOps, databases, tools and methods). Bullets start
+   with a past-tense action verb, never "I", at most 25 words, reuse the
+   offer's vocabulary.
+3. Fact check in Python: a bullet containing a proper noun or number absent
+   from its own item is dropped (an item left empty falls back to its
+   recorded actions); skills are restricted to the profile's skills; an
+   unsupported headline is removed and an unsupported summary replaced by
+   the profile summary.
+4. Layout (`fpdf2`, Helvetica, black, single column, real text): font 10.5
+   or 10 pt (never smaller), margins 1.6 cm, dates normalised, education and
+   experience in reverse chronological order (at most 3 education entries
+   on a one-page CV), projects with link and stack, certifications on one
+   line, languages with CEFR levels, PDF title and author set. Page limit:
+   the font goes to 10 pt, then project bullets, then projects beyond two,
+   then experience bullets down to three, and so on.
+5. Delivery: `data/cvs/<hash>/Firstname_Lastname_CV.pdf` as a Telegram
+   document; the caption gives the region, paper, pages and language.
 
-Measured on the NVIDIA *Deep Learning* offer with the production profile:
-8–9 s, one page, no bullet dropped.
+Measured on 2026-09-30 with the production profile: Amazon Toronto (Canada,
+Letter, 1 page, working-holiday line), Perplexity London (UK, A4, 1 page,
+personal statement), Airbus Manching (DACH, A4, tabular, 2 pages); 8–10 s
+each.
 
 ### 3.8 Application tracking (`tracking.py`)
 

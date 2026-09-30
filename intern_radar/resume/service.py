@@ -10,6 +10,7 @@ from typing import Any
 
 from intern_radar.candidate import Candidate
 from intern_radar.config import Contact
+from intern_radar.conventions import convention_for
 from intern_radar.models import Job
 from intern_radar.notifier import Message, Notifier
 from intern_radar.resume.pdf import file_name, render
@@ -27,6 +28,7 @@ def format_resume_caption(job: Job, report: dict[str, Any]) -> str:
         f"📄 <b>CV adapté · {e(job.company[:80])}</b>",
         e(job.title[:200]),
         f"🧩  {report['items']} éléments mis en avant",
+        f"🌍  Format : {e(report.get('format', ''))}",
     ]
     if report.get("fact_dropped"):
         lines.append(
@@ -95,11 +97,15 @@ class ResumeService:
 
     def _generate(self, job: Job, now: datetime) -> Path:
         candidate = self._candidate()
-        resume = ResumeWriter(self._backend, candidate).write(job)
-        pdf, dropped_chars, pages, removed = render(resume, candidate, self._contact)
+        convention = convention_for(job.location)
+        scored = self._store.scored_job(job.id)
+        visa = scored.assessment.work_authorisation if scored else "uncertain"
+        resume = ResumeWriter(self._backend, candidate, convention).write(job)
+        pdf, dropped_chars, pages, removed = render(
+            resume, candidate, self._contact, convention, visa
+        )
         folder = hashlib.sha1(job.id.encode()).hexdigest()[:10]
-        last_name = self._contact.name.split()[-1]
-        path = self._out_dir / folder / file_name(last_name, job.company, job.title)
+        path = self._out_dir / folder / file_name(self._contact.name)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(pdf)
         report = {
@@ -109,6 +115,8 @@ class ResumeService:
             "fit_removed": removed,
             "dropped_chars": dropped_chars,
             "pages": pages,
+            "format": f"{convention.region} ({convention.paper}, "
+            f"{pages}/{convention.cv_pages} page(s), {resume.language})",
         }
         self._store.save_resume(job.id, str(path), report, now)
         self._send(job, path, report)

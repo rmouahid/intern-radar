@@ -119,3 +119,39 @@ def _pattern(country: str) -> re.Pattern[str]:
 def mentions_any(location: str, countries: tuple[str, ...]) -> bool:
     """True when the location names one of `countries`."""
     return any(_pattern(country).search(location) for country in countries)
+
+
+# Other countries used to detect the CV and letter conventions of an offer.
+ALIASES.update(
+    {
+        "United States": (
+            "united states", "usa", "u.s.", "new york", "san francisco", "seattle",
+            "boston", "austin", "chicago", "mountain view", "menlo park",
+            "palo alto", "santa clara", "sunnyvale", "cupertino", "san jose",
+            "redmond", "los angeles", "washington", "california", "texas",
+            "massachusetts", "pittsburgh", "atlanta", "denver", "miami",
+        ),
+        "Québec": ("québec", "quebec", "montréal", "montreal", "laval"),
+        "Ireland": ("ireland", "dublin", "cork", "galway", "leixlip"),
+        "Luxembourg": ("luxembourg",),
+        "Iceland": ("iceland", "reykjavik"),
+        "India": ("india", "bangalore", "bengaluru", "hyderabad", "pune", "mumbai",
+                  "delhi", "chennai", "gurgaon", "noida"),
+        "China": ("china", "beijing", "shanghai", "shenzhen", "hangzhou"),
+        "United Arab Emirates": ("united arab emirates", "uae", "dubai", "abu dhabi"),
+        "Saudi Arabia": ("saudi arabia", "riyadh", "jeddah"),
+        "Qatar": ("qatar", "doha"),
+        "Romania": ("romania", "bucharest", "cluj"),
+        "Hungary": ("hungary", "budapest"),
+        "Bulgaria": ("bulgaria", "sofia"),
+        "Croatia": ("croatia", "zagreb"),
+        "Estonia": ("estonia", "tallinn"),
+    }
+)  # fmt: skip
+ISO3.update(
+    {
+        "United States": "USA", "Ireland": "IRL", "Luxembourg": "LUX", "India": "IND",
+        "China": "CHN", "United Arab Emirates": "ARE", "Saudi Arabia": "SAU",
+        "Qatar": "QAT", "Romania": "ROU", "Hungary": "HUN", "Bulgaria": "BGR",
+    }
+)  # fmt: skip

@@ -11,6 +11,7 @@ config/career.md
 config/career/
 config/candidate.json
 config/candidate.json.bak
+config/writing-guide.md
 
 # Runtime data
 data/

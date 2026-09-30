@@ -24,8 +24,10 @@ letter as a PDF on demand from the notification itself.
   offer, rejected, no answer) with a reminder after 14 days without news.
 - **Private dashboard** over Tailscale: funnel, score distribution, sources
   health, applications and LLM costs, server-rendered without JavaScript.
-- **Tailored one-page CVs** in ~10 s, one tap, every bullet traced back to
-  the structured candidate profile.
+- **Tailored CVs following each country's conventions** (US Letter or A4,
+  page limit, spelling, section order, date style, tabular Lebenslauf,
+  right-to-work line, local mentions), in ~10 s from one tap, every bullet
+  traced back to the structured candidate profile.
 - **Cover letters in ~25 s**: one tap → draft from CV facts only, ATS keyword
   check, anti-cliché pass, fidelity check, one-page PDF in the chat.
 - **Built to run unattended** on a 1 vCPU / 2 GB VPS under systemd, with
