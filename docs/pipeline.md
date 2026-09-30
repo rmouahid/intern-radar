@@ -419,13 +419,22 @@ machine is pure and tested:
 
 ### 3.9 Dashboard (`dashboard/`)
 
-`intern-radar dashboard` serves one read-only page at
+`intern-radar dashboard` serves one page at
 `http://<tailscale-ip>:8787/` (`dashboard_host`, `dashboard_port`; the host
 defaults to `tailscale ip -4` and the command refuses to start without it).
 Standard library HTTP server, server-rendered HTML, inline SVG charts, no
 JavaScript, no new dependency; the SQLite file is opened read-only per
 request (`mode=ro`), so the page can never change data. `/healthz` answers
 `ok`.
+
+**Pipeline** section: state of `intern-radar-run.service` (running since…,
+or last result, end time and summary line) and a *Lancer un run* button.
+`POST /run` asks systemd to start that unit (`systemctl start --no-block`),
+exactly as the timer does, so a manual run gets the same environment, logs
+and timeout, and systemd never starts a second instance while one is active
+(the button is disabled and the page reloads every 15 s during a run). The
+request is accepted only when its `Origin` (or `Referer`) is the dashboard
+itself; otherwise it gets HTTP 403. The data stays read-only.
 
 Sections: key figures (offers seen, scored, immediate, digest, applications,
 interviews, offers, LLM cost over 7 days), weekly funnel by cohort (seen →
