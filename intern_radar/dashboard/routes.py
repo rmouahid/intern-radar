@@ -2,10 +2,9 @@
 
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
 
 from intern_radar.config import Profile, VisaPenalties, Weights
 from intern_radar.dashboard import queries
@@ -19,13 +18,17 @@ from intern_radar.dashboard.app import (
     text_response,
 )
 from intern_radar.dashboard.layout import e, page
+from intern_radar.dashboard.pages.actions import NOTICES as ACTION_NOTICES
+from intern_radar.dashboard.pages.actions import actions_html
 from intern_radar.dashboard.pages.offer import OfferView, offer_body
 from intern_radar.dashboard.pages.offers import offers_body
 from intern_radar.dashboard.render import stats_body
 from intern_radar.dashboard.runner import RunStatus
+from intern_radar.dashboard.worker import KINDS, Worker
 from intern_radar.store import Store
+from intern_radar.tracking import can_move
 
-NOTICES: dict[str, str] = {}
+NOTICES: dict[str, str] = dict(ACTION_NOTICES)
 RUN_NOTICES = {
     "started": "Run lancé : les résultats apparaîtront à la fin (environ une minute).",
     "busy": "Un run est déjà en cours.",
@@ -46,7 +49,7 @@ class Context:
     config_dir: Path | None = None
     data_dir: Path | None = None  # generated PDFs are served from here only
     profile: Profile | None = None
-    services: dict[str, Any] = field(default_factory=dict)
+    worker: Worker | None = None
 
     @contextmanager
     def store(self) -> Iterator[Store]:
@@ -56,10 +59,6 @@ class Context:
             yield store
         finally:
             store.close()
-
-    def actions_for(self, view: OfferView) -> str:
-        """Action buttons for an offer (filled by the web actions)."""
-        return ""
 
 
 def not_found(message: str) -> Response:
@@ -147,10 +146,40 @@ def build_app(ctx: Context) -> App:
         weights = ctx.profile.weights if ctx.profile else Weights()
         visa = ctx.profile.visa_penalties if ctx.profile else VisaPenalties()
         title = view.group[0].job.title
-        body = offer_body(view, weights, visa, ctx.actions_for(view))
-        return html_response(
-            page(title, body, "offers", NOTICES.get(request.arg("done")))
+        actions = actions_html(
+            ref, view.application, view.has_letter, view.has_resume, ctx.worker
         )
+        body = offer_body(view, weights, visa, actions)
+        notice = NOTICES.get(request.arg("done"))
+        busy = ctx.worker is not None and ctx.worker.busy(ref)
+        return html_response(
+            page(title, body, "offers", notice, refresh=5 if busy else None)
+        )
+
+    @app.route("POST", "/offers/<int:ref>/status")
+    def set_status(request: Request, ref: int):
+        new = request.form.get("status", "")
+        with ctx.store() as store:
+            job = store.job_by_ref(ref)
+            if job is None:
+                return not_found("Offre introuvable.")
+            if not can_move(store.application_status(job.id), new):
+                return redirect(f"/offers/{ref}?done=refused")
+            store.set_application(job.id, new, ctx.clock())
+        return redirect(f"/offers/{ref}?done=status")
+
+    @app.route("POST", "/offers/<int:ref>/<str:kind>")
+    def start_task(request: Request, ref: int, kind: str):
+        if kind not in KINDS:
+            return not_found("Action inconnue.")
+        if ctx.worker is None:
+            return redirect(f"/offers/{ref}?done=unavailable")
+        with ctx.store() as store:
+            job = store.job_by_ref(ref)
+        if job is None:
+            return not_found("Offre introuvable.")
+        queued = ctx.worker.submit(kind, ref, job.id)
+        return redirect(f"/offers/{ref}?done={'queued' if queued else 'already'}")
 
     @app.route("GET", "/files/<str:kind>/<int:ref>")
     def files(request: Request, ref: int, kind: str):
