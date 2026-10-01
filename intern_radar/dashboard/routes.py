@@ -8,7 +8,13 @@ from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import parse_qs
 
-from intern_radar.candidate import candidate_text, load_candidate
+from intern_radar.candidate import (
+    CandidateError,
+    Regeneration,
+    candidate_text,
+    load_candidate,
+    regenerate,
+)
 from intern_radar.config import Profile, VisaPenalties, Weights
 from intern_radar.dashboard import queries
 from intern_radar.dashboard.app import (
@@ -32,11 +38,17 @@ from intern_radar.dashboard.pages.feedback import feedback_body
 from intern_radar.dashboard.pages.insights import insights_body
 from intern_radar.dashboard.pages.offer import OfferView, offer_body
 from intern_radar.dashboard.pages.offers import offers_body, query_string
+from intern_radar.dashboard.pages.profile import (
+    LAST_KEY,
+    profile_body,
+    regeneration_report,
+)
 from intern_radar.dashboard.pages.searches import searches_body
 from intern_radar.dashboard.render import stats_body
 from intern_radar.dashboard.runner import RunStatus
-from intern_radar.dashboard.worker import KINDS, Worker
+from intern_radar.dashboard.worker import KINDS, PENDING, RUNNING, Worker
 from intern_radar.editing import DocumentEditor, EditError
+from intern_radar.scorer import LLMBackend
 from intern_radar.store import ApplicationDetails, Store
 from intern_radar.tracking import can_move
 
@@ -46,6 +58,8 @@ NOTICES: dict[str, str] = {
     "details": "Suivi enregistré.",
     "search_saved": "Recherche enregistrée : alertes après chaque run.",
     "search_name": "Donne un nom à la recherche.",
+    "career_saved": "career.md enregistré (ancienne version : career.md.bak).",
+    "career_invalid": "career.md vide ou trop long : non enregistré.",
     "edited": "Document modifié : le PDF a été régénéré.",
     "edited_sent": "Document modifié : le PDF régénéré part sur Telegram.",
 }
@@ -71,6 +85,7 @@ class Context:
     data_dir: Path | None = None  # generated PDFs are served from here only
     profile: Profile | None = None
     worker: Worker | None = None
+    profile_backend: Callable[[], LLMBackend] | None = None
 
     def editor(self, store: Store) -> DocumentEditor | None:
         """Edits need the contact block; CV edits also the candidate profile."""
@@ -109,6 +124,7 @@ def not_found(message: str) -> Response:
     return html_response(page("Introuvable", body), 404)
 
 
+MAX_CAREER = 300_000  # characters
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 DATETIME_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$")
 
@@ -382,6 +398,78 @@ def build_app(ctx: Context) -> App:
                 return not_found("Action inconnue.")
         return redirect("/searches")
 
+    @app.route("GET", "/profile")
+    def profile_page(request: Request):
+        candidate, error, career = None, "", None
+        if ctx.config_dir is not None:
+            path = ctx.config_dir / "candidate.json"
+            try:
+                candidate = load_candidate(path) if path.exists() else None
+            except CandidateError as exc:
+                error = str(exc)
+            career_path = ctx.config_dir / "career.md"
+            if career_path.exists():
+                career = career_path.read_text(encoding="utf-8")
+        with ctx.store() as store:
+            last = store.get_meta(LAST_KEY)
+        state = ctx.worker.call_state("profile") if ctx.worker else None
+        running = state is not None and state.state in (PENDING, RUNNING)
+        body = profile_body(
+            candidate,
+            error,
+            career,
+            last,
+            running,
+            ctx.worker is not None
+            and ctx.profile_backend is not None
+            and ctx.config_dir is not None,
+        )
+        notice = NOTICES.get(request.arg("done"))
+        return html_response(
+            page("Profil", body, "more", notice, refresh=10 if running else None)
+        )
+
+    @app.route("POST", "/profile/career")
+    def save_career(request: Request):
+        if ctx.config_dir is None:
+            return not_found("Dossier de configuration inconnu.")
+        text = request.form.get("career", "").replace("\r\n", "\n")
+        if not text.strip() or len(text) > MAX_CAREER:
+            return redirect("/profile?done=career_invalid")
+        path = ctx.config_dir / "career.md"
+        if path.exists():
+            path.replace(path.with_suffix(".md.bak"))
+        path.write_text(text, encoding="utf-8")
+        return redirect("/profile?done=career_saved")
+
+    @app.route("POST", "/profile/regenerate")
+    def regenerate_profile(request: Request):
+        if ctx.worker is None or ctx.profile_backend is None or not ctx.config_dir:
+            return redirect("/profile?done=unavailable")
+        config_dir, backend, db_path, clock = (
+            ctx.config_dir, ctx.profile_backend, ctx.db_path, ctx.clock,
+        )  # fmt: skip
+
+        def task() -> Regeneration:
+            result, error = None, ""
+            try:
+                result = regenerate(backend(), config_dir)
+                return result
+            except Exception as exc:
+                error = str(exc) or type(exc).__name__
+                raise
+            finally:
+                store = Store(db_path)
+                try:
+                    store.set_meta(
+                        LAST_KEY, regeneration_report(result, error, clock())
+                    )
+                finally:
+                    store.close()
+
+        queued = ctx.worker.submit_call("profile", task)
+        return redirect(f"/profile?done={'queued' if queued else 'already'}")
+
     @app.route("GET", "/applications")
     def applications_page(request: Request):
         days = ctx.profile.reminder_days if ctx.profile else 14
@@ -479,6 +567,7 @@ def build_app(ctx: Context) -> App:
 # Pages reachable from the "Plus" tab (extended by later pages).
 MORE_LINKS: list[tuple[str, str, str]] = [
     ("/stats", "Statistiques", "Entonnoir, scores, sources, usage LLM, runs"),
+    ("/profile", "Profil", "candidate.json, career.md et régénération"),
     ("/searches", "Recherches", "Alertes Telegram sur des filtres enregistrés"),
     ("/feedback", "Mes avis", "Les offres notées 👍/👎, prises en compte au scoring"),
 ]

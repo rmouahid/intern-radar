@@ -496,3 +496,40 @@ def generate(
         return parse_candidate(result)
     except CandidateError as exc:
         raise LLMError(f"invalid profile from the LLM: {exc}") from exc
+
+
+@dataclass(frozen=True)
+class Regeneration:
+    summary: str
+    warnings: tuple[str, ...]
+    changes: tuple[str, ...] | None  # None when there was no previous profile
+    saved: bool
+
+
+def regenerate(
+    backend: LLMBackend, config_dir: Path, save: bool = True
+) -> Regeneration:
+    """Rebuild candidate.json from career.md (one LLM call).
+
+    The previous profile's ids are reused and the previous file is kept as
+    candidate.json.bak. Raises CandidateError or LLMError.
+    """
+    path = config_dir / "candidate.json"
+    dossier = read_dossier(config_dir / "career.md", config_dir / "career")
+    previous = None
+    if path.exists():
+        try:
+            previous = load_candidate(path)
+        except CandidateError:
+            previous = None  # unreadable: regenerated from scratch
+    candidate = generate(backend, dossier, previous)
+    if save:
+        if path.exists():
+            path.replace(path.with_suffix(".json.bak"))
+        save_candidate(candidate, path)
+    return Regeneration(
+        summary=summarise(candidate),
+        warnings=tuple(check_candidate(candidate, dossier)),
+        changes=tuple(diff(previous, candidate)) if previous is not None else None,
+        saved=save,
+    )
