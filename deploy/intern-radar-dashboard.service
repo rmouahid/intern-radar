@@ -1,5 +1,5 @@
 [Unit]
-Description=intern-radar: statistics dashboard (Tailscale only)
+Description=intern-radar: web app (Tailscale only)
 After=network-online.target tailscaled.service
 Wants=network-online.target
 

@@ -291,7 +291,7 @@ def dashboard(
     host: str | None = typer.Option(None, "--host", help="Default: Tailscale IP."),
     port: int | None = typer.Option(None, "--port"),
 ) -> None:
-    """Serve the read-only statistics page on the Tailscale address."""
+    """Serve the web app (offers, applications, stats) on the Tailscale address."""
     _setup_logging()
     profile, watched = _load(config_dir)
     address = host or profile.dashboard_host or tailscale_ip()

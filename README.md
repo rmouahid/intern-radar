@@ -22,8 +22,12 @@ letter as a PDF on demand from the notification itself.
   alerts, no inbound port on the server.
 - **Application tracking** from the same messages (applied, interview,
   offer, rejected, no answer) with a reminder after 14 days without news.
-- **Private dashboard** over Tailscale: funnel, score distribution, sources
-  health, applications and LLM costs, server-rendered without JavaScript.
+- **Private web app** over Tailscale, mobile-first and installable on the
+  iPhone home screen: filterable offers with score breakdown, letter/CV
+  generation and editing, 👍/👎 feedback fed to the scoring, applications
+  board with agenda, skills gap analysis, saved searches with Telegram
+  alerts, company pages, profile editor, run history and chance calibration.
+  Server-rendered with the standard library, no framework.
 - **Tailored CVs following each country's conventions** (US Letter or A4,
   page limit, spelling, section order, date style, tabular Lebenslauf,
   right-to-work line, local mentions), in ~10 s from one tap, every bullet
@@ -154,6 +158,13 @@ systemctl enable --now intern-radar-run.timer intern-radar-digest.timer
 systemctl enable --now intern-radar-letters.service
 systemctl enable --now intern-radar-dashboard.service   # Tailscale address only
 ```
+
+The web app listens on the Tailscale address only (`http://<tailscale-ip>:8787`).
+Add it to the iPhone home screen from Safari (Share → *Sur l'écran
+d'accueil*). Offline reading of the last pages needs HTTPS: enable *HTTPS
+Certificates* in the Tailscale admin console, then
+`tailscale serve --bg http://<tailscale-ip>:8787` and open
+`https://<machine>.<tailnet>.ts.net`.
 
 Runs every 2 hours from 08:00 to 22:00 and sends the digest at 21:00,
 Europe/Paris time (DST handled by systemd). The unit files assume the

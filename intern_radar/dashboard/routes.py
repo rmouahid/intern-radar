@@ -16,7 +16,7 @@ from intern_radar.candidate import (
     regenerate,
 )
 from intern_radar.config import Profile, VisaPenalties, Weights
-from intern_radar.dashboard import queries
+from intern_radar.dashboard import pwa, queries
 from intern_radar.dashboard.app import (
     App,
     Request,
@@ -233,6 +233,20 @@ def build_app(ctx: Context) -> App:
     @app.route("GET", "/healthz")
     def healthz(request: Request):
         return text_response("ok")
+
+    @app.route("GET", "/manifest.webmanifest")
+    def manifest(request: Request):
+        return text_response(pwa.manifest(), content_type="application/manifest+json")
+
+    @app.route("GET", "/sw.js")
+    def service_worker(request: Request):
+        return text_response(pwa.SERVICE_WORKER, content_type="text/javascript")
+
+    @app.route("GET", "/icon-<int:size>.png")
+    def app_icon(request: Request, size: int):
+        if size not in pwa.ICON_SIZES:
+            return not_found("Icône inconnue.")
+        return Response(200, pwa.icon(size), "image/png")
 
     @app.route("GET", "/offers/<int:ref>")
     def offer(request: Request, ref: int):
