@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, unquote
 
 from intern_radar.candidate import (
     CandidateError,
@@ -33,6 +33,7 @@ from intern_radar.dashboard.pages.applications import (
     applications_body,
     details_form,
 )
+from intern_radar.dashboard.pages.companies import companies_body, company_body
 from intern_radar.dashboard.pages.editing import letter_form, resume_form
 from intern_radar.dashboard.pages.feedback import feedback_body
 from intern_radar.dashboard.pages.insights import insights_body
@@ -86,6 +87,7 @@ class Context:
     profile: Profile | None = None
     worker: Worker | None = None
     profile_backend: Callable[[], LLMBackend] | None = None
+    companies: tuple[tuple[str, str, str], ...] = ()  # watched: name, tier, source
 
     def editor(self, store: Store) -> DocumentEditor | None:
         """Edits need the contact block; CV edits also the candidate profile."""
@@ -470,6 +472,34 @@ def build_app(ctx: Context) -> App:
         queued = ctx.worker.submit_call("profile", task)
         return redirect(f"/profile?done={'queued' if queued else 'already'}")
 
+    @app.route("GET", "/companies")
+    def companies_page(request: Request):
+        db = queries.connect(ctx.db_path)
+        try:
+            rows = queries.companies(
+                db, ctx.companies, ctx.clock().date(), ctx.thresholds[0],
+                ctx.max_offer_age_days,
+            )  # fmt: skip
+        finally:
+            db.close()
+        body = companies_body(rows, request.arg("q")[:80])
+        return html_response(page("Entreprises", body, "more"))
+
+    @app.route("GET", "/companies/<str:name>")
+    def company_page(request: Request, name: str):
+        name = unquote(name)
+        db = queries.connect(ctx.db_path)
+        try:
+            detail = queries.company_detail(
+                db, name, ctx.companies, ctx.clock(), ctx.thresholds[0],
+                ctx.max_offer_age_days,
+            )  # fmt: skip
+        finally:
+            db.close()
+        if detail is None:
+            return not_found("Entreprise inconnue.")
+        return html_response(page(name, company_body(detail), "more"))
+
     @app.route("GET", "/applications")
     def applications_page(request: Request):
         days = ctx.profile.reminder_days if ctx.profile else 14
@@ -567,6 +597,7 @@ def build_app(ctx: Context) -> App:
 # Pages reachable from the "Plus" tab (extended by later pages).
 MORE_LINKS: list[tuple[str, str, str]] = [
     ("/stats", "Statistiques", "Entonnoir, scores, sources, usage LLM, runs"),
+    ("/companies", "Entreprises", "Offres, candidatures et santé des sources"),
     ("/profile", "Profil", "candidate.json, career.md et régénération"),
     ("/searches", "Recherches", "Alertes Telegram sur des filtres enregistrés"),
     ("/feedback", "Mes avis", "Les offres notées 👍/👎, prises en compte au scoring"),

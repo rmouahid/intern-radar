@@ -1,6 +1,7 @@
 """Offer detail: everything known about one posting, on one page."""
 
 from dataclasses import dataclass
+from urllib.parse import quote
 
 from intern_radar.chance import Chance
 from intern_radar.config import VisaPenalties, Weights
@@ -125,7 +126,8 @@ def offer_body(
     header = (
         f'<p class="muted"><a href="/offers">← Offres</a></p>'
         f'<div class="top" style="display:flex;justify-content:space-between;gap:8px">'
-        f'<div><div class="muted">{e(job.company)} · {e(tier_label(job.tier))}</div>'
+        f'<div><div class="muted"><a href="/companies/{quote(job.company, safe="")}">'
+        f"{e(job.company)}</a> · {e(tier_label(job.tier))}</div>"
         f"<h1>{e(job.title)}</h1></div>"
         f'<div class="score" style="font-size:26px">{lead.score or 0:.1f}</div></div>'
         f'<div class="actions">{link}</div>{actions}'

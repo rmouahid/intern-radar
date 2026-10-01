@@ -293,7 +293,7 @@ def dashboard(
 ) -> None:
     """Serve the read-only statistics page on the Tailscale address."""
     _setup_logging()
-    profile, _ = _load(config_dir)
+    profile, watched = _load(config_dir)
     address = host or profile.dashboard_host or tailscale_ip()
     if not address:
         typer.echo(
@@ -313,6 +313,7 @@ def dashboard(
         data_dir=db.parent,
         profile=profile,
         worker=Worker(lambda: _web_services(config_dir, db)),
+        companies=tuple((c.name, c.tier, c.source) for c in watched),
         profile_backend=lambda: ClaudeCliBackend(
             model=profile.profile_model, timeout=900
         ),
