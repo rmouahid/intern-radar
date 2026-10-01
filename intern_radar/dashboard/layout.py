@@ -2,6 +2,8 @@
 
 import html
 
+from intern_radar.dashboard import pwa
+
 e = html.escape
 
 NAV = (
@@ -110,5 +112,5 @@ def page(
     )
 
 
-# Filled by the installable-app issue (manifest, icons); empty until then.
-HEAD_EXTRA = ""
+# Manifest, icons and service worker registration (installable app).
+HEAD_EXTRA = pwa.HEAD

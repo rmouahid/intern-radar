@@ -97,7 +97,9 @@ def test_page_renders_every_section_and_escapes(db_path):
         assert title in html
     assert "Entretien obtenu" in html and "en échec depuis" in html
     assert "<x>" not in html and "Co &lt;x&gt;" in html
-    assert "prefers-color-scheme: dark" in html and "<script" not in html
+    assert "prefers-color-scheme: dark" in html
+    # The only script registers the offline service worker (installable app).
+    assert html.count("<script") == 1 and "serviceWorker.register" in html
 
 
 def test_empty_database_renders(tmp_path):
