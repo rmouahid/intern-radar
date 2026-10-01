@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
 from intern_radar.conventions import CONVENTIONS, convention_for
+from intern_radar.description import clean_description
+from intern_radar.skills import BY_NAME, find_skills
 
 
 def connect(path: str) -> sqlite3.Connection:
@@ -498,3 +500,81 @@ def calendar(
             events.append(Event(max(due.date().isoformat(), today), "reminder", *base))
     upcoming = [ev for ev in events if today <= ev.when <= until]
     return sorted(upcoming, key=lambda ev: (ev.when, ev.kind, ev.company))
+
+
+# --- skills insights -------------------------------------------------------------
+
+TREND_WEEKS = 6
+
+
+@dataclass(frozen=True)
+class SkillDemand:
+    name: str
+    category: str
+    offers: int  # relevant posting groups asking for it
+    share: float  # of the relevant posting groups
+    covered: bool  # the candidate profile shows it
+    examples: tuple[tuple[int, str, str], ...]  # (ref, company, title), best first
+    trend: tuple[int, ...]  # offers per week, oldest first (TREND_WEEKS weeks)
+
+
+def _distinct_companies(rows: list[sqlite3.Row], limit: int = 3):
+    """Best-scored offers from different companies, as (ref, company, title)."""
+    seen: dict[str, tuple[int, str, str]] = {}
+    for row in rows:
+        if row["company"] not in seen:
+            seen[row["company"]] = (row["ref"], row["company"], row["title"])
+        if len(seen) == limit:
+            break
+    return tuple(seen.values())
+
+
+def skill_demand(
+    db: sqlite3.Connection,
+    profile_text: str,
+    now: datetime,
+    min_relevance: int = 7,
+    days: int = 90,
+) -> tuple[list[SkillDemand], int]:
+    """Skills asked for by relevant offers, most requested first, and the
+    number of relevant posting groups they were counted on."""
+    since = (now - timedelta(days=days)).isoformat()
+    rows = db.execute(
+        "SELECT rowid AS ref, id, company, title, description, first_seen,"
+        " group_key, score FROM jobs WHERE status = 'scored' AND score IS NOT NULL"
+        " AND json_extract(assessment, '$.ai_relevance') >= ? AND first_seen >= ?"
+        " ORDER BY score DESC",
+        (min_relevance, since),
+    ).fetchall()
+    week_start = (now - timedelta(days=7 * TREND_WEEKS)).isoformat()
+    counts: dict[str, list[sqlite3.Row]] = {}
+    groups: set[str] = set()
+    for row in rows:
+        group = row["group_key"] or row["id"]
+        if group in groups:
+            continue  # the same posting elsewhere counts once
+        groups.add(group)
+        text = f"{row['title']}\n{clean_description(row['description'])}"
+        for name in find_skills(text):
+            counts.setdefault(name, []).append(row)
+    covered = find_skills(profile_text)
+    result = []
+    for name, matched in counts.items():
+        trend = [0] * TREND_WEEKS
+        for row in matched:
+            if row["first_seen"] >= week_start:
+                age = (now - datetime.fromisoformat(row["first_seen"])).days // 7
+                trend[TREND_WEEKS - 1 - min(age, TREND_WEEKS - 1)] += 1
+        result.append(
+            SkillDemand(
+                name=name,
+                category=BY_NAME[name].category,
+                offers=len(matched),
+                share=len(matched) / len(groups),
+                covered=name in covered,
+                examples=_distinct_companies(matched),
+                trend=tuple(trend),
+            )
+        )
+    result.sort(key=lambda s: (-s.offers, s.name))
+    return result, len(groups)
