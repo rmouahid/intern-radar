@@ -643,3 +643,17 @@ def test_concurrent_scoring_can_record_llm_usage_in_the_store():
     assert pipeline.run().scored == 30
     count = store._db.execute("SELECT count(*) FROM llm_usage").fetchone()[0]
     assert count == 3
+
+
+def test_saved_search_alerts_run_after_the_run_and_never_fail_it():
+    pipeline, _, _ = build({"fake": FakeSource([])}, FakeScorer({}))
+    pipeline._searches = lambda: 3
+    assert pipeline.run().search_alerts == 3
+
+    def broken():
+        raise RuntimeError("bad filters")
+
+    pipeline._searches = broken
+    report = pipeline.run()
+    assert report.search_alerts == 0
+    assert report.errors == ["saved searches: bad filters"]

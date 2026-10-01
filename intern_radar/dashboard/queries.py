@@ -278,12 +278,24 @@ class OfferRow:
     chance: int | None
     other_places: int  # copies of the posting in other locations
     vote: int | None = None  # the candidate's 👍 (1) or 👎 (-1)
+    job_id: str = ""
+    first_seen: str = ""
+    url: str = ""
 
 
 def offers(
     db: sqlite3.Connection, filters: OfferFilters, today: date
 ) -> tuple[list[OfferRow], int]:
     """One page of offers (one per posting group) and the total matching."""
+    selected = matching_offers(db, filters, today)
+    start = (filters.page - 1) * PER_PAGE
+    return selected[start : start + PER_PAGE], len(selected)
+
+
+def matching_offers(
+    db: sqlite3.Connection, filters: OfferFilters, today: date
+) -> list[OfferRow]:
+    """Every offer matching the filters, one per posting group, best first."""
     sql = [
         "SELECT j.rowid AS ref, j.*, a.status AS application, c.percent AS chance,"
         " json_extract(j.assessment, '$.work_authorisation') AS wa,"
@@ -342,10 +354,12 @@ def offers(
                 chance=lead["chance"],
                 other_places=len(members) - 1,
                 vote=lead["vote"],
+                job_id=lead["id"],
+                first_seen=lead["first_seen"],
+                url=lead["url"],
             )
         )
-    start = (filters.page - 1) * PER_PAGE
-    return selected[start : start + PER_PAGE], len(selected)
+    return selected
 
 
 # --- applications board ----------------------------------------------------------

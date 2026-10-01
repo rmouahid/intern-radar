@@ -44,10 +44,11 @@ from intern_radar.letters.service import LetterService
 from intern_radar.letters.writer import LetterWriter
 from intern_radar.models import Company, Job
 from intern_radar.notifier import ConsoleNotifier, NotifyError, TelegramNotifier
-from intern_radar.pipeline import Pipeline
+from intern_radar.pipeline import Pipeline, utcnow
 from intern_radar.promotion import Promoter
 from intern_radar.resume.service import ResumeService
 from intern_radar.scorer import ClaudeCliBackend, LLMError, Scorer
+from intern_radar.searches import SearchAlerts
 from intern_radar.sources import SOURCE_NAMES, build_sources
 from intern_radar.store import Store
 from intern_radar.telegram import TelegramClient
@@ -171,6 +172,9 @@ def _pipeline(
         chance=_chance(config_dir, profile, store),
         resumes=bool(profile.contact and (config_dir / "candidate.json").exists()),
         tracking=bool(profile.cv_url and profile.contact),  # the listener runs
+        searches=SearchAlerts(
+            store, notifier, utcnow, profile.max_offer_age_days
+        ).check,
     )
     return pipeline, store, client
 
@@ -192,7 +196,7 @@ def run(
         f" scored={report.scored} notified={report.notified}"
         f" errors={len(report.errors)} grouped={report.grouped}"
         f" out_of_scope={report.out_of_scope} stale={report.stale}"
-        f" discovery={report.discovery}"
+        f" discovery={report.discovery} search_alerts={report.search_alerts}"
     )
 
 

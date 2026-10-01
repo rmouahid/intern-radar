@@ -50,6 +50,7 @@ class RunReport:
     scored: int = 0
     notified: int = 0
     grouped: int = 0  # jobs that reused the result of their posting group
+    search_alerts: int = 0  # saved-search matches sent
     errors: list[str] = field(default_factory=list)
 
 
@@ -66,7 +67,9 @@ class Pipeline:
         chance: Callable[[ScoredJob], Chance | None] | None = None,
         resumes: bool = False,
         tracking: bool = False,
+        searches: Callable[[], int] | None = None,
     ) -> None:
+        self._searches = searches
         self._companies = companies
         self._sources = sources
         self._store = store
@@ -84,6 +87,12 @@ class Pipeline:
         self._score(report)
         if self._notify(report):
             self._alert(report)
+        if self._searches is not None:
+            try:
+                report.search_alerts = self._searches()
+            except Exception as exc:  # alerts must not fail the run
+                log.exception("saved-search alerts failed")
+                report.errors.append(f"saved searches: {exc}")
         return report
 
     def digest(self) -> int:
