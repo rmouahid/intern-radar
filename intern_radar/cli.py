@@ -321,6 +321,8 @@ def dashboard(
         status=run_status,
         trigger=start_run,
         config_dir=config_dir,
+        data_dir=db.parent,
+        profile=profile,
     )
     server = make_server(
         str(db), address, port or profile.dashboard_port, thresholds, context=context

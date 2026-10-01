@@ -311,3 +311,72 @@ def test_offers_page_route(tmp_path):
     assert app.handle(Request("GET", "/nope", {})).status == 404
     post = Request("POST", "/run", {}, {}, {"host": "x", "origin": "http://evil"})
     assert app.handle(post).status == 403
+
+
+def test_offer_detail_page(tmp_path):
+    from intern_radar.chance import Chance
+    from intern_radar.dashboard.app import Request
+    from intern_radar.dashboard.routes import Context, build_app
+
+    path = offers_db(tmp_path)
+    store = Store(path)
+    ref = store.job_ref("de")
+    store.save_chance("de", Chance(42, ((True, "Stack RAG alignée"),)))
+    store.set_application("de", "applied", NOW)
+    store.set_application("de", "interview", NOW + timedelta(days=3))
+    assert store.application_history("de") == [
+        ("applied", NOW.isoformat()),
+        ("interview", (NOW + timedelta(days=3)).isoformat()),
+    ]
+    store.close()
+    app = build_app(Context(path, clock=lambda: NOW))
+    body = app.handle(Request("GET", f"/offers/{ref}", {})).body.decode()
+    assert "SDE Intern - Germany" in body and "42 %" in body
+    assert "Stack RAG alignée" in body and "Entretien obtenu" in body
+    assert "Candidature envoyée" in body  # history
+    assert "London, UK" in body  # the other location of the group
+    assert "Pertinence IA" in body and "8/10 × 0.5" in body
+    assert "Aucune lettre ni CV" in body
+    assert app.handle(Request("GET", "/offers/9999", {})).status == 404
+
+
+def test_score_rows_add_up_to_the_final_score():
+    from intern_radar.config import VisaPenalties, Weights
+    from intern_radar.dashboard.pages.offer import score_rows
+    from intern_radar.models import ScoredJob
+    from intern_radar.ranking import final_score
+
+    assessment = make_assessment(
+        work_authorisation="uncertain", eligibility="local_students_only"
+    )
+    job = make_job(tier="A")
+    weights = Weights(tier=0.3, relevance=0.5, dates=0.2)
+    score = final_score("A", assessment, weights)
+    rows = score_rows(ScoredJob(job, assessment, score), weights, VisaPenalties())
+    assert round(sum(points for _, _, points in rows), 1) == score
+
+
+def test_documents_are_served_from_the_data_dir_only(tmp_path):
+    from intern_radar.dashboard.app import Request
+    from intern_radar.dashboard.routes import Context, build_app
+
+    path = offers_db(tmp_path)
+    data = tmp_path / "data"
+    (data / "letters").mkdir(parents=True)
+    letter = data / "letters" / "lettre.pdf"
+    letter.write_bytes(b"%PDF-1.4 letter")
+    outside = tmp_path / "cv.pdf"
+    outside.write_bytes(b"%PDF-1.4 cv")
+    store = Store(path)
+    ref = store.job_ref("de")
+    store.save_letter("de", str(letter), {}, NOW)
+    store.save_resume("de", str(outside), {}, NOW)
+    store.close()
+    app = build_app(Context(path, data_dir=data))
+    response = app.handle(Request("GET", f"/files/letter/{ref}", {}))
+    assert response.status == 200 and response.body == b"%PDF-1.4 letter"
+    assert response.content_type == "application/pdf"
+    assert app.handle(Request("GET", f"/files/cv/{ref}", {})).status == 404
+    assert app.handle(Request("GET", f"/files/other/{ref}", {})).status == 404
+    page_html = app.handle(Request("GET", f"/offers/{ref}", {})).body.decode()
+    assert f"/files/letter/{ref}" in page_html
