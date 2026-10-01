@@ -33,6 +33,7 @@ from intern_radar.conventions import convention_for, visa_fact
 from intern_radar.dashboard.routes import Context
 from intern_radar.dashboard.runner import run_status, start_run
 from intern_radar.dashboard.server import make_server, tailscale_ip
+from intern_radar.dashboard.worker import Services, Worker
 from intern_radar.description import clean_description
 from intern_radar.http import make_client
 from intern_radar.letters.cv import CvSource
@@ -323,6 +324,7 @@ def dashboard(
         config_dir=config_dir,
         data_dir=db.parent,
         profile=profile,
+        worker=Worker(lambda: _web_services(config_dir, db)),
     )
     server = make_server(
         str(db), address, port or profile.dashboard_port, thresholds, context=context
@@ -472,6 +474,25 @@ def _resume_service(
         telegram,
         TelegramNotifier(telegram),
         profile.max_resumes_per_day,
+    )
+
+
+def _web_services(config_dir: Path, db: Path) -> Services:
+    """The listener's services, for the web actions (built in their thread)."""
+    service, store, _, profile, telegram = _letter_service(config_dir, db)
+    resumes = _resume_service(config_dir, profile, store, telegram)
+    promoter = Promoter(
+        store,
+        TelegramNotifier(telegram),
+        letters=True,
+        chance=_chance(config_dir, profile, store),
+        resumes=resumes is not None,
+        tracking=True,
+    )
+    return Services(
+        letter=service.handle,
+        promote=promoter.promote,
+        resume=resumes.handle if resumes else None,
     )
 
 
