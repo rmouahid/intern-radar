@@ -657,3 +657,28 @@ def test_saved_search_alerts_run_after_the_run_and_never_fail_it():
     report = pipeline.run()
     assert report.search_alerts == 0
     assert report.errors == ["saved searches: bad filters"]
+
+
+def test_runs_are_recorded_with_timings_errors_and_crashes():
+    from intern_radar.dashboard import queries
+
+    class Broken(FakeSource):
+        def fetch(self, company, known_ids):
+            raise RuntimeError("HTTP 500")
+
+    pipeline, store, _ = build({"fake": Broken([])}, FakeScorer({}))
+    pipeline.run()
+    summary = queries.runs(store._db)
+    (run,) = summary.runs
+    assert run.errors == ["Acme: HTTP 500"] and run.crash is None
+    assert set(run.timings) == {"collect", "score", "notify"}
+    assert run.counters["fetched"] == 0 and summary.failing == [("Acme", 1, "HTTP 500")]
+
+    def crash(report):
+        raise ValueError("boom")
+
+    pipeline._score = crash
+    with pytest.raises(ValueError):
+        pipeline.run()
+    latest = queries.runs(store._db).runs[0]
+    assert latest.crash == "ValueError: boom" and "score" in latest.timings

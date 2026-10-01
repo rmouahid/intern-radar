@@ -380,3 +380,30 @@ def test_documents_are_served_from_the_data_dir_only(tmp_path):
     assert app.handle(Request("GET", f"/files/other/{ref}", {})).status == 404
     page_html = app.handle(Request("GET", f"/offers/{ref}", {})).body.decode()
     assert f"/files/letter/{ref}" in page_html
+
+
+def test_runs_summary_and_stats_section(tmp_path):
+    from intern_radar.dashboard.render import _runs
+
+    path = str(tmp_path / "runs.db")
+    store = Store(path)
+    for i, (duration, errors, crash) in enumerate(
+        [(60.0, [], None), (300.0, ["Acme: HTTP 500", "LLM: timeout"], None),
+         (120.0, ["Acme: HTTP 502"], None), (30.0, [], "RuntimeError: x")]
+    ):  # fmt: skip
+        store.record_run(
+            NOW + timedelta(hours=i), duration, {"new": i, "scored": i, "notified": 0},
+            errors, {"collect": duration / 2, "score": duration / 4}, crash,
+        )  # fmt: skip
+    store.close()
+    summary = queries.runs(queries.connect(path))
+    assert [r.duration for r in summary.runs] == [30.0, 120.0, 300.0, 60.0]
+    assert summary.median == 120.0
+    assert [s for s, _ in summary.steps] == ["collect", "score"]
+    assert summary.failing == [("Acme", 2, "HTTP 502")]
+    html = _runs(summary)
+    assert "durée médiane 2 min 00" in html and "Acme" in html
+    assert "RuntimeError: x" in html and "Collecte 1 min 03" in html
+    assert "Aucun run" in _runs(queries.RunSummary([], None, [], []))
+    page = render_dashboard(path, (5.5, 7.5), NOW)
+    assert "Derniers runs" in page

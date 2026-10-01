@@ -728,3 +728,65 @@ def company_detail(
         )
     ]
     return CompanyDetail(row, weekly, offers, applications)
+
+
+# --- runs ------------------------------------------------------------------------
+
+STEP_LABELS = {
+    "collect": "Collecte",
+    "score": "Notation",
+    "notify": "Notifications",
+    "searches": "Recherches",
+}
+
+
+@dataclass(frozen=True)
+class RunRow:
+    started_at: str
+    duration: float
+    counters: dict[str, int]
+    errors: list[str]
+    timings: dict[str, float]
+    crash: str | None
+
+
+@dataclass(frozen=True)
+class RunSummary:
+    runs: list[RunRow]  # latest first
+    median: float | None  # seconds
+    steps: list[tuple[str, float]]  # average seconds per step, slowest first
+    failing: list[tuple[str, int, str]]  # (source, runs failed, last error)
+
+
+def runs(db: sqlite3.Connection, limit: int = 30) -> RunSummary:
+    rows = [
+        RunRow(
+            r["started_at"],
+            r["duration"],
+            json.loads(r["counters"]),
+            json.loads(r["errors"]),
+            json.loads(r["timings"]),
+            r["crash"],
+        )
+        for r in db.execute(
+            "SELECT * FROM runs ORDER BY started_at DESC, id DESC LIMIT ?", (limit,)
+        )
+    ]
+    durations = sorted(r.duration for r in rows)
+    median = durations[len(durations) // 2] if durations else None
+    totals: dict[str, list[float]] = {}
+    failing: dict[str, tuple[int, str]] = {}
+    for run in rows:
+        for step, seconds in run.timings.items():
+            totals.setdefault(step, []).append(seconds)
+        for error in run.errors:
+            source, _, message = error.partition(": ")
+            if source in ("LLM", "saved searches") or not message:
+                continue
+            count, last = failing.get(source, (0, message))
+            failing[source] = (count + 1, last)  # rows are latest first
+    steps = sorted(
+        ((step, sum(v) / len(v)) for step, v in totals.items()), key=lambda s: -s[1]
+    )
+    worst = sorted(failing.items(), key=lambda f: (-f[1][0], f[0]))
+    return RunSummary(rows, median, steps, [(s, n, m) for s, (n, m) in worst])
