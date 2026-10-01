@@ -80,6 +80,12 @@ CREATE TABLE IF NOT EXISTS chances (
     reasons TEXT NOT NULL,
     created_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS application_events (
+    id INTEGER PRIMARY KEY,
+    job_id TEXT NOT NULL,
+    status TEXT NOT NULL,
+    at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS meta (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
@@ -472,6 +478,18 @@ class Store:
                 " applied_at = COALESCE(applications.applied_at, excluded.applied_at)",
                 (job_id, status, stamp, status, stamp),
             )
+            self._db.execute(
+                "INSERT INTO application_events (job_id, status, at) VALUES (?, ?, ?)",
+                (job_id, status, stamp),
+            )
+
+    def application_history(self, job_id: str) -> list[tuple[str, str]]:
+        """Status changes of one application, oldest first: (status, at)."""
+        rows = self._db.execute(
+            "SELECT status, at FROM application_events WHERE job_id = ? ORDER BY id",
+            (job_id,),
+        )
+        return [(row["status"], row["at"]) for row in rows]
 
     def applications(self) -> list[tuple[Job, str, str, str | None]]:
         """Tracked offers: job, status, last update, application date."""

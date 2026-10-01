@@ -75,6 +75,7 @@ nav.bottom a { color:var(--muted); font-size:11px; text-align:center;
   flex:1; }
 nav.bottom a span { display:block; font-size:19px; }
 nav.bottom a.active { color:var(--accent); font-weight:600; }
+table.breakdown td:nth-child(2) { white-space:normal; color:var(--muted); }
 svg text { fill:var(--muted); font-size:11px; }
 """
 
