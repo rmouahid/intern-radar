@@ -2,6 +2,7 @@
 
 import json
 import sqlite3
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
@@ -592,3 +593,138 @@ def skill_demand(
         )
     result.sort(key=lambda s: (-s.offers, s.name))
     return result, len(groups)
+
+
+# --- companies -------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class CompanyRow:
+    name: str
+    tier: str
+    source: str
+    seen: int  # offers ever collected
+    open: int  # posting groups currently in the offers list
+    applications: int  # tracked applications (dismissed excluded)
+    best: float | None  # best score of the open offers
+    last_new: str | None  # date of the last new offer
+    failing_since: str | None
+    error: str | None
+    watched: bool  # in companies.yaml (otherwise found by discovery)
+
+
+def companies(
+    db: sqlite3.Connection,
+    watched: Sequence[tuple[str, str, str]],
+    today: date,
+    min_score: float = 5.5,
+    days: int = 60,
+) -> list[CompanyRow]:
+    """Every watched or seen company, those with open offers first.
+
+    `watched` lists (name, tier, source) from the configuration.
+    """
+    health = {
+        row["company"]: (row["first_failure"], row["last_error"])
+        for row in db.execute("SELECT * FROM source_health")
+    }
+    seen = {
+        row["company"]: row
+        for row in db.execute(
+            "SELECT company, max(tier) AS tier, max(source) AS source, count(*) AS n,"
+            " max(first_seen) AS last FROM jobs GROUP BY company"
+        )
+    }
+    tracked = {
+        row["company"]: row["n"]
+        for row in db.execute(
+            "SELECT j.company, count(*) AS n FROM applications a JOIN jobs j"
+            " ON j.id = a.job_id WHERE a.status != 'dismissed' GROUP BY j.company"
+        )
+    }
+    open_offers: dict[str, list[OfferRow]] = {}
+    for row in matching_offers(db, OfferFilters(min_score=min_score, days=days), today):
+        open_offers.setdefault(row.company, []).append(row)
+    configured = {name: (tier, source) for name, tier, source in watched}
+    result = []
+    for name in sorted(set(configured) | set(seen)):
+        row = seen.get(name)
+        tier, source = configured.get(name) or (row["tier"], row["source"])
+        offers = open_offers.get(name, [])
+        failing_since, error = health.get(name, (None, None))
+        result.append(
+            CompanyRow(
+                name=name,
+                tier=tier,
+                source=source,
+                seen=row["n"] if row else 0,
+                open=len(offers),
+                applications=tracked.get(name, 0),
+                best=max((o.score for o in offers), default=None),
+                last_new=row["last"][:10] if row else None,
+                failing_since=failing_since,
+                error=error,
+                watched=name in configured,
+            )
+        )
+    result.sort(key=lambda c: (-c.open, -(c.best or 0), -c.seen, c.name))
+    return result
+
+
+@dataclass(frozen=True)
+class CompanyDetail:
+    company: CompanyRow
+    weekly: list[tuple[str, int]]  # (week start, offers first seen), oldest first
+    offers: list[OfferRow]  # open offers, best first
+    applications: list[tuple[int, str, str, str]]  # (ref, title, status, updated)
+
+
+def company_detail(
+    db: sqlite3.Connection,
+    name: str,
+    watched: Sequence[tuple[str, str, str]],
+    now: datetime,
+    min_score: float = 5.5,
+    days: int = 60,
+    weeks: int = 12,
+) -> CompanyDetail | None:
+    row = next(
+        (
+            c
+            for c in companies(db, watched, now.date(), min_score, days)
+            if c.name == name
+        ),
+        None,
+    )
+    if row is None:
+        return None
+    start = now.date() - timedelta(days=now.date().weekday() + 7 * (weeks - 1))
+    counts = {
+        r["week"]: r["n"]
+        for r in db.execute(
+            "SELECT date(first_seen, '-6 days', 'weekday 1') AS week, count(*) AS n"
+            " FROM jobs WHERE company = ? AND first_seen >= ? GROUP BY week",
+            (name, start.isoformat()),
+        )
+    }
+    weekly = []
+    for i in range(weeks):
+        week = (start + timedelta(days=7 * i)).isoformat()
+        weekly.append((week, counts.get(week, 0)))
+    offers = [
+        o
+        for o in matching_offers(
+            db, OfferFilters(min_score=min_score, days=days, q=name), now.date()
+        )
+        if o.company == name
+    ]
+    applications = [
+        (r["ref"], r["title"], r["status"], r["updated_at"][:10])
+        for r in db.execute(
+            "SELECT j.rowid AS ref, j.title, a.status, a.updated_at FROM applications a"
+            " JOIN jobs j ON j.id = a.job_id WHERE j.company = ?"
+            " AND a.status != 'dismissed' ORDER BY a.updated_at DESC",
+            (name,),
+        )
+    ]
+    return CompanyDetail(row, weekly, offers, applications)
