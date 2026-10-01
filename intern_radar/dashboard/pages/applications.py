@@ -67,6 +67,7 @@ def applications_body(columns: dict[str, list[BoardCard]], events: list[Event]) 
     alert = f'<div class="notice">🔔 {due} relance(s) à faire.</div>' if due else ""
     return (
         f"<h1>Candidatures</h1><p class='muted'>{e(counts)}</p>{alert}"
+        '<p><a class="button ghost" href="/applications.csv">⬇️ Exporter (CSV)</a></p>'
         f"<section><h2>Agenda</h2>{calendar}</section>"
         '<p class="muted">À postuler : offres 👍 ou notifiées depuis 30 jours, '
         "sans suivi.</p>"
