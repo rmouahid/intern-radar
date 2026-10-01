@@ -13,14 +13,9 @@ from intern_radar import ranking
 from intern_radar.candidate import (
     CandidateError,
     candidate_text,
-    check_candidate,
-    diff,
-    generate,
     load_candidate,
-    read_dossier,
-    save_candidate,
+    regenerate,
     select_items,
-    summarise,
 )
 from intern_radar.chance import CachedChance, ChanceEstimator
 from intern_radar.config import (
@@ -270,36 +265,23 @@ def generate_profile(
 ) -> None:
     """Build config/candidate.json from config/career.md (one LLM call)."""
     profile, _ = _load(config_dir)
-    path = config_dir / "candidate.json"
+    backend = ClaudeCliBackend(model=profile.profile_model, timeout=900)
     try:
-        dossier = read_dossier(config_dir / "career.md", config_dir / "career")
+        result = regenerate(backend, config_dir, save=not dry_run)
     except CandidateError as exc:
         typer.echo(f"Configuration error: {exc}", err=True)
         raise typer.Exit(2) from exc
-    previous = None
-    if path.exists():
-        try:
-            previous = load_candidate(path)
-        except CandidateError as exc:
-            typer.echo(f"Previous profile ignored: {exc}", err=True)
-    backend = ClaudeCliBackend(model=profile.profile_model, timeout=900)
-    try:
-        candidate = generate(backend, dossier, previous)
     except LLMError as exc:
         typer.echo(f"Profile not generated: {exc}", err=True)
         raise typer.Exit(1) from exc
-    typer.echo(summarise(candidate))
-    for warning in check_candidate(candidate, dossier):
+    typer.echo(result.summary)
+    for warning in result.warnings:
         typer.echo(f"warning: {warning}")
-    if previous is not None:
-        for line in diff(previous, candidate) or ["no change"]:
+    if result.changes is not None:
+        for line in result.changes or ("no change",):
             typer.echo(line)
-    if dry_run:
-        return
-    if path.exists():
-        path.replace(path.with_suffix(".json.bak"))
-    save_candidate(candidate, path)
-    typer.echo(f"saved {path}")
+    if result.saved:
+        typer.echo(f"saved {config_dir / 'candidate.json'}")
 
 
 @app.command()
@@ -331,6 +313,9 @@ def dashboard(
         data_dir=db.parent,
         profile=profile,
         worker=Worker(lambda: _web_services(config_dir, db)),
+        profile_backend=lambda: ClaudeCliBackend(
+            model=profile.profile_model, timeout=900
+        ),
     )
     server = make_server(
         str(db), address, port or profile.dashboard_port, thresholds, context=context

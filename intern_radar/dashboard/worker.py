@@ -12,6 +12,7 @@ from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 log = logging.getLogger(__name__)
 
@@ -32,6 +33,7 @@ class Services:
 class TaskState:
     state: str
     error: str = ""
+    result: Any = None
 
 
 class Worker:
@@ -54,6 +56,32 @@ class Worker:
             self._states[key] = TaskState(PENDING)
         self._pool.submit(self._run, kind, ref, job_id)
         return True
+
+    def submit_call(self, name: str, call: Callable[[], Any]) -> bool:
+        """Queue any slow call under a name (e.g. the profile regeneration);
+        False when it is already queued or running."""
+        key = (f"call:{name}", 0)
+        with self._lock:
+            current = self._states.get(key)
+            if current and current.state in (PENDING, RUNNING):
+                return False
+            self._states[key] = TaskState(PENDING)
+        self._pool.submit(self._run_call, key, call)
+        return True
+
+    def call_state(self, name: str) -> TaskState | None:
+        with self._lock:
+            return self._states.get((f"call:{name}", 0))
+
+    def _run_call(self, key: tuple[str, int], call: Callable[[], Any]) -> None:
+        self._set(*key, TaskState(RUNNING))
+        try:
+            result = call()
+        except Exception as exc:
+            log.exception("web call %s failed", key[0])
+            self._set(*key, TaskState(FAILED, (str(exc) or type(exc).__name__)[:300]))
+            return
+        self._set(*key, TaskState(DONE, result=result))
 
     def state(self, kind: str, ref: int) -> TaskState | None:
         with self._lock:
