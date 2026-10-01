@@ -1,5 +1,6 @@
 """Read-only statistics for the dashboard, computed from the SQLite store."""
 
+import json
 import sqlite3
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
@@ -343,3 +344,157 @@ def offers(
         )
     start = (filters.page - 1) * PER_PAGE
     return selected[start : start + PER_PAGE], len(selected)
+
+
+# --- applications board ----------------------------------------------------------
+
+# Ongoing applications first: on a phone the columns stack.
+COLUMNS = (
+    ("interview", "Entretien"),
+    ("offer", "Offre"),
+    ("applied", "Postulé"),
+    ("to_apply", "À postuler"),
+    ("closed", "Clôturé"),
+)
+COLUMN_OF = {
+    "applied": "applied",
+    "interview": "interview",
+    "offer": "offer",
+    "rejected": "closed",
+    "no_answer": "closed",
+}
+TO_APPLY_DAYS = 30  # liked or notified offers stay "to apply" this long
+
+
+@dataclass(frozen=True)
+class BoardCard:
+    ref: int
+    company: str
+    title: str
+    score: float | None
+    status: str | None
+    since: str  # date the card entered its column
+    deadline: str | None
+    next_action: str
+    next_action_date: str | None
+    interviews: tuple[str, ...]
+    reminder_due: bool
+    liked: bool
+
+
+@dataclass(frozen=True)
+class Event:
+    when: str  # YYYY-MM-DD or YYYY-MM-DDTHH:MM
+    kind: str  # interview, deadline, action, reminder
+    ref: int
+    company: str
+    title: str
+    detail: str = ""
+
+
+def _details(row: sqlite3.Row) -> tuple[str | None, str, str | None, tuple[str, ...]]:
+    interviews = tuple(json.loads(row["interviews"])) if row["interviews"] else ()
+    return (
+        row["deadline"],
+        row["next_action"] or "",
+        row["next_action_date"],
+        interviews,
+    )
+
+
+def board(
+    db: sqlite3.Connection, now: datetime, reminder_days: int
+) -> dict[str, list[BoardCard]]:
+    """Cards by column; "to apply" holds liked or notified offers not tracked."""
+    due_before = (now - timedelta(days=reminder_days)).isoformat()
+    recent = (now - timedelta(days=TO_APPLY_DAYS)).isoformat()
+    rows = db.execute(
+        "SELECT j.rowid AS ref, j.company, j.title, j.score, j.notified_at,"
+        " j.first_seen, j.group_key, j.id, a.status, a.updated_at, a.applied_at,"
+        " a.reminded_at,"
+        " f.vote, d.deadline, d.next_action, d.next_action_date, d.interviews"
+        " FROM jobs j"
+        " LEFT JOIN applications a ON a.job_id = j.id"
+        " LEFT JOIN feedback f ON f.job_id = j.id"
+        " LEFT JOIN application_details d ON d.job_id = j.id"
+        " WHERE a.status IS NOT NULL"
+        " OR ((f.vote = 1 OR j.notified_at >= ?) AND j.score IS NOT NULL)",
+        (recent,),
+    ).fetchall()
+    columns: dict[str, list[BoardCard]] = {key: [] for key, _ in COLUMNS}
+    # A posting listed in several places is one card (its best-scored copy);
+    # a group with a tracked copy is not "to apply" any more.
+    tracked = {row["group_key"] or row["id"] for row in rows if row["status"]}
+    seen: set[str] = set()
+    rows = sorted(rows, key=lambda r: -(r["score"] or 0))
+    for row in rows:
+        status = row["status"]
+        column = "to_apply" if status is None else COLUMN_OF.get(status)
+        if column is None:  # dismissed
+            continue
+        group = row["group_key"] or row["id"]
+        if column == "to_apply":
+            if group in tracked or group in seen:
+                continue
+            seen.add(group)
+        deadline, action, action_date, interviews = _details(row)
+        since = row["updated_at"] if status else row["notified_at"] or row["first_seen"]
+        columns[column].append(
+            BoardCard(
+                ref=row["ref"],
+                company=row["company"],
+                title=row["title"],
+                score=row["score"],
+                status=status,
+                since=(since or "")[:10],
+                deadline=deadline,
+                next_action=action,
+                next_action_date=action_date,
+                interviews=interviews,
+                reminder_due=status == "applied"
+                and row["reminded_at"] is None
+                and row["updated_at"] <= due_before,
+                liked=row["vote"] == 1,
+            )
+        )
+    for key, cards in columns.items():
+        if key == "to_apply":
+            cards.sort(key=lambda c: (c.deadline or "9999", -(c.score or 0)))
+        else:
+            cards.sort(key=lambda c: (not c.reminder_due, c.since), reverse=False)
+    return columns
+
+
+def calendar(
+    db: sqlite3.Connection, now: datetime, reminder_days: int, days: int = 60
+) -> list[Event]:
+    """Upcoming interviews, deadlines, next actions and reminders, soonest first."""
+    today = now.date().isoformat()
+    until = (now + timedelta(days=days)).date().isoformat() + "T99"
+    rows = db.execute(
+        "SELECT j.rowid AS ref, j.company, j.title, a.status, a.updated_at,"
+        " a.reminded_at, d.deadline, d.next_action, d.next_action_date, d.interviews"
+        " FROM jobs j LEFT JOIN applications a ON a.job_id = j.id"
+        " LEFT JOIN application_details d ON d.job_id = j.id"
+        " WHERE d.job_id IS NOT NULL OR a.status = 'applied'"
+    ).fetchall()
+    events: list[Event] = []
+    for row in rows:
+        closed = row["status"] in ("rejected", "offer", "dismissed")
+        base = (row["ref"], row["company"], row["title"])
+        if row["interviews"]:
+            for when in json.loads(row["interviews"]):
+                events.append(Event(when, "interview", *base))
+        if row["deadline"] and not closed and row["status"] is None:
+            events.append(Event(row["deadline"], "deadline", *base))
+        if row["next_action_date"] and not closed:
+            events.append(
+                Event(row["next_action_date"], "action", *base, row["next_action"])
+            )
+        if row["status"] == "applied" and row["reminded_at"] is None:
+            due = datetime.fromisoformat(row["updated_at"]) + timedelta(
+                days=reminder_days
+            )
+            events.append(Event(max(due.date().isoformat(), today), "reminder", *base))
+    upcoming = [ev for ev in events if today <= ev.when <= until]
+    return sorted(upcoming, key=lambda ev: (ev.when, ev.kind, ev.company))
