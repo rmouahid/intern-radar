@@ -114,8 +114,9 @@ def test_server_routes(db_path):
     base = f"http://127.0.0.1:{server.server_address[1]}"
     try:
         assert httpx.get(f"{base}/healthz").text == "ok"
-        home = httpx.get(f"{base}/")
-        assert home.status_code == 200 and "intern-radar" in home.text
+        home = httpx.get(f"{base}/", follow_redirects=True)
+        assert home.status_code == 200 and "Offres" in home.text
+        assert "intern-radar" in httpx.get(f"{base}/stats").text
         assert httpx.get(f"{base}/nope").status_code == 404
     finally:
         server.shutdown()
@@ -194,13 +195,15 @@ def serve(db_path, running=False, trigger_ok=True):
 def test_run_button_starts_a_run_from_the_page(db_path):
     server, host, started = serve(db_path)
     try:
-        home = httpx.get(f"http://{host}/")
+        home = httpx.get(f"http://{host}/stats")
         assert "<button>Lancer un run</button>" in home.text
         assert "Dernier run ✅ réussi" in home.text and "fetched=5" in home.text
         post = httpx.post(f"http://{host}/run", headers={"Origin": f"http://{host}"})
-        assert post.status_code == 303 and post.headers["location"] == "/?run=started"
+        assert (
+            post.status_code == 303 and post.headers["location"] == "/stats?run=started"
+        )
         assert started == [True]
-        notice = httpx.get(f"http://{host}/?run=started")
+        notice = httpx.get(f"http://{host}/stats?run=started")
         assert "Run lancé" in notice.text
     finally:
         server.shutdown()
@@ -214,8 +217,8 @@ def test_run_button_refuses_foreign_origins_and_busy_runs(db_path):
         evil = httpx.post(f"http://{host}/run", headers={"Origin": "http://evil.test"})
         assert evil.status_code == 403
         busy = httpx.post(f"http://{host}/run", headers={"Referer": f"http://{host}/"})
-        assert busy.headers["location"] == "/?run=busy" and started == []
-        page_html = httpx.get(f"http://{host}/").text
+        assert busy.headers["location"] == "/stats?run=busy" and started == []
+        page_html = httpx.get(f"http://{host}/stats").text
         assert "Run en cours" in page_html and "<button disabled>" in page_html
         assert 'http-equiv="refresh"' in page_html
     finally:
@@ -227,7 +230,84 @@ def test_run_button_reports_systemd_refusal(db_path):
     server, host, _ = serve(db_path, trigger_ok=False)
     try:
         post = httpx.post(f"http://{host}/run", headers={"Origin": f"http://{host}"})
-        assert post.headers["location"] == "/?run=error"
+        assert post.headers["location"] == "/stats?run=error"
     finally:
         server.shutdown()
         server.server_close()
+
+
+def offers_db(tmp_path):
+    path = str(tmp_path / "offers.db")
+    store = Store(path)
+    rows = (
+        ("de", "SDE Intern - Germany", "Berlin", "A", 8.0, "free", "2026-09-20"),
+        ("uk", "SDE Intern - UK", "London, UK", "A", 8.0, "uncertain", "2026-09-20"),
+        ("ca", "ML Intern", "Toronto, CAN", "S", 9.0, "self_arranged", "2026-09-25"),
+        ("old", "Data Intern", "Madrid", "B", 7.0, "free", "2026-05-01"),
+        ("low", "Ops Intern", "Paris", "B", 3.0, "free", "2026-09-25"),
+        ("disc", "AI Intern", "Munich", "unlisted", 7.5, "free", "2026-09-28"),
+        ("gone", "Research Intern", "Oslo", "A", 7.2, "free", "2026-09-28"),
+    )
+    for job_id, title, location, tier, score, visa, posted in rows:
+        store.add(
+            make_job(id=job_id, company="Co de" if job_id == "uk" else f"Co {job_id}",
+                     title=title, location=location,
+                     tier=tier, posted_at=posted),
+            "pending", NOW,
+        )  # fmt: skip
+        store.save_assessment(job_id, make_assessment(work_authorisation=visa), score)
+    store.set_application("ca", "applied", NOW)
+    store.set_application("gone", "dismissed", NOW)
+    store.close()
+    return path
+
+
+def offers_ids(path, **query):
+    rows, total = queries.offers(
+        queries.connect(path),
+        queries.OfferFilters.from_query({k: str(v) for k, v in query.items()}, 60),
+        NOW.date(),
+    )
+    return [r.company for r in rows], total
+
+
+def test_offers_default_view_groups_postings_and_hides_noise(tmp_path):
+    path = offers_db(tmp_path)
+    companies, total = offers_ids(path)
+    # score >= 5.5, within 60 days, not dismissed, one card per posting group
+    assert companies == ["Co ca", "Co de", "Co disc"] and total == 3
+    rows, _ = queries.offers(queries.connect(path), queries.OfferFilters(), NOW.date())
+    assert rows[1].other_places == 1
+
+
+@pytest.mark.parametrize(
+    "query, expected",
+    [
+        ({"tier": "unlisted"}, ["Co disc"]),
+        ({"region": "canada"}, ["Co ca"]),
+        ({"visa": "none", "tier": "S"}, ["Co ca"]),
+        ({"status": "applied"}, ["Co ca"]),
+        ({"status": "dismissed"}, ["Co gone"]),
+        ({"days": 0}, ["Co ca", "Co de", "Co disc", "Co old"]),
+        ({"q": "ai intern"}, ["Co disc"]),
+        ({"min": 8.5}, ["Co ca"]),
+    ],
+)
+def test_offers_filters(tmp_path, query, expected):
+    assert offers_ids(offers_db(tmp_path), **query)[0] == expected
+
+
+def test_offers_page_route(tmp_path):
+    from intern_radar.dashboard.app import Request
+    from intern_radar.dashboard.routes import Context, build_app
+
+    app = build_app(Context(offers_db(tmp_path), clock=lambda: NOW))
+    response = app.handle(Request("GET", "/offers", {"tier": "unlisted"}))
+    body = response.body.decode()
+    assert response.status == 200 and "Co disc" in body and "Découverte" in body
+    assert 'href="/offers/' in body and '<nav class="bottom">' in body
+    assert app.handle(Request("GET", "/", {})).status == 303
+    assert app.handle(Request("GET", "/more", {})).status == 200
+    assert app.handle(Request("GET", "/nope", {})).status == 404
+    post = Request("POST", "/run", {}, {}, {"host": "x", "origin": "http://evil"})
+    assert app.handle(post).status == 403
