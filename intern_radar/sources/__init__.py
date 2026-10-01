@@ -49,5 +49,6 @@ def build_sources(
             profile.adzuna_app_key,
             company_lookup(companies),
             search_terms(companies),
+            discovery=profile.discovery,
         ),
     }

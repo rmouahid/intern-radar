@@ -23,6 +23,7 @@ from intern_radar.sources.base import (
 )
 
 API = "https://api.adzuna.com/v1/api/jobs/{country}/search/1"
+DISCOVERY_TERMS = "machine learning ai llm nlp genai data scientist deep learning"
 DEFAULT_COUNTRIES = (
     "gb",
     "us",
@@ -36,6 +37,8 @@ DEFAULT_COUNTRIES = (
     "at",
     "be",
     "pl",
+    "au",
+    "nz",
 )
 
 Lookup = dict[str, tuple[str, Tier]]
@@ -100,53 +103,77 @@ class AdzunaSource:
         app_key: str | None,
         lookup: Lookup,
         terms: str,
+        discovery: bool = False,
     ) -> None:
+        """`discovery` adds, per country, a generic AI query whose offers from
+        employers outside the watch list are kept as tier "unlisted"."""
         self._client = client
         self._app_id = app_id
         self._app_key = app_key
         self._lookup = lookup
         self._terms = terms
+        self._discovery = discovery
 
     def fetch(self, company: Company, known_ids: Container[str]) -> list[Job]:
         if not (self._app_id and self._app_key):
             raise SourceError("adzuna_app_id / adzuna_app_key missing in profile.yaml")
 
-        def convert(item: dict[str, Any]) -> Job | None:
-            job_id = f"adzuna:{item['id']}"
-            title = html_to_text(item.get("title", ""))
-            if job_id in known_ids or not is_internship_title(title):
-                return None
-            employer = (item.get("company") or {}).get("display_name", "")
-            name, tier = match_company(employer, self._lookup)
-            if tier == "unlisted":  # not a watched company
-                return None
-            return Job(
-                id=job_id,
-                company=name,
-                tier=tier,
-                title=title,
-                location=(item.get("location") or {}).get("display_name", ""),
-                url=item["redirect_url"],
-                description=html_to_text(item.get("description", "")),
-                source="adzuna",
-                posted_at=iso_date(item.get("created")),
-            )
+        def converter(keep_unlisted: bool):
+            def convert(item: dict[str, Any]) -> Job | None:
+                return self._convert(item, known_ids, keep_unlisted)
+
+            return convert
 
         jobs: list[Job] = []
+        seen: set[str] = set()
+        queries = [(self._terms or DISCOVERY_TERMS, False)]
+        if self._discovery:
+            queries.append((DISCOVERY_TERMS, True))
         for country in company.params.get("countries", DEFAULT_COUNTRIES):
-            data = get_json(
-                self._client,
-                "GET",
-                API.format(country=country),
-                params={
-                    "app_id": self._app_id,
-                    "app_key": self._app_key,
-                    "results_per_page": 50,
-                    "what": "intern",
-                    "what_or": self._terms or "machine learning ai data llm",
-                    "max_days_old": MAX_DAYS_OLD,
-                    "content-type": "application/json",
-                },
-            )
-            jobs.extend(collect(company, data.get("results", []), convert))
+            for terms, keep_unlisted in queries:
+                data = get_json(
+                    self._client,
+                    "GET",
+                    API.format(country=country),
+                    params={
+                        "app_id": self._app_id,
+                        "app_key": self._app_key,
+                        "results_per_page": 50,
+                        "what": "intern",
+                        "what_or": terms,
+                        "max_days_old": MAX_DAYS_OLD,
+                        "content-type": "application/json",
+                    },
+                )
+                for job in collect(
+                    company, data.get("results", []), converter(keep_unlisted)
+                ):
+                    if job.id not in seen:
+                        seen.add(job.id)
+                        jobs.append(job)
         return jobs
+
+    def _convert(
+        self, item: dict[str, Any], known_ids: Container[str], keep_unlisted: bool
+    ) -> Job | None:
+        """Watched employers from the targeted query; employers outside the
+        watch list only from the discovery query."""
+        job_id = f"adzuna:{item['id']}"
+        title = html_to_text(item.get("title", ""))
+        if job_id in known_ids or not is_internship_title(title):
+            return None
+        employer = (item.get("company") or {}).get("display_name", "")
+        name, tier = match_company(employer, self._lookup)
+        if (tier == "unlisted") != keep_unlisted:
+            return None
+        return Job(
+            id=job_id,
+            company=name,
+            tier=tier,
+            title=title,
+            location=(item.get("location") or {}).get("display_name", ""),
+            url=item["redirect_url"],
+            description=html_to_text(item.get("description", "")),
+            source="adzuna",
+            posted_at=iso_date(item.get("created")),
+        )

@@ -85,7 +85,19 @@ watched company. The previous generic search returned 200 offers per fetch
 from employers outside the watch list and none from Google, Meta, Apple…;
 the targeted one returned 91 offers, all from watched companies (Siemens,
 IBM, ByteDance, BCG, Meta, Google, Sea, Grab, JPMorgan…), 77 of them passing
-the pre-filter. The API's `company` filter was rejected: it needs Adzuna's
+the pre-filter. **Discovery** (`discovery: true`, default): a second query per country
+(`what_or` = generic AI/ML/LLM/data terms) keeps the offers of employers
+**outside** the watch list (tier `unlisted`, shown as *découverte*), mostly
+European startups and mid-size companies whose interview odds are much
+better than the prestigious watch list's. A free rule drops them before
+the LLM unless the title names an AI field and the location is in the
+EU/EEA/Switzerland or a `self_sponsored_countries` country; the ranking is
+unchanged (4 tier points), so only very relevant offers with compatible
+dates reach immediate notifications. Australia and New Zealand were added
+to the Adzuna countries (14 countries × 2 queries per fetch, every 6 h, i.e.
+~84 requests a day). Measured on 2026-10-01: 374 offers from employers
+outside the list, 43 kept by the rule (Cellbyte, OMMAX, Astrafy, alinia.ai,
+Axiomatic AI, Tether, Sanctuary AI…). The API's `company` filter was rejected: it needs Adzuna's
 canonical employer name (`Meta` → HTTP 400, `Apple` → 0 results).
 
 | Plugin | Endpoint | Paging / caps | Detail call |

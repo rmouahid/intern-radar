@@ -3,6 +3,7 @@
 import re
 from datetime import date
 
+from intern_radar.countries import FREE_MOVEMENT, mentions_any
 from intern_radar.models import Job
 
 TITLE_RE = re.compile(
@@ -88,6 +89,27 @@ def is_past_cycle(title: str, window_year: int) -> bool:
 def is_undergrad_only_title(title: str) -> bool:
     """True for titles reserved to bachelor's students ("Intern, Bachelor's")."""
     return bool(UNDERGRAD_RE.search(title)) and not GRADUATE_RE.search(title)
+
+
+# Discovery offers (employers outside the watch list) must name an AI field.
+AI_TITLE_RE = re.compile(
+    r"\b(ai|ml|machine learning|deep learning|llms?|nlp|genai|generative|"
+    r"data scien\w*|computer vision|artificial intelligence|intelligence "
+    r"artificielle|rag|mlops|research scientist|applied scientist|kI|"
+    r"künstliche intelligenz)\b",
+    re.IGNORECASE,
+)
+
+
+def is_discovery_worthy(
+    title: str, location: str, self_sponsored: tuple[str, ...] = ()
+) -> bool:
+    """An offer from outside the watch list is kept only for an AI title in a
+    country where the candidate needs no sponsor (EU/EEA/Switzerland or
+    `self_sponsored`)."""
+    return bool(AI_TITLE_RE.search(title)) and mentions_any(
+        location, FREE_MOVEMENT + self_sponsored
+    )
 
 
 def is_internship_title(title: str) -> bool:

@@ -43,6 +43,7 @@ class RunReport:
     candidates: int = 0
     out_of_scope: int = 0  # internship titles dropped by the field filter
     stale: int = 0  # offers published more than max_offer_age_days ago
+    discovery: int = 0  # offers kept from employers outside the watch list
     scored: int = 0
     notified: int = 0
     grouped: int = 0  # jobs that reused the result of their posting group
@@ -146,7 +147,12 @@ class Pipeline:
                 if job.id in known:
                     continue
                 known.add(job.id)
-                if prefilter.is_stale(
+                discovery = job.tier == "unlisted"
+                if discovery and not prefilter.is_discovery_worthy(
+                    job.title, job.location, self._profile.self_sponsored_countries
+                ):
+                    status = "rejected"
+                elif prefilter.is_stale(
                     job.posted_at, now.date(), self._profile.max_offer_age_days
                 ):
                     status = "rejected"
@@ -163,6 +169,7 @@ class Pipeline:
                 else:
                     status = "pending"
                 self._store.add(job, status, now)
+                report.discovery += discovery and status == "pending"
                 report.new += 1
                 report.candidates += status == "pending"
 
