@@ -1,5 +1,7 @@
 """The web app's pages and actions."""
 
+import csv
+import io
 import re
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
@@ -117,6 +119,20 @@ class Context:
             yield store
         finally:
             store.close()
+
+
+def _cell(value: str) -> str:
+    """Neutralise spreadsheet formulas (=, +, -, @ at the start of a cell)."""
+    return f"'{value}" if value[:1] in ("=", "+", "-", "@", "\t", "\r") else value
+
+
+def to_csv(header: tuple[str, ...], rows: list[tuple[str, ...]]) -> bytes:
+    """UTF-8 CSV with a BOM, so that spreadsheets read the accents."""
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(header)
+    writer.writerows([_cell(v) for v in row] for row in rows)
+    return ("\ufeff" + buffer.getvalue()).encode("utf-8")
 
 
 def not_found(message: str) -> Response:
@@ -515,6 +531,21 @@ def build_app(ctx: Context) -> App:
         if detail is None:
             return not_found("Entreprise inconnue.")
         return html_response(page(name, company_body(detail), "more"))
+
+    @app.route("GET", "/applications.csv")
+    def applications_csv(request: Request):
+        db = queries.connect(ctx.db_path)
+        try:
+            rows = queries.applications_export(db)
+        finally:
+            db.close()
+        name = f"candidatures-{ctx.clock():%Y-%m-%d}.csv"
+        return Response(
+            200,
+            to_csv(queries.EXPORT_HEADER, rows),
+            "text/csv; charset=utf-8",
+            (("Content-Disposition", f'attachment; filename="{name}"'),),
+        )
 
     @app.route("GET", "/applications")
     def applications_page(request: Request):

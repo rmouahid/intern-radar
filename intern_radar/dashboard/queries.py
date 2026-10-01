@@ -9,6 +9,7 @@ from datetime import date, datetime, timedelta
 from intern_radar.conventions import CONVENTIONS, convention_for
 from intern_radar.description import clean_description
 from intern_radar.skills import BY_NAME, find_skills
+from intern_radar.tracking import STATUS_TEXT
 
 
 def connect(path: str) -> sqlite3.Connection:
@@ -866,3 +867,48 @@ def calibration(db: sqlite3.Connection) -> Calibration:
         [b for b in buckets if b.decided],
         [t for t in tiers if t.decided],
     )
+
+
+# --- applications export ---------------------------------------------------------
+
+EXPORT_HEADER = (
+    "Entreprise", "Poste", "Lieu", "Statut", "Mis à jour", "Candidature envoyée",
+    "Date limite", "Entretiens", "Prochaine action", "Pour le", "Contact",
+    "E-mail du contact", "Notes", "Score", "Chance (%)", "Lien",
+)  # fmt: skip
+
+
+def applications_export(db: sqlite3.Connection) -> list[tuple[str, ...]]:
+    """One row per tracked application (dismissed offers excluded), latest first."""
+    rows = db.execute(
+        "SELECT j.company, j.title, j.location, j.url, j.score, a.status,"
+        " a.updated_at, a.applied_at, c.percent, d.deadline, d.interviews,"
+        " d.next_action, d.next_action_date, d.contact_name, d.contact_email,"
+        " d.notes FROM applications a JOIN jobs j ON j.id = a.job_id"
+        " LEFT JOIN chances c ON c.job_id = a.job_id"
+        " LEFT JOIN application_details d ON d.job_id = a.job_id"
+        " WHERE a.status != 'dismissed' ORDER BY a.updated_at DESC"
+    )
+    return [
+        (
+            r["company"],
+            r["title"],
+            r["location"],
+            STATUS_TEXT.get(r["status"], r["status"]),
+            r["updated_at"][:10],
+            (r["applied_at"] or "")[:10],
+            r["deadline"] or "",
+            " ; ".join(
+                w.replace("T", " ") for w in json.loads(r["interviews"] or "[]")
+            ),
+            r["next_action"] or "",
+            r["next_action_date"] or "",
+            r["contact_name"] or "",
+            r["contact_email"] or "",
+            r["notes"] or "",
+            f"{r['score']:.1f}" if r["score"] is not None else "",
+            str(r["percent"]) if r["percent"] is not None else "",
+            r["url"],
+        )
+        for r in rows
+    ]

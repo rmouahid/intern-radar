@@ -150,3 +150,44 @@ def test_board_shows_one_card_per_posting_group(tmp_path):
     columns = queries.board(store._db, NOW, reminder_days=14)
     assert companies(columns["to_apply"]) == ["Acme"]  # Beta is tracked via "e"
     assert companies(columns["applied"]) == ["Beta"]
+
+
+def test_applications_csv_export(tmp_path):
+    import csv
+    import io
+
+    from intern_radar.chance import Chance
+
+    path = make_db(tmp_path)
+    store = Store(path)
+    store.save_chance("interview", Chance(12, ()))
+    store.save_application_details(
+        "interview",
+        ApplicationDetails(
+            contact_name="Ada", contact_email="ada@acme.io",
+            notes="=HYPERLINK(\"http://evil\")", interviews=("2026-10-03T10:00",),
+        ),
+        NOW,
+    )  # fmt: skip
+    store.close()
+    app = build_app(Context(path, clock=lambda: NOW))
+    response = app.handle(Request("GET", "/applications.csv", {}))
+    assert response.content_type == "text/csv; charset=utf-8"
+    assert response.headers == (
+        ("Content-Disposition", 'attachment; filename="candidatures-2026-10-01.csv"'),
+    )
+    assert response.body.startswith("﻿".encode())
+    rows = list(csv.reader(io.StringIO(response.body.decode("utf-8-sig"))))
+    header, *lines = rows
+    assert header[:4] == ["Entreprise", "Poste", "Lieu", "Statut"]
+    companies = {line[0] for line in lines}
+    assert "Co gone" not in companies  # dismissed
+    assert {"Co applied", "Co interview", "Co offer"} <= companies
+    row = next(line for line in lines if line[0] == "Co interview")
+    by = dict(zip(header, row, strict=True))
+    assert by["Statut"] == "Entretien obtenu" and by["Contact"] == "Ada"
+    assert by["Entretiens"] == "2026-10-03 10:00" and by["Chance (%)"] == "12"
+    assert by["Notes"].startswith("'=HYPERLINK")  # formula neutralised
+    assert by["Lien"].startswith("https://")
+    page = app.handle(Request("GET", "/applications", {})).body.decode()
+    assert 'href="/applications.csv"' in page
