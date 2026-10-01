@@ -4,6 +4,35 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] — 2026-10-01
+
+### Added
+
+- **Country conventions for tailored CVs and cover letters**, from the
+  candidate's writing guide: the region of the offer sets the paper (Letter
+  or A4), page limit, spelling, date style, section order and titles, the
+  tabular German-style CV, the right-to-work line, local mentions
+  (referees, GDPR clause), and the letter's salutation, closing, date,
+  subject line and length; letters follow a hook / proof / fit / closing
+  structure (#70, #72).
+- **Discovery offers**: AI internships from employers outside the watch
+  list (EU/EEA/Switzerland or working-holiday countries), labelled
+  *découverte* (#74).
+- **Self-arranged work authorisation**: `self_sponsored_countries` (e.g.
+  working-holiday visas) are not penalised; EU/EEA/Swiss offers are always
+  visa-free by rule (#68).
+- **Dashboard run button** to start a run through systemd (#66).
+- Watch list widened from 65 to **116 companies**; Adzuna now targets the
+  watched companies without a public feed (#60, #62).
+
+### Changed
+
+- Interview-chance estimates are recalibrated: explicit base rates by
+  company type, fit multiplier and bounded adjustments (#68).
+- Offers first published more than 60 days ago are dropped and never sent
+  (`max_offer_age_days`) (#64).
+- The candidate profile gains project links and a certifications field.
+
 ## [0.2.0] — 2026-09-30
 
 ### Added
@@ -67,5 +96,6 @@ All notable changes to this project are documented here. The format follows
   checks, one-page PDF delivered in the chat.
 - systemd units, logrotate configuration and complete documentation.
 
+[0.3.0]: https://github.com/rmouahid/intern-radar/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/rmouahid/intern-radar/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/rmouahid/intern-radar/releases/tag/v0.1.0
