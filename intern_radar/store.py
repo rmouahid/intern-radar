@@ -86,6 +86,12 @@ CREATE TABLE IF NOT EXISTS application_events (
     status TEXT NOT NULL,
     at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS feedback (
+    job_id TEXT PRIMARY KEY,
+    vote INTEGER NOT NULL,
+    reason TEXT NOT NULL,
+    at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS meta (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
@@ -557,6 +563,40 @@ class Store:
                 " VALUES (?, ?, ?, datetime('now'))",
                 (job_id, chance.percent, json.dumps(chance.reasons)),
             )
+
+    def set_feedback(self, job_id: str, vote: int, reason: str, now: datetime) -> None:
+        """The candidate's 👍 (1) or 👎 (-1) on an offer, with an optional reason."""
+        if vote not in (1, -1):
+            raise ValueError(vote)
+        with self._db:
+            self._db.execute(
+                "INSERT OR REPLACE INTO feedback (job_id, vote, reason, at)"
+                " VALUES (?, ?, ?, ?)",
+                (job_id, vote, reason.strip()[:300], now.isoformat()),
+            )
+
+    def clear_feedback(self, job_id: str) -> None:
+        with self._db:
+            self._db.execute("DELETE FROM feedback WHERE job_id = ?", (job_id,))
+
+    def feedback(self, job_id: str) -> tuple[int, str] | None:
+        row = self._db.execute(
+            "SELECT vote, reason FROM feedback WHERE job_id = ?", (job_id,)
+        ).fetchone()
+        return (row["vote"], row["reason"]) if row else None
+
+    def feedback_entries(self, limit: int = 200) -> list[tuple[Job, int, str, str]]:
+        """Latest feedback first: job, vote, reason, date."""
+        rows = self._db.execute(
+            "SELECT j.*, f.vote AS f_vote, f.reason AS f_reason, f.at AS f_at"
+            " FROM feedback f JOIN jobs j ON j.id = f.job_id"
+            " ORDER BY f.at DESC, f.rowid DESC LIMIT ?",
+            (limit,),
+        )
+        return [
+            (_row_to_job(row), row["f_vote"], row["f_reason"], row["f_at"])
+            for row in rows
+        ]
 
     def get_meta(self, key: str) -> str | None:
         row = self._db.execute(

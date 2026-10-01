@@ -64,7 +64,7 @@ Candidate:
 {summary}
 
 Internship window: {start} to {end}. Minimum duration: {months} months.
-
+{preferences}
 Return one assessment per job below, with the same job_id:
 - is_internship: true only for an internship, co-op or placement for students.
 - ai_relevance: 0-10, how close the role is to AI/ML engineering (LLMs, RAG,
@@ -237,6 +237,14 @@ def _parse(item: Any) -> Assessment | None:
     )
 
 
+PREFERENCES = """
+The candidate's own feedback on recent offers. Use it only to calibrate
+ai_relevance for similar roles (same kind of work, domain or company); it
+changes none of the other fields.
+{feedback}
+"""
+
+
 class Scorer:
     def __init__(
         self,
@@ -245,9 +253,13 @@ class Scorer:
         window_start: date,
         window_end: date,
         min_months: int,
+        preferences: str = "",
     ) -> None:
         self._backend = backend
         self._header = INSTRUCTIONS.format(
+            preferences=PREFERENCES.format(feedback=preferences.strip())
+            if preferences.strip()
+            else "",
             summary=candidate_summary.strip(),
             start=window_start.isoformat(),
             end=window_end.isoformat(),

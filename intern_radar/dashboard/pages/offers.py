@@ -60,7 +60,7 @@ def filters_form(f: OfferFilters) -> str:
     )
 
 
-def offer_card(row: OfferRow) -> str:
+def offer_card(row: OfferRow, back: str = "/offers") -> str:
     label = tier_label(row.tier)
     chips = [label[:1].upper() + label[1:]]
     chips.append(WORK_AUTHORISATION_LABELS.get(row.work_authorisation, "Visa ?"))
@@ -77,13 +77,31 @@ def offer_card(row: OfferRow) -> str:
     places = f" · +{row.other_places} lieu(x)" if row.other_places else ""
     chip_html = "".join(f'<span class="chip">{e(c)}</span>' for c in chips)
     return (
-        f'<a class="card" href="/offers/{row.ref}">'
+        f'<div class="card"><a class="cardlink" href="/offers/{row.ref}">'
         f'<div class="top"><div><div class="muted">{e(row.company)}</div>'
         f'<div class="title">{e(row.title)}</div>'
         f'<div class="muted">📍 {e(row.location[:80] or "Lieu non précisé")}'
         f"{places}</div>"
         f'</div><div class="score">{row.score:.1f}</div></div>{chip_html}</a>'
+        f"{vote_buttons(row.ref, row.vote, back)}</div>"
     )
+
+
+def vote_buttons(ref: int, vote: int | None, back: str) -> str:
+    """👍/👎 forms; tapping the current vote again removes it."""
+
+    def button(value: int, icon: str) -> str:
+        chosen = vote == value
+        action = "clear" if chosen else ("up" if value > 0 else "down")
+        css = "vote on" if chosen else "vote"
+        return (
+            f'<form class="inline" method="post" action="/offers/{ref}/feedback">'
+            f'<input type="hidden" name="vote" value="{action}">'
+            f'<input type="hidden" name="next" value="{e(back)}">'
+            f'<button class="{css}" title="{icon}">{icon}</button></form>'
+        )
+
+    return f'<div class="votes">{button(1, "👍")}{button(-1, "👎")}</div>'
 
 
 def offers_body(rows: list[OfferRow], total: int, f: OfferFilters) -> str:
@@ -114,7 +132,8 @@ def offers_body(rows: list[OfferRow], total: int, f: OfferFilters) -> str:
         else "<span></span>"
     )
     pager += "</div>"
-    cards = "".join(offer_card(row) for row in rows) or (
+    here = link(f.page)
+    cards = "".join(offer_card(row, here) for row in rows) or (
         '<section class="muted">Aucune offre ne correspond à ces filtres.</section>'
     )
     return (
