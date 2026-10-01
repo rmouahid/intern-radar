@@ -240,3 +240,20 @@ def test_is_stale(posted_at, stale):
 
     assert is_stale(posted_at, date(2026, 9, 30), 60) is stale
     assert is_stale(posted_at, date(2026, 9, 30), 0) is False
+
+
+@pytest.mark.parametrize(
+    "title, location, kept",
+    [
+        ("Machine Learning Intern", "Berlin", True),
+        ("Stage Data Scientist - NLP", "Amsterdam", True),
+        ("AI Engineer Intern", "Toronto, CAN", True),  # self-sponsored country
+        ("AI Engineer Intern", "London, UK", False),
+        ("AI Engineer Intern", "New York", False),
+        ("Marketing Intern", "Berlin", False),
+    ],
+)
+def test_discovery_offers_need_an_ai_title_and_no_sponsor(title, location, kept):
+    from intern_radar.prefilter import is_discovery_worthy
+
+    assert is_discovery_worthy(title, location, ("Canada",)) is kept

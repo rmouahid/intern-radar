@@ -85,6 +85,7 @@ Letters are enabled (button shown, commands usable) when `cv_url` and
 | `resume_effort` | string | `low` | `--effort` for tailored CVs |
 | `dashboard_host` | string | Tailscale IP | address the dashboard listens on |
 | `dashboard_port` | int | `8787` | dashboard port |
+| `discovery` | bool | `true` | also keep AI internships from employers outside the watch list (Adzuna), in the EU/EEA/Switzerland or a self-sponsored country, shown as *découverte* |
 | `self_sponsored_countries` | list of names | `[]` | countries where you obtain the visa without an employer sponsor (e.g. working holiday); offers there get `self_arranged`, no penalty |
 | `max_offer_age_days` | int | `60` | offers first published earlier are dropped and never sent; `0` disables |
 | `reminder_days` | int | `14` | days without news before an application reminder |

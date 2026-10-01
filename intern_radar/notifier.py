@@ -32,6 +32,11 @@ WORK_AUTHORISATION_LABELS = {
 e = html.escape
 
 
+def tier_label(tier: str) -> str:
+    """ "niveau S/A/B", or "découverte" for employers outside the watch list."""
+    return "découverte" if tier == "unlisted" else f"niveau {tier}"
+
+
 class NotifyError(Exception):
     """A notification could not be delivered.
 
@@ -111,7 +116,7 @@ def format_immediate(
     width = 60 if siblings else 100
     # Source and LLM fields are unbounded; Telegram rejects texts over 4096.
     lines = [
-        f"🔥 <b>{e(job.company[:80])} · niveau {job.tier}</b>",
+        f"🔥 <b>{e(job.company[:80])} · {tier_label(job.tier)}</b>",
         f"<b>{e(job.title[:200])}</b>",
         SEPARATOR,
         f"📍  {_locations([scored, *siblings], width)}",
@@ -150,7 +155,7 @@ def format_digest(
     shown = groups[:MAX_DIGEST_LINES]
     number = (lambda n: f"{n}. ") if refs else (lambda n: "")
     blocks = [
-        f"<b>{number(n)}{e(s.job.company)}</b> · niveau {s.job.tier}\n"
+        f"<b>{number(n)}{e(s.job.company)}</b> · {tier_label(s.job.tier)}\n"
         f'<a href="{e(s.job.url)}">{e(s.job.title[:80])}</a>\n'
         f"📍 {_locations(group, 40)}   ⭐ {s.score:.1f} / 10"
         for n, (s, group) in enumerate(((g[0], g) for g in shown), start=1)

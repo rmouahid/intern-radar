@@ -527,3 +527,38 @@ def test_offers_in_self_sponsored_countries_are_not_penalised():
     pipeline.run()
     [scored] = store.scored(0)
     assert scored.assessment.work_authorisation == "self_arranged"
+
+
+def test_discovery_offers_are_filtered_counted_and_labelled():
+    jobs = [
+        make_job(
+            id="d1",
+            company="Tiny AI",
+            tier="unlisted",
+            title="ML Intern",
+            location="Berlin",
+        ),
+        make_job(
+            id="d2",
+            company="Tiny Ads",
+            tier="unlisted",
+            title="Marketing Intern",
+            location="Berlin",
+        ),
+        make_job(
+            id="d3",
+            company="Tiny US",
+            tier="unlisted",
+            title="ML Intern US",
+            location="New York",
+        ),
+    ]
+    scorer = FakeScorer(
+        {"d1": make_assessment(ai_relevance=10, work_authorisation="free")}
+    )
+    notifier = FakeNotifier()
+    pipeline, _, _ = build({"fake": FakeSource(jobs)}, scorer, notifier)
+    report = pipeline.run()
+    assert (report.discovery, report.candidates) == (1, 1)
+    assert scorer.batches == [["d1"]]
+    assert first_line(notifier.sent[0]) == "🔥 <b>Tiny AI · découverte</b>"

@@ -112,3 +112,41 @@ def test_search_terms_cover_companies_without_feed_only():
         Company("Arm", "A", "none", {"aliases": ["Arm Holdings"]}),
     ]
     assert search_terms(companies) == ("goldman sachs meta facebook g-research arm")
+
+
+def test_discovery_query_keeps_only_employers_outside_the_watch_list():
+    calls = []
+
+    def search_both(request):
+        what_or = request.url.params["what_or"]
+        calls.append(what_or)
+        employer = "Google UK Ltd" if "google" in what_or else "Tiny AI Startup"
+        twin = "Google UK Ltd" if "google" not in what_or else "Tiny AI Startup"
+        return httpx.Response(
+            200,
+            json={
+                "results": [
+                    {
+                        "id": f"{len(calls)}{n}",
+                        "title": "ML Intern",
+                        "company": {"display_name": name},
+                        "location": {"display_name": "Berlin"},
+                        "redirect_url": "https://a",
+                        "description": "",
+                        "created": None,
+                    }
+                    for n, name in enumerate((employer, twin))
+                ]
+            },
+        )
+
+    source = AdzunaSource(
+        mock_client({f"GET {API}": search_both}), "id", "key", LOOKUP,
+        search_terms(COMPANIES), discovery=True,
+    )  # fmt: skip
+    jobs = source.fetch(COMPANIES[2], set())
+    assert len(calls) == 2 and "machine learning" in calls[1]
+    assert sorted((j.company, j.tier) for j in jobs) == [
+        ("Google", "S"),
+        ("Tiny AI Startup", "unlisted"),
+    ]

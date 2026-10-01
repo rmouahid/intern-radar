@@ -86,6 +86,9 @@ class Profile:
     # Countries where the candidate obtains work authorisation without an
     # employer sponsor (e.g. working holiday visas).
     self_sponsored_countries: tuple[str, ...] = ()
+    # Also keep AI internships from employers outside the watch list (Adzuna),
+    # in the EU/EEA/Switzerland or a self-sponsored country.
+    discovery: bool = True
     dashboard_host: str | None = None  # default: the Tailscale address
     dashboard_port: int = 8787
     max_letters_per_day: int = 10
