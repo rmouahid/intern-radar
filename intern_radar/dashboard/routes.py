@@ -1,5 +1,6 @@
 """The web app's pages and actions."""
 
+import re
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -21,6 +22,10 @@ from intern_radar.dashboard.app import (
 from intern_radar.dashboard.layout import e, page
 from intern_radar.dashboard.pages.actions import NOTICES as ACTION_NOTICES
 from intern_radar.dashboard.pages.actions import actions_html
+from intern_radar.dashboard.pages.applications import (
+    applications_body,
+    details_form,
+)
 from intern_radar.dashboard.pages.editing import letter_form, resume_form
 from intern_radar.dashboard.pages.feedback import feedback_body
 from intern_radar.dashboard.pages.offer import OfferView, offer_body
@@ -29,12 +34,13 @@ from intern_radar.dashboard.render import stats_body
 from intern_radar.dashboard.runner import RunStatus
 from intern_radar.dashboard.worker import KINDS, Worker
 from intern_radar.editing import DocumentEditor, EditError
-from intern_radar.store import Store
+from intern_radar.store import ApplicationDetails, Store
 from intern_radar.tracking import can_move
 
 NOTICES: dict[str, str] = {
     **ACTION_NOTICES,
     "feedback": "Avis enregistré.",
+    "details": "Suivi enregistré.",
     "edited": "Document modifié : le PDF a été régénéré.",
     "edited_sent": "Document modifié : le PDF régénéré part sur Telegram.",
 }
@@ -90,6 +96,40 @@ def not_found(message: str) -> Response:
     return html_response(page("Introuvable", body), 404)
 
 
+DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+DATETIME_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$")
+
+
+def parse_details(form: dict[str, str]) -> ApplicationDetails:
+    """CRM fields from the form; empty fields clear, malformed dates refuse."""
+
+    def date(name: str) -> str | None:
+        value = form.get(name, "").strip()
+        if value and not DATE_RE.match(value):
+            raise ValueError(f"date invalide : {value[:20]}")
+        return value or None
+
+    interviews = []
+    for key in sorted(k for k in form if k.startswith("interview")):
+        value = form[key].strip()[:16]
+        if value:
+            if not DATETIME_RE.match(value):
+                raise ValueError(f"date d'entretien invalide : {value}")
+            interviews.append(value)
+    email = form.get("contact_email", "").strip()[:200]
+    if email and "@" not in email:
+        raise ValueError("e-mail du contact invalide")
+    return ApplicationDetails(
+        notes=form.get("notes", "").strip()[:4000],
+        contact_name=form.get("contact_name", "").strip()[:200],
+        contact_email=email,
+        deadline=date("deadline"),
+        interviews=tuple(sorted(set(interviews))),
+        next_action=form.get("next_action", "").strip()[:300],
+        next_action_date=date("next_action_date"),
+    )
+
+
 def load_offer(store: Store, ref: int) -> OfferView | None:
     group = store.group_by_ref(ref)
     if not group:
@@ -105,6 +145,7 @@ def load_offer(store: Store, ref: int) -> OfferView | None:
         has_resume=store.resume(job_id) is not None,
         sibling_refs=tuple(store.job_ref(s.job.id) or 0 for s in group[1:]),
         feedback=store.feedback(job_id),
+        details_form=details_form(ref, store.application_details(job_id)),
     )
 
 
@@ -259,6 +300,36 @@ def build_app(ctx: Context) -> App:
             ctx.worker.submit(kind, ref, job.id)
             return redirect(f"/offers/{ref}?done=edited_sent")
         return redirect(f"/offers/{ref}?done=edited")
+
+    @app.route("POST", "/offers/<int:ref>/details")
+    def save_details(request: Request, ref: int):
+        try:
+            details = parse_details(request.form)
+        except ValueError as exc:
+            body = (
+                f"<h1>Non enregistré</h1><p>{e(str(exc))}</p>"
+                f'<p><a href="/offers/{ref}">← Retour</a></p>'
+            )
+            return html_response(page("Non enregistré", body, "offers"), 400)
+        with ctx.store() as store:
+            job = store.job_by_ref(ref)
+            if job is None:
+                return not_found("Offre introuvable.")
+            store.save_application_details(job.id, details, ctx.clock())
+        return redirect(f"/offers/{ref}?done=details")
+
+    @app.route("GET", "/applications")
+    def applications_page(request: Request):
+        days = ctx.profile.reminder_days if ctx.profile else 14
+        now = ctx.clock()
+        db = queries.connect(ctx.db_path)
+        try:
+            body = applications_body(
+                queries.board(db, now, days), queries.calendar(db, now, days)
+            )
+        finally:
+            db.close()
+        return html_response(page("Candidatures", body, "applications"))
 
     @app.route("POST", "/offers/<int:ref>/feedback")
     def give_feedback(request: Request, ref: int):

@@ -34,6 +34,7 @@ class OfferView:
     has_resume: bool
     sibling_refs: tuple[int, ...] = ()  # refs of group[1:]
     feedback: tuple[int, str] | None = None  # vote and reason
+    details_form: str = ""  # CRM fields form, rendered by the route
 
 
 def score_rows(
@@ -188,7 +189,9 @@ def offer_body(
     parts.append(
         _section(
             "Candidature",
-            f"<p><b>{e(status)}</b></p>" + (f"<ul>{history}</ul>" if history else ""),
+            f"<p><b>{e(status)}</b></p>"
+            + (f"<ul>{history}</ul>" if history else "")
+            + view.details_form,
         )
     )
     documents = []

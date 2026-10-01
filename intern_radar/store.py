@@ -4,7 +4,7 @@ import json
 import sqlite3
 import threading
 from collections.abc import Callable
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -92,11 +92,36 @@ CREATE TABLE IF NOT EXISTS feedback (
     reason TEXT NOT NULL,
     at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS application_details (
+    job_id TEXT PRIMARY KEY,
+    notes TEXT NOT NULL DEFAULT '',
+    contact_name TEXT NOT NULL DEFAULT '',
+    contact_email TEXT NOT NULL DEFAULT '',
+    deadline TEXT,
+    interviews TEXT NOT NULL DEFAULT '[]',
+    next_action TEXT NOT NULL DEFAULT '',
+    next_action_date TEXT,
+    updated_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS meta (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
 """
+
+
+@dataclass(frozen=True)
+class ApplicationDetails:
+    """What the candidate notes about one application (CRM fields)."""
+
+    notes: str = ""
+    contact_name: str = ""
+    contact_email: str = ""
+    deadline: str | None = None  # YYYY-MM-DD
+    interviews: tuple[str, ...] = ()  # YYYY-MM-DDTHH:MM, sorted
+    next_action: str = ""
+    next_action_date: str | None = None  # YYYY-MM-DD
+
 
 JOB_COLUMNS = (
     "id",
@@ -562,6 +587,43 @@ class Store:
                 "INSERT OR REPLACE INTO chances (job_id, percent, reasons, created_at)"
                 " VALUES (?, ?, ?, datetime('now'))",
                 (job_id, chance.percent, json.dumps(chance.reasons)),
+            )
+
+    def application_details(self, job_id: str) -> ApplicationDetails:
+        row = self._db.execute(
+            "SELECT * FROM application_details WHERE job_id = ?", (job_id,)
+        ).fetchone()
+        if row is None:
+            return ApplicationDetails()
+        return ApplicationDetails(
+            notes=row["notes"],
+            contact_name=row["contact_name"],
+            contact_email=row["contact_email"],
+            deadline=row["deadline"],
+            interviews=tuple(json.loads(row["interviews"])),
+            next_action=row["next_action"],
+            next_action_date=row["next_action_date"],
+        )
+
+    def save_application_details(
+        self, job_id: str, details: ApplicationDetails, now: datetime
+    ) -> None:
+        with self._db:
+            self._db.execute(
+                "INSERT OR REPLACE INTO application_details (job_id, notes,"
+                " contact_name, contact_email, deadline, interviews, next_action,"
+                " next_action_date, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (
+                    job_id,
+                    details.notes,
+                    details.contact_name,
+                    details.contact_email,
+                    details.deadline,
+                    json.dumps(sorted(details.interviews)),
+                    details.next_action,
+                    details.next_action_date,
+                    now.isoformat(),
+                ),
             )
 
     def set_feedback(self, job_id: str, vote: int, reason: str, now: datetime) -> None:
