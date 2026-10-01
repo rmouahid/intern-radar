@@ -790,3 +790,79 @@ def runs(db: sqlite3.Connection, limit: int = 30) -> RunSummary:
     )
     worst = sorted(failing.items(), key=lambda f: (-f[1][0], f[0]))
     return RunSummary(rows, median, steps, [(s, n, m) for s, (n, m) in worst])
+
+
+# --- chance calibration ----------------------------------------------------------
+
+CHANCE_BUCKETS = ((0, 5), (5, 10), (10, 20), (20, 40), (40, 101))
+MIN_DECIDED = 5  # concluded applications needed before showing rates
+REACHED = ("interview", "offer")
+CONCLUDED = ("interview", "offer", "rejected", "no_answer")
+
+
+@dataclass(frozen=True)
+class CalibrationRow:
+    label: str  # chance bucket ("5–10 %") or company type
+    decided: int
+    interviews: int
+    predicted: float  # mean announced chance, in %
+
+    @property
+    def observed(self) -> float:
+        return 100 * self.interviews / self.decided if self.decided else 0.0
+
+
+@dataclass(frozen=True)
+class Calibration:
+    decided: int
+    pending: int  # applied with a chance, no outcome yet
+    buckets: list[CalibrationRow]
+    tiers: list[CalibrationRow]
+
+
+def calibration(db: sqlite3.Connection) -> Calibration:
+    """Announced interview chance versus outcomes of concluded applications.
+
+    An application reached the interview when it is, or ever was, at the
+    interview or offer stage (a rejection after an interview still counts).
+    """
+    rows = db.execute(
+        "SELECT j.tier, c.percent, a.status,"
+        " EXISTS (SELECT 1 FROM application_events ev WHERE ev.job_id = a.job_id"
+        " AND ev.status IN ('interview', 'offer')) AS reached"
+        " FROM applications a JOIN chances c ON c.job_id = a.job_id"
+        " JOIN jobs j ON j.id = a.job_id"
+        " WHERE a.status NOT IN ('dismissed')"
+    ).fetchall()
+    decided = [
+        (r["tier"], r["percent"], bool(r["reached"]) or r["status"] in REACHED)
+        for r in rows
+        if r["status"] in CONCLUDED
+    ]
+    pending = sum(1 for r in rows if r["status"] == "applied")
+
+    def summarise(label: str, group: list[tuple[str, int, bool]]) -> CalibrationRow:
+        return CalibrationRow(
+            label,
+            len(group),
+            sum(1 for _, _, reached in group if reached),
+            sum(p for _, p, _ in group) / len(group) if group else 0.0,
+        )
+
+    buckets = [
+        summarise(
+            f"{low}–{high} %" if high <= 100 else f"{low} % et plus",
+            [d for d in decided if low <= d[1] < high],
+        )
+        for low, high in CHANCE_BUCKETS
+    ]
+    tiers = [
+        summarise(tier, [d for d in decided if d[0] == tier])
+        for tier in ("S", "A", "B", "unlisted")
+    ]
+    return Calibration(
+        len(decided),
+        pending,
+        [b for b in buckets if b.decided],
+        [t for t in tiers if t.decided],
+    )

@@ -215,6 +215,7 @@ def render_stats(ctx: Context, notice: str | None = None) -> str:
             queries.llm_usage(db, now),
             run,
             queries.runs(db),
+            queries.calibration(db),
         )
     finally:
         db.close()

@@ -4,8 +4,11 @@ import html
 from datetime import datetime
 
 from intern_radar.dashboard.queries import (
+    MIN_DECIDED,
     STEP_LABELS,
     ApplicationRow,
+    Calibration,
+    CalibrationRow,
     Kpis,
     RunSummary,
     SourceRow,
@@ -13,6 +16,7 @@ from intern_radar.dashboard.queries import (
     Week,
 )
 from intern_radar.dashboard.runner import RunStatus
+from intern_radar.notifier import tier_label
 from intern_radar.tracking import STATUS_TEXT
 
 e = html.escape
@@ -250,6 +254,42 @@ def _runs(summary: RunSummary) -> str:
     )
 
 
+def _calibration(cal: Calibration) -> str:
+    title = "<h2>Chances annoncées vs entretiens obtenus</h2>"
+    if cal.decided < MIN_DECIDED:
+        return (
+            f"<section>{title}<p class='muted'>Pas encore assez de candidatures "
+            f"conclues : {cal.decided} sur {MIN_DECIDED} nécessaires "
+            f"({cal.pending} en attente de réponse). Une candidature est conclue à "
+            "l'entretien, à l'offre, au refus ou sans réponse.</p></section>"
+        )
+
+    def table(rows: list[CalibrationRow], head: str, labels=None) -> str:
+        body = "".join(
+            f"<tr><td>{e((labels or {}).get(r.label, r.label))}</td>"
+            f"<td class='n'>{r.decided}</td><td class='n'>{r.predicted:.0f} %</td>"
+            f"<td class='n {'ok' if r.observed >= r.predicted else 'warn'}'>"
+            f"{r.observed:.0f} %</td></tr>"
+            for r in rows
+        )
+        return (
+            f"<table><tr><th>{e(head)}</th><th class='n'>Conclues</th>"
+            "<th class='n'>Annoncé</th><th class='n'>Obtenu</th></tr>"
+            f"{body}</table>"
+        )
+
+    tiers = {t: tier_label(t) for t in ("S", "A", "B", "unlisted")}
+    return (
+        f"<section>{title}<p class='muted'>{cal.decided} candidature(s) conclue(s), "
+        f"{cal.pending} en attente. « Obtenu » : part ayant atteint l'entretien "
+        "(en vert quand la réalité dépasse l'estimation).</p>"
+        + table(cal.buckets, "Chance annoncée")
+        + "<div style='height:10px'></div>"
+        + table(cal.tiers, "Type d'entreprise", tiers)
+        + "</section>"
+    )
+
+
 def stats_body(
     now: datetime,
     kpis: Kpis,
@@ -261,6 +301,7 @@ def stats_body(
     usage: list[UsageRow],
     run: RunStatus | None = None,
     runs: RunSummary | None = None,
+    calibration: Calibration | None = None,
 ) -> str:
     digest, immediate = thresholds
     return (
@@ -272,6 +313,7 @@ def stats_body(
         + _histogram(histogram, digest, immediate)
         + _applications(applications)
         + _sources(sources)
+        + (_calibration(calibration) if calibration is not None else "")
         + (_runs(runs) if runs is not None else "")
         + _usage(usage)
     )

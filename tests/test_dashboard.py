@@ -407,3 +407,46 @@ def test_runs_summary_and_stats_section(tmp_path):
     assert "Aucun run" in _runs(queries.RunSummary([], None, [], []))
     page = render_dashboard(path, (5.5, 7.5), NOW)
     assert "Derniers runs" in page
+
+
+def test_chance_calibration(tmp_path):
+    from intern_radar.chance import Chance
+    from intern_radar.dashboard.render import _calibration
+
+    path = str(tmp_path / "cal.db")
+    store = Store(path)
+    cases = (
+        ("a", "S", 3, ["applied", "rejected"]),
+        ("b", "S", 4, ["applied", "interview", "rejected"]),  # reached, then refused
+        ("c", "A", 8, ["applied", "no_answer"]),
+        ("d", "A", 12, ["applied", "interview"]),
+        ("e", "unlisted", 30, ["applied", "interview", "offer"]),
+        ("f", "A", 9, ["applied"]),  # pending
+        ("g", "A", 9, ["dismissed"]),  # ignored
+    )
+    for job_id, tier, percent, statuses in cases:
+        store.add(make_job(id=job_id, tier=tier), "pending", NOW)
+        store.save_chance(job_id, Chance(percent, ()))
+        for status in statuses:
+            store.set_application(job_id, status, NOW)
+    store.close()
+    db = queries.connect(path)
+    cal = queries.calibration(db)
+    assert (cal.decided, cal.pending) == (5, 1)
+    assert [(b.label, b.decided, b.interviews) for b in cal.buckets] == [
+        ("0–5 %", 2, 1),
+        ("5–10 %", 1, 0),
+        ("10–20 %", 1, 1),
+        ("20–40 %", 1, 1),
+    ]
+    assert [(t.label, t.decided, t.interviews) for t in cal.tiers] == [
+        ("S", 2, 1),
+        ("A", 2, 1),
+        ("unlisted", 1, 1),
+    ]
+    assert cal.buckets[0].predicted == 3.5 and cal.buckets[0].observed == 50.0
+    html = _calibration(cal)
+    assert "Chance annoncée" in html and "Type d&#x27;entreprise" in html
+    few = _calibration(queries.Calibration(2, 3, [], []))
+    assert "2 sur 5 nécessaires" in few and "3 en attente" in few
+    assert "Chances annoncées" in render_dashboard(path, (5.5, 7.5), NOW)
