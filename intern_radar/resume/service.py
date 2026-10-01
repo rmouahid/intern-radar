@@ -11,6 +11,7 @@ from typing import Any
 from intern_radar.candidate import Candidate
 from intern_radar.config import Contact
 from intern_radar.conventions import convention_for
+from intern_radar.editing import resume_to_dict
 from intern_radar.models import Job
 from intern_radar.notifier import Message, Notifier
 from intern_radar.resume.pdf import file_name, render
@@ -117,6 +118,7 @@ class ResumeService:
             "pages": pages,
             "format": f"{convention.region} ({convention.paper}, "
             f"{pages}/{convention.cv_pages} page(s), {resume.language})",
+            "resume": resume_to_dict(resume),
         }
         self._store.save_resume(job.id, str(path), report, now)
         self._send(job, path, report)

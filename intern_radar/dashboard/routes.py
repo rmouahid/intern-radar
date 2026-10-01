@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+from intern_radar.candidate import load_candidate
 from intern_radar.config import Profile, VisaPenalties, Weights
 from intern_radar.dashboard import queries
 from intern_radar.dashboard.app import (
@@ -20,16 +21,23 @@ from intern_radar.dashboard.app import (
 from intern_radar.dashboard.layout import e, page
 from intern_radar.dashboard.pages.actions import NOTICES as ACTION_NOTICES
 from intern_radar.dashboard.pages.actions import actions_html
+from intern_radar.dashboard.pages.editing import letter_form, resume_form
 from intern_radar.dashboard.pages.feedback import feedback_body
 from intern_radar.dashboard.pages.offer import OfferView, offer_body
 from intern_radar.dashboard.pages.offers import offers_body
 from intern_radar.dashboard.render import stats_body
 from intern_radar.dashboard.runner import RunStatus
 from intern_radar.dashboard.worker import KINDS, Worker
+from intern_radar.editing import DocumentEditor, EditError
 from intern_radar.store import Store
 from intern_radar.tracking import can_move
 
-NOTICES: dict[str, str] = {**ACTION_NOTICES, "feedback": "Avis enregistré."}
+NOTICES: dict[str, str] = {
+    **ACTION_NOTICES,
+    "feedback": "Avis enregistré.",
+    "edited": "Document modifié : le PDF a été régénéré.",
+    "edited_sent": "Document modifié : le PDF régénéré part sur Telegram.",
+}
 VOTES = {"up": 1, "down": -1}
 RUN_NOTICES = {
     "started": "Run lancé : les résultats apparaîtront à la fin (environ une minute).",
@@ -52,6 +60,18 @@ class Context:
     data_dir: Path | None = None  # generated PDFs are served from here only
     profile: Profile | None = None
     worker: Worker | None = None
+
+    def editor(self, store: Store) -> DocumentEditor | None:
+        """Edits need the contact block; CV edits also the candidate profile."""
+        if self.profile is None or self.profile.contact is None:
+            return None
+        path = self.config_dir / "candidate.json" if self.config_dir else None
+        candidate = (
+            (lambda: load_candidate(path))
+            if path is not None and path.exists()
+            else None
+        )
+        return DocumentEditor(store, self.profile.contact, candidate)
 
     @contextmanager
     def store(self) -> Iterator[Store]:
@@ -170,6 +190,75 @@ def build_app(ctx: Context) -> App:
                 return redirect(f"/offers/{ref}?done=refused")
             store.set_application(job.id, new, ctx.clock())
         return redirect(f"/offers/{ref}?done=status")
+
+    @app.route("GET", "/offers/<int:ref>/<str:kind>/edit")
+    def edit_form(request: Request, ref: int, kind: str):
+        if kind not in ("letter", "cv"):
+            return not_found("Document inconnu.")
+        with ctx.store() as store:
+            job = store.job_by_ref(ref)
+            editor = ctx.editor(store)
+            if job is None or editor is None:
+                return not_found("Édition indisponible (profil sans contact).")
+            try:
+                if kind == "letter":
+                    form = letter_form(
+                        ref, job.company, job.title, editor.letter(job.id)
+                    )
+                else:
+                    form = resume_form(
+                        ref, job.company, job.title, editor.resume(job.id)
+                    )
+            except EditError as exc:
+                return not_found(f"Impossible de modifier : {exc}.")
+        return html_response(page("Modifier", form, "offers"))
+
+    @app.route("POST", "/offers/<int:ref>/<str:kind>/edit")
+    def save_edit(request: Request, ref: int, kind: str):
+        if kind not in ("letter", "cv"):
+            return not_found("Document inconnu.")
+        form = request.form
+        with ctx.store() as store:
+            job = store.job_by_ref(ref)
+            editor = ctx.editor(store)
+            if job is None or editor is None:
+                return not_found("Édition indisponible (profil sans contact).")
+            try:
+                if kind == "letter":
+                    paragraphs = [
+                        form[k]
+                        for k in sorted(
+                            (k for k in form if k[:1] == "p" and k[1:].isdigit()),
+                            key=lambda k: int(k[1:]),
+                        )
+                    ]
+                    editor.edit_letter(
+                        job.id,
+                        form.get("greeting", ""),
+                        paragraphs,
+                        form.get("closing", ""),
+                        ctx.clock(),
+                    )
+                else:
+                    bullets = {k[2:]: v for k, v in form.items() if k.startswith("b_")}
+                    editor.edit_resume(
+                        job.id,
+                        form.get("headline", ""),
+                        form.get("summary", ""),
+                        bullets,
+                        ctx.clock(),
+                    )
+            except EditError as exc:
+                body = (
+                    f"<h1>Non enregistré</h1><p>{e(str(exc))}</p>"
+                    f'<p><a href="/offers/{ref}/{kind}/edit">'
+                    "← Revenir au formulaire</a></p>"
+                )
+                return html_response(page("Non enregistré", body, "offers"), 400)
+        if form.get("resend") and ctx.worker is not None:
+            ctx.worker.submit(kind, ref, job.id)
+            return redirect(f"/offers/{ref}?done=edited_sent")
+        return redirect(f"/offers/{ref}?done=edited")
 
     @app.route("POST", "/offers/<int:ref>/feedback")
     def give_feedback(request: Request, ref: int):

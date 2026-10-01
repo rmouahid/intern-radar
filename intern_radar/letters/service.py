@@ -12,6 +12,7 @@ from typing import Any, Protocol
 
 from intern_radar.config import Contact
 from intern_radar.conventions import convention_for
+from intern_radar.editing import letter_to_dict
 from intern_radar.letters.cv import CvError
 from intern_radar.letters.delivery import DeliveryError, GmailSender
 from intern_radar.letters.pdf import file_name, render
@@ -176,6 +177,7 @@ class LetterService:
             "dropped": dropped,
             "pages": pages,
             "text": letter.text(),
+            "letter": letter_to_dict(letter),
         }
         self._store.save_letter(job.id, str(path), data, now)
         self._deliver(job, path, data)
