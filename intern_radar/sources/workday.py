@@ -6,7 +6,7 @@ from typing import Any
 import httpx
 
 from intern_radar.models import Company, Job
-from intern_radar.prefilter import is_internship_title
+from intern_radar.prefilter import ListingRules, is_internship_title
 from intern_radar.sources.base import collect, get_json, html_to_text, require_param
 
 PAGE_SIZE = 20
@@ -14,8 +14,9 @@ MAX_PAGES = 5  # results are relevance-sorted; internships come first
 
 
 class WorkdaySource:
-    def __init__(self, client: httpx.Client) -> None:
+    def __init__(self, client: httpx.Client, rules: ListingRules | None = None) -> None:
         self._client = client
+        self._rules = rules
 
     def fetch(self, company: Company, known_ids: Container[str]) -> list[Job]:
         host = require_param(company, "host")
@@ -31,6 +32,19 @@ class WorkdaySource:
             job_id = f"workday:{tenant}:{path}"
             if job_id in known_ids:
                 return None
+            listed_at = posting.get("locationsText", "")
+            if self._rules is not None and not self._rules.keep(title, listed_at):
+                # Rejected by the pre-filter anyway: no detail request.
+                return Job(
+                    id=job_id,
+                    company=company.name,
+                    tier=company.tier,
+                    title=title.strip(),
+                    location=listed_at,
+                    url=f"https://{host}/{site}{path}",
+                    description="",
+                    source="workday",
+                )
             info = get_json(self._client, "GET", f"{base}{path}")["jobPostingInfo"]
             offices = [info.get("location"), *(info.get("additionalLocations") or [])]
             return Job(

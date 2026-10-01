@@ -1,6 +1,7 @@
 """Cheap rule-based filter applied before any LLM call."""
 
 import re
+from dataclasses import dataclass
 from datetime import date
 
 from intern_radar.countries import FREE_MOVEMENT, mentions_any
@@ -184,3 +185,29 @@ def passes(
         and not is_out_of_scope(job.title, extra_excluded)
         and not is_france_only(job.location)
     )
+
+
+@dataclass(frozen=True)
+class ListingRules:
+    """The pre-filter decisions that need no offer detail.
+
+    Sources that download one detail page per offer check these rules on the
+    listing first: an offer the pipeline would reject anyway is returned
+    without its description, saving the request. Decisions are unchanged.
+    """
+
+    extra_excluded: tuple[str, ...] = ()
+    window_year: int | None = None
+    max_age_days: int = 0
+    today: date | None = None
+
+    def keep(
+        self, title: str, location: str = "", posted_at: str | None = None
+    ) -> bool:
+        if self.today and is_stale(posted_at, self.today, self.max_age_days):
+            return False
+        listing = Job(
+            id="", company="", tier="unlisted", title=title, location=location,
+            url="", description="", source="",
+        )  # fmt: skip
+        return passes(listing, self.extra_excluded, self.window_year)

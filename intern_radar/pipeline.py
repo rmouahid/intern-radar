@@ -2,6 +2,7 @@
 
 import logging
 from collections.abc import Callable, Mapping
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 
@@ -9,7 +10,7 @@ from intern_radar import prefilter, ranking
 from intern_radar.chance import Chance
 from intern_radar.config import Profile
 from intern_radar.grouping import group_scored
-from intern_radar.models import Company, ScoredJob
+from intern_radar.models import Company, Job, ScoredJob
 from intern_radar.notifier import (
     Message,
     Notifier,
@@ -27,6 +28,8 @@ from intern_radar.tracking import format_reminder, tracking_row
 log = logging.getLogger(__name__)
 
 BATCH_SIZE = 10
+FETCH_WORKERS = 6  # companies fetched at the same time
+SCORING_WORKERS = 3  # LLM batches scored at the same time (memory, quota)
 SOURCE_ALERT_AFTER = timedelta(days=3)
 LLM_ALERT_AFTER = timedelta(days=1)
 SENT, REJECTED, FAILED = "sent", "rejected", "failed"
@@ -126,14 +129,20 @@ class Pipeline:
         now = self._clock()
         known = self._store.known_ids()
         extra = self._profile.extra_excluded_title_words
-        for company in self._companies:
-            if company.source == "none" or self._fetched_recently(company, now):
-                continue
-            source = self._sources.get(company.source)
+        companies = [
+            c
+            for c in self._companies
+            if c.source != "none" and not self._fetched_recently(c, now)
+        ]
+        # Fetches run concurrently (network-bound; the HTTP client keeps one
+        # request per second per host); results are stored in company order,
+        # from this thread only.
+        snapshot = frozenset(known)
+        with ThreadPoolExecutor(max_workers=FETCH_WORKERS) as pool:
+            futures = [(c, pool.submit(self._fetch, c, snapshot)) for c in companies]
+        for company, future in futures:
             try:
-                if source is None:
-                    raise LookupError(f"unknown source '{company.source}'")
-                jobs = source.fetch(company, known)
+                jobs = future.result()
             except Exception as exc:  # one broken source must not stop the run
                 log.warning("%s: %s", company.name, exc)
                 report.errors.append(f"{company.name}: {exc}")
@@ -173,6 +182,12 @@ class Pipeline:
                 report.new += 1
                 report.candidates += status == "pending"
 
+    def _fetch(self, company: Company, known: frozenset[str]) -> list[Job]:
+        source = self._sources.get(company.source)
+        if source is None:
+            raise LookupError(f"unknown source '{company.source}'")
+        return source.fetch(company, known)
+
     def _min_posted(self, now: datetime) -> str | None:
         """Oldest publication date still worth sending, or None (no limit)."""
         days = self._profile.max_offer_age_days
@@ -192,15 +207,27 @@ class Pipeline:
         report.grouped += self._store.inherit_group_assessments()
         limit = BATCH_SIZE * self._profile.max_llm_batches_per_run
         pending = self._store.pending(limit=limit)
-        for start in range(0, len(pending), BATCH_SIZE):
-            batch = pending[start : start + BATCH_SIZE]
+        batches = [
+            pending[start : start + BATCH_SIZE]
+            for start in range(0, len(pending), BATCH_SIZE)
+        ]
+        # Batches are scored concurrently (the CLI waits on the API); their
+        # results are saved in order from this thread. A failed batch counts
+        # no attempt and is retried next run, like before.
+        with ThreadPoolExecutor(max_workers=SCORING_WORKERS) as pool:
+            futures = [
+                (batch, pool.submit(self._scorer.assess, batch)) for batch in batches
+            ]
+        failed = False
+        for batch, future in futures:
             try:
-                assessments = self._scorer.assess(batch)
+                assessments = future.result()
             except LLMError as exc:
-                log.warning("LLM unavailable: %s", exc)
-                report.errors.append(f"LLM: {exc}")
-                self._store.record_llm_result(False, now)
-                return
+                if not failed:
+                    log.warning("LLM unavailable: %s", exc)
+                    report.errors.append(f"LLM: {exc}")
+                failed = True
+                continue
             self._store.record_llm_result(True, now)
             missing = [job.id for job in batch if job.id not in assessments]
             self._store.record_attempt(missing)
@@ -220,6 +247,8 @@ class Pipeline:
                 )
                 self._store.save_assessment(job.id, assessment, score)
                 report.scored += 1
+        if failed:
+            self._store.record_llm_result(False, now)
         report.grouped += self._store.inherit_group_assessments()
 
     def _notify(self, report: RunReport) -> bool:

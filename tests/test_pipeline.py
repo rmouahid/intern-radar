@@ -562,3 +562,61 @@ def test_discovery_offers_are_filtered_counted_and_labelled():
     assert (report.discovery, report.candidates) == (1, 1)
     assert scorer.batches == [["d1"]]
     assert first_line(notifier.sent[0]) == "🔥 <b>Tiny AI · découverte</b>"
+
+
+def test_batches_are_scored_concurrently_with_the_same_decisions(monkeypatch):
+    import threading
+    import time
+
+    from intern_radar import pipeline as pipeline_module
+
+    class SlowScorer(FakeScorer):
+        def __init__(self, answers):
+            super().__init__(answers)
+            self.active = self.peak = 0
+            self.lock = threading.Lock()
+
+        def assess(self, jobs):
+            with self.lock:
+                self.active += 1
+                self.peak = max(self.peak, self.active)
+            time.sleep(0.05)
+            with self.lock:
+                self.active -= 1
+            return super().assess(jobs)
+
+    jobs = [
+        make_job(id=f"j{i:02d}", tier="S", title=f"ML Intern {i}") for i in range(50)
+    ]
+    answers = {
+        job.id: make_assessment(ai_relevance=5 + i % 5) for i, job in enumerate(jobs)
+    }
+
+    def scores(workers):
+        monkeypatch.setattr(pipeline_module, "SCORING_WORKERS", workers)
+        scorer = SlowScorer(answers)
+        pipeline, store, _ = build({"fake": FakeSource(jobs)}, scorer)
+        assert pipeline.run().scored == 50
+        return scorer.peak, {s.job.id: s.score for s in store.scored(0)}
+
+    peak, concurrent = scores(3)
+    one, sequential = scores(1)
+    assert 1 < peak <= 3 and one == 1
+    assert concurrent == sequential
+
+
+def test_one_failed_batch_does_not_lose_the_others():
+    class FlakyScorer(FakeScorer):
+        def assess(self, jobs):
+            if any(job.id == "j05" for job in jobs):
+                raise LLMError("quota")
+            return super().assess(jobs)
+
+    jobs = [
+        make_job(id=f"j{i:02d}", tier="S", title=f"ML Intern {i}") for i in range(20)
+    ]
+    scorer = FlakyScorer({job.id: make_assessment() for job in jobs})
+    pipeline, store, _ = build({"fake": FakeSource(jobs)}, scorer)
+    report = pipeline.run()
+    assert report.scored == 10 and report.errors == ["LLM: quota"]
+    assert len(store.pending()) == 10  # retried next run, no attempt counted

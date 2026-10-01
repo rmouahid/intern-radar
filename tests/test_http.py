@@ -36,3 +36,29 @@ def test_make_client_sets_user_agent():
     client = make_client(Throttle(interval=0), httpx.MockTransport(handler))
     client.get("https://a.example/")
     assert seen["ua"] == USER_AGENT
+
+
+def test_throttle_is_per_host_and_thread_safe():
+    import threading
+    import time
+
+    import httpx
+
+    from intern_radar.http import Throttle
+
+    throttle = Throttle(interval=0.2)
+    stamps: dict[str, list[float]] = {"a": [], "b": []}
+
+    def hit(host):
+        throttle(httpx.Request("GET", f"https://{host}.test/"))
+        stamps[host].append(time.monotonic())
+
+    threads = [threading.Thread(target=hit, args=(h,)) for h in ("a", "a", "b")]
+    start = time.monotonic()
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    a1, a2 = sorted(stamps["a"])
+    assert a2 - a1 >= 0.19  # same host: spaced
+    assert stamps["b"][0] - start < 0.15  # other host: no wait
