@@ -274,6 +274,7 @@ class OfferRow:
     digested: bool
     chance: int | None
     other_places: int  # copies of the posting in other locations
+    vote: int | None = None  # the candidate's 👍 (1) or 👎 (-1)
 
 
 def offers(
@@ -283,8 +284,10 @@ def offers(
     sql = [
         "SELECT j.rowid AS ref, j.*, a.status AS application, c.percent AS chance,"
         " json_extract(j.assessment, '$.work_authorisation') AS wa,"
-        " json_extract(j.assessment, '$.ai_relevance') AS relevance"
+        " json_extract(j.assessment, '$.ai_relevance') AS relevance,"
+        " f.vote AS vote"
         " FROM jobs j LEFT JOIN applications a ON a.job_id = j.id"
+        " LEFT JOIN feedback f ON f.job_id = j.id"
         " LEFT JOIN chances c ON c.job_id = j.id"
         " WHERE j.status = 'scored' AND j.score IS NOT NULL AND j.score >= ?"
     ]
@@ -335,6 +338,7 @@ def offers(
                 digested=lead["digested_at"] is not None,
                 chance=lead["chance"],
                 other_places=len(members) - 1,
+                vote=lead["vote"],
             )
         )
     start = (filters.page - 1) * PER_PAGE

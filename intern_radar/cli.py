@@ -35,6 +35,7 @@ from intern_radar.dashboard.runner import run_status, start_run
 from intern_radar.dashboard.server import make_server, tailscale_ip
 from intern_radar.dashboard.worker import Services, Worker
 from intern_radar.description import clean_description
+from intern_radar.feedback import feedback_summary
 from intern_radar.http import make_client
 from intern_radar.letters.cv import CvSource
 from intern_radar.letters.delivery import GmailSender
@@ -154,6 +155,7 @@ def _pipeline(
         profile.window_start,
         profile.window_end,
         profile.min_months,
+        preferences=feedback_summary(store.feedback_entries()),
     )
     notifier = (
         ConsoleNotifier() if dry_run else TelegramNotifier(_telegram(profile, client))

@@ -20,6 +20,7 @@ from intern_radar.dashboard.app import (
 from intern_radar.dashboard.layout import e, page
 from intern_radar.dashboard.pages.actions import NOTICES as ACTION_NOTICES
 from intern_radar.dashboard.pages.actions import actions_html
+from intern_radar.dashboard.pages.feedback import feedback_body
 from intern_radar.dashboard.pages.offer import OfferView, offer_body
 from intern_radar.dashboard.pages.offers import offers_body
 from intern_radar.dashboard.render import stats_body
@@ -28,7 +29,8 @@ from intern_radar.dashboard.worker import KINDS, Worker
 from intern_radar.store import Store
 from intern_radar.tracking import can_move
 
-NOTICES: dict[str, str] = dict(ACTION_NOTICES)
+NOTICES: dict[str, str] = {**ACTION_NOTICES, "feedback": "Avis enregistré."}
+VOTES = {"up": 1, "down": -1}
 RUN_NOTICES = {
     "started": "Run lancé : les résultats apparaîtront à la fin (environ une minute).",
     "busy": "Un run est déjà en cours.",
@@ -82,6 +84,7 @@ def load_offer(store: Store, ref: int) -> OfferView | None:
         has_letter=store.letter(job_id) is not None,
         has_resume=store.resume(job_id) is not None,
         sibling_refs=tuple(store.job_ref(s.job.id) or 0 for s in group[1:]),
+        feedback=store.feedback(job_id),
     )
 
 
@@ -168,6 +171,34 @@ def build_app(ctx: Context) -> App:
             store.set_application(job.id, new, ctx.clock())
         return redirect(f"/offers/{ref}?done=status")
 
+    @app.route("POST", "/offers/<int:ref>/feedback")
+    def give_feedback(request: Request, ref: int):
+        vote = request.form.get("vote", "")
+        back = request.form.get("next", "")
+        if not back.startswith("/offers") or "//" in back:
+            back = f"/offers/{ref}?done=feedback"
+        with ctx.store() as store:
+            job = store.job_by_ref(ref)
+            if job is None:
+                return not_found("Offre introuvable.")
+            if vote == "clear":
+                store.clear_feedback(job.id)
+            elif vote in VOTES:
+                store.set_feedback(
+                    job.id, VOTES[vote], request.form.get("reason", ""), ctx.clock()
+                )
+            else:
+                return redirect(f"/offers/{ref}")
+        return redirect(back)
+
+    @app.route("GET", "/feedback")
+    def feedback_page(request: Request):
+        with ctx.store() as store:
+            entries = store.feedback_entries()
+            refs = [store.job_ref(job.id) or 0 for job, *_ in entries]
+        body = feedback_body(entries, refs)
+        return html_response(page("Mes avis", body, "more"))
+
     @app.route("POST", "/offers/<int:ref>/<str:kind>")
     def start_task(request: Request, ref: int, kind: str):
         if kind not in KINDS:
@@ -224,4 +255,5 @@ def build_app(ctx: Context) -> App:
 # Pages reachable from the "Plus" tab (extended by later pages).
 MORE_LINKS: list[tuple[str, str, str]] = [
     ("/stats", "Statistiques", "Entonnoir, scores, sources, usage LLM, runs"),
+    ("/feedback", "Mes avis", "Les offres notées 👍/👎, prises en compte au scoring"),
 ]

@@ -29,6 +29,11 @@ h1 { font-size:21px; margin:6px 0 4px; } h2 { font-size:16px; margin:0 0 10px; }
 section, .card { background:var(--card); border:1px solid var(--line);
   border-radius:14px; padding:14px; margin:12px 0; overflow-x:auto; }
 .card { display:block; color:inherit; }
+.cardlink { display:block; color:inherit; }
+.votes { display:flex; gap:6px; justify-content:flex-end; margin-top:6px; }
+button.vote { background:var(--chip); color:var(--text); padding:4px 12px;
+  font-size:16px; opacity:.55; }
+button.vote.on { opacity:1; outline:2px solid var(--accent); }
 .card .top { display:flex; justify-content:space-between; gap:8px; }
 .card .title { font-weight:600; margin:2px 0; }
 .score { font-weight:700; font-size:17px; white-space:nowrap; }

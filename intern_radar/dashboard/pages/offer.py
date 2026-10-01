@@ -33,6 +33,7 @@ class OfferView:
     has_letter: bool
     has_resume: bool
     sibling_refs: tuple[int, ...] = ()  # refs of group[1:]
+    feedback: tuple[int, str] | None = None  # vote and reason
 
 
 def score_rows(
@@ -68,6 +69,40 @@ def score_rows(
         label = WORK_AUTHORISATION_LABELS[a.work_authorisation]
         rows.append(("Visa", label, -penalty))
     return rows
+
+
+def feedback_form(view: OfferView) -> str:
+    vote, reason = view.feedback or (0, "")
+    current = {1: "👍 Tu aimes cette offre", -1: "👎 Tu n'aimes pas cette offre"}
+
+    def choice(value: str, label: str, checked: bool) -> str:
+        mark = " checked" if checked else ""
+        return (
+            f'<label style="display:inline-block;margin-right:14px">'
+            f'<input type="radio" name="vote" value="{value}"{mark} '
+            f'style="width:auto"> {label}</label>'
+        )
+
+    clear = (
+        f'<form class="inline" method="post" action="/offers/{view.ref}/feedback">'
+        '<input type="hidden" name="vote" value="clear">'
+        '<button class="ghost">Retirer mon avis</button></form>'
+        if view.feedback
+        else ""
+    )
+    return (
+        f"<p><b>{e(current.get(vote, 'Pas encore d’avis'))}</b></p>"
+        f'<form method="post" action="/offers/{view.ref}/feedback">'
+        + choice("up", "👍 J'aime", vote == 1)
+        + choice("down", "👎 Pas pour moi", vote == -1)
+        + '<textarea name="reason" maxlength="300" '
+        'style="min-height:60px;margin-top:8px" '
+        f'placeholder="Pourquoi ? (facultatif, aide la notation)">{e(reason)}'
+        "</textarea>"
+        f'<div class="actions"><button>Enregistrer</button></div></form>{clear}'
+        '<p class="muted">Tes derniers avis sont résumés dans le prompt de notation '
+        "et ajustent la pertinence des offres similaires.</p>"
+    )
 
 
 def _section(title: str, body: str) -> str:
@@ -144,6 +179,7 @@ def offer_body(
         f'<div class="muted">{e(convention.spelling)}</div>'
     )
     parts.append(_section("Conventions du pays", convention_text))
+    parts.append(_section("Ton avis", feedback_form(view)))
     status = STATUS_TEXT.get(view.application or "", "Aucun suivi")
     history = "".join(
         f"<li>{e(at[:16].replace('T', ' '))} · {e(STATUS_TEXT.get(s, s))}</li>"
