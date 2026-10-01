@@ -196,10 +196,14 @@ def offer_body(
         documents.append(
             f'<a class="button ghost" href="/files/letter/{view.ref}">'
             "✍️ Lettre (PDF)</a>"
+            f'<a class="button ghost" href="/offers/{view.ref}/letter/edit">'
+            "✏️ Modifier la lettre</a>"
         )
     if view.has_resume:
         documents.append(
             f'<a class="button ghost" href="/files/cv/{view.ref}">📄 CV (PDF)</a>'
+            f'<a class="button ghost" href="/offers/{view.ref}/cv/edit">'
+            "✏️ Modifier le CV</a>"
         )
     parts.append(
         _section(
