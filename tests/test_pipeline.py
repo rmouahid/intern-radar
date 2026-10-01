@@ -620,3 +620,26 @@ def test_one_failed_batch_does_not_lose_the_others():
     report = pipeline.run()
     assert report.scored == 10 and report.errors == ["LLM: quota"]
     assert len(store.pending()) == 10  # retried next run, no attempt counted
+
+
+def test_concurrent_scoring_can_record_llm_usage_in_the_store():
+    """Regression: the CLI backend records usage from the scoring threads."""
+    store = Store(":memory:")
+    usage = {"model": "haiku", "input": 1, "output": 1, "cost": 0.01, "seconds": 1}
+
+    class RecordingScorer(FakeScorer):
+        def assess(self, jobs):
+            store.record_llm_usage("scoring", usage, NOW)
+            return super().assess(jobs)
+
+    jobs = [
+        make_job(id=f"j{i:02d}", tier="S", title=f"ML Intern {i}") for i in range(30)
+    ]
+    scorer = RecordingScorer({job.id: make_assessment() for job in jobs})
+    pipeline = Pipeline(
+        [ACME], {"fake": FakeSource(jobs)}, store, scorer, FakeNotifier(),
+        make_profile(), Clock(),
+    )  # fmt: skip
+    assert pipeline.run().scored == 30
+    count = store._db.execute("SELECT count(*) FROM llm_usage").fetchone()[0]
+    assert count == 3

@@ -2,6 +2,7 @@
 
 import json
 import sqlite3
+import threading
 from collections.abc import Callable
 from dataclasses import asdict
 from datetime import datetime, timedelta
@@ -109,7 +110,10 @@ def _row_to_scored(row: sqlite3.Row) -> ScoredJob:
 
 class Store:
     def __init__(self, path: str) -> None:
-        self._db = sqlite3.connect(path)
+        # LLM usage is recorded from the scoring worker threads (see
+        # record_llm_usage); every other access happens in the main thread.
+        self._db = sqlite3.connect(path, check_same_thread=False)
+        self._usage_lock = threading.Lock()
         self._db.row_factory = sqlite3.Row
         self._db.executescript(SCHEMA)
         self._migrate()
@@ -436,7 +440,7 @@ class Store:
     def record_llm_usage(
         self, purpose: str, usage: dict[str, Any], now: datetime
     ) -> None:
-        with self._db:
+        with self._usage_lock, self._db:
             self._db.execute(
                 "INSERT INTO llm_usage (at, purpose, model, input, output, cost,"
                 " seconds) VALUES (?, ?, ?, ?, ?, ?, ?)",
