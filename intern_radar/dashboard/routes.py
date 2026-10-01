@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
-from intern_radar.candidate import load_candidate
+from intern_radar.candidate import candidate_text, load_candidate
 from intern_radar.config import Profile, VisaPenalties, Weights
 from intern_radar.dashboard import queries
 from intern_radar.dashboard.app import (
@@ -28,6 +28,7 @@ from intern_radar.dashboard.pages.applications import (
 )
 from intern_radar.dashboard.pages.editing import letter_form, resume_form
 from intern_radar.dashboard.pages.feedback import feedback_body
+from intern_radar.dashboard.pages.insights import insights_body
 from intern_radar.dashboard.pages.offer import OfferView, offer_body
 from intern_radar.dashboard.pages.offers import offers_body
 from intern_radar.dashboard.render import stats_body
@@ -78,6 +79,14 @@ class Context:
             else None
         )
         return DocumentEditor(store, self.profile.contact, candidate)
+
+    def profile_text(self) -> tuple[str, str]:
+        """The candidate's profile as text, and where it was read from."""
+        path = self.config_dir / "candidate.json" if self.config_dir else None
+        if path is not None and path.exists():
+            return candidate_text(load_candidate(path)), "candidate.json"
+        summary = self.profile.candidate_summary if self.profile else ""
+        return summary, "profile.yaml"
 
     @contextmanager
     def store(self) -> Iterator[Store]:
@@ -317,6 +326,22 @@ def build_app(ctx: Context) -> App:
                 return not_found("Offre introuvable.")
             store.save_application_details(job.id, details, ctx.clock())
         return redirect(f"/offers/{ref}?done=details")
+
+    @app.route("GET", "/insights")
+    def insights(request: Request):
+        try:
+            relevance = int(request.arg("relevance") or 7)
+        except ValueError:
+            relevance = 7
+        relevance = min(max(relevance, 0), 10)
+        text, source = ctx.profile_text()
+        db = queries.connect(ctx.db_path)
+        try:
+            skills, offers = queries.skill_demand(db, text, ctx.clock(), relevance)
+        finally:
+            db.close()
+        body = insights_body(skills, offers, relevance, source)
+        return html_response(page("Compétences", body, "insights"))
 
     @app.route("GET", "/applications")
     def applications_page(request: Request):
