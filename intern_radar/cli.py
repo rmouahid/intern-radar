@@ -30,6 +30,7 @@ from intern_radar.config import (
     load_profile,
 )
 from intern_radar.conventions import convention_for, visa_fact
+from intern_radar.dashboard.routes import Context
 from intern_radar.dashboard.runner import run_status, start_run
 from intern_radar.dashboard.server import make_server, tailscale_ip
 from intern_radar.description import clean_description
@@ -313,13 +314,16 @@ def dashboard(
         raise typer.Exit(2)
     Store(str(db)).close()  # creates or migrates the schema once
     thresholds = (profile.thresholds.digest, profile.thresholds.immediate)
-    server = make_server(
+    context = Context(
         str(db),
-        address,
-        port or profile.dashboard_port,
         thresholds,
+        max_offer_age_days=profile.max_offer_age_days,
         status=run_status,
         trigger=start_run,
+        config_dir=config_dir,
+    )
+    server = make_server(
+        str(db), address, port or profile.dashboard_port, thresholds, context=context
     )
     typer.echo(f"dashboard on http://{address}:{server.server_address[1]}/")
     try:

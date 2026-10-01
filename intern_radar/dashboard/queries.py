@@ -4,6 +4,8 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
+from intern_radar.conventions import CONVENTIONS, convention_for
+
 
 def connect(path: str) -> sqlite3.Connection:
     """Read-only connection: the dashboard can never change the data."""
@@ -202,3 +204,138 @@ def llm_usage(db: sqlite3.Connection, now: datetime, days: int = 14) -> list[Usa
         UsageRow(r["day"], r["purpose"], r["calls"], r["tin"], r["tout"], r["cost"])
         for r in rows
     ]
+
+
+# --- offers list -----------------------------------------------------------------
+
+REGIONS: tuple[tuple[str, str], ...] = tuple(
+    (key, convention.region) for key, convention in CONVENTIONS.items()
+)
+_REGION_KEY = {id(convention): key for key, convention in CONVENTIONS.items()}
+VISA_GROUPS = {
+    "none": ("free", "self_arranged"),  # no sponsor needed
+    "sponsor": ("programme", "sponsorship_stated", "uncertain", "unlikely"),
+}
+PER_PAGE = 30
+
+
+def region_key(location: str) -> str:
+    return _REGION_KEY[id(convention_for(location))]
+
+
+@dataclass(frozen=True)
+class OfferFilters:
+    min_score: float = 5.5
+    tier: str = ""  # S, A, B or unlisted (discovery)
+    region: str = ""  # a CONVENTIONS key
+    visa: str = ""  # a VISA_GROUPS key
+    status: str = ""  # an application status, "none" or "dismissed"
+    days: int = 60  # publication age; 0 = any
+    q: str = ""
+    page: int = 1
+
+    @classmethod
+    def from_query(cls, query: dict[str, str], default_days: int) -> "OfferFilters":
+        def number(name: str, default: float) -> float:
+            try:
+                return float(query.get(name, "") or default)
+            except ValueError:
+                return default
+
+        return cls(
+            min_score=number("min", 5.5),
+            tier=query.get("tier", "")
+            if query.get("tier") in ("S", "A", "B", "unlisted")
+            else "",
+            region=query.get("region", "")
+            if query.get("region") in CONVENTIONS
+            else "",
+            visa=query.get("visa", "") if query.get("visa") in VISA_GROUPS else "",
+            status=query.get("status", "").strip()[:20],
+            days=int(number("days", default_days)),
+            q=query.get("q", "").strip()[:80],
+            page=max(1, int(number("page", 1))),
+        )
+
+
+@dataclass(frozen=True)
+class OfferRow:
+    ref: int
+    company: str
+    tier: str
+    title: str
+    location: str
+    score: float
+    posted_at: str | None
+    relevance: int | None
+    work_authorisation: str
+    application: str | None
+    notified: bool
+    digested: bool
+    chance: int | None
+    other_places: int  # copies of the posting in other locations
+
+
+def offers(
+    db: sqlite3.Connection, filters: OfferFilters, today: date
+) -> tuple[list[OfferRow], int]:
+    """One page of offers (one per posting group) and the total matching."""
+    sql = [
+        "SELECT j.rowid AS ref, j.*, a.status AS application, c.percent AS chance,"
+        " json_extract(j.assessment, '$.work_authorisation') AS wa,"
+        " json_extract(j.assessment, '$.ai_relevance') AS relevance"
+        " FROM jobs j LEFT JOIN applications a ON a.job_id = j.id"
+        " LEFT JOIN chances c ON c.job_id = j.id"
+        " WHERE j.status = 'scored' AND j.score IS NOT NULL AND j.score >= ?"
+    ]
+    params: list[object] = [filters.min_score]
+    if filters.tier:
+        sql.append("AND j.tier = ?")
+        params.append(filters.tier)
+    if filters.days > 0:
+        cutoff = (today - timedelta(days=filters.days)).isoformat()
+        sql.append("AND (j.posted_at IS NULL OR substr(j.posted_at, 1, 10) >= ?)")
+        params.append(cutoff)
+    if filters.q:
+        sql.append("AND (j.company LIKE ? OR j.title LIKE ?)")
+        params += [f"%{filters.q}%", f"%{filters.q}%"]
+    sql.append("ORDER BY j.score DESC, j.first_seen DESC, j.id")
+    rows = db.execute(" ".join(sql), params).fetchall()
+    groups: dict[str, list[sqlite3.Row]] = {}
+    for row in rows:
+        groups.setdefault(row["group_key"] or row["id"], []).append(row)
+    selected = []
+    for members in groups.values():
+        lead = members[0]
+        wa = lead["wa"] or "uncertain"
+        status = lead["application"]
+        if filters.region and region_key(lead["location"]) != filters.region:
+            continue
+        if filters.visa and wa not in VISA_GROUPS[filters.visa]:
+            continue
+        if filters.status == "none" and status is not None:
+            continue
+        if filters.status not in ("", "none") and status != filters.status:
+            continue
+        if not filters.status and status == "dismissed":
+            continue  # dismissed offers are hidden unless asked for
+        selected.append(
+            OfferRow(
+                ref=lead["ref"],
+                company=lead["company"],
+                tier=lead["tier"],
+                title=lead["title"],
+                location=lead["location"],
+                score=lead["score"],
+                posted_at=lead["posted_at"],
+                relevance=lead["relevance"],
+                work_authorisation=wa,
+                application=status,
+                notified=lead["notified_at"] is not None,
+                digested=lead["digested_at"] is not None,
+                chance=lead["chance"],
+                other_places=len(members) - 1,
+            )
+        )
+    start = (filters.page - 1) * PER_PAGE
+    return selected[start : start + PER_PAGE], len(selected)

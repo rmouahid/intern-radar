@@ -1,4 +1,4 @@
-"""The dashboard page: server-rendered HTML with inline SVG charts, no JS."""
+"""Statistics page sections: server-rendered HTML with inline SVG charts."""
 
 import html
 from datetime import datetime
@@ -14,43 +14,6 @@ from intern_radar.dashboard.runner import RunStatus
 from intern_radar.tracking import STATUS_TEXT
 
 e = html.escape
-
-CSS = """
-:root { --bg:#f7f7f5; --card:#fff; --text:#1d1d1f; --muted:#6b6b70;
-  --line:#e3e3e0; --accent:#2f6fde; --accent2:#9bb8ef; --warn:#c2410c;
-  --ok:#15803d; }
-@media (prefers-color-scheme: dark) { :root { --bg:#141416; --card:#1e1e21;
-  --text:#ececec; --muted:#9a9aa0; --line:#2e2e33; --accent:#6c9bf0;
-  --accent2:#34507f; --warn:#fb923c; --ok:#4ade80; } }
-* { box-sizing:border-box; }
-body { margin:0; background:var(--bg); color:var(--text);
-  font:15px/1.45 -apple-system, "Segoe UI", Roboto, sans-serif; }
-main { max-width:1100px; margin:0 auto; padding:16px; }
-h1 { font-size:22px; margin:8px 0 2px; } h2 { font-size:17px; margin:0 0 10px; }
-.muted { color:var(--muted); font-size:13px; }
-section { background:var(--card); border:1px solid var(--line);
-  border-radius:12px; padding:16px; margin:14px 0; overflow-x:auto; }
-.tiles { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
-  gap:10px; }
-.tile { background:var(--card); border:1px solid var(--line); border-radius:12px;
-  padding:12px; }
-.tile b { display:block; font-size:24px; } .tile span { color:var(--muted);
-  font-size:13px; }
-table { border-collapse:collapse; width:100%; font-size:14px; }
-th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line);
-  white-space:nowrap; }
-th { color:var(--muted); font-weight:600; } td.n, th.n { text-align:right; }
-.warn { color:var(--warn); font-weight:600; } .ok { color:var(--ok); }
-a { color:var(--accent); text-decoration:none; }
-.run { display:flex; flex-wrap:wrap; gap:12px; align-items:center;
-  justify-content:space-between; }
-button { background:var(--accent); color:#fff; border:0; border-radius:10px;
-  padding:10px 18px; font-size:15px; font-weight:600; cursor:pointer; }
-button:disabled { opacity:.5; cursor:default; }
-.notice { background:var(--card); border:1px solid var(--accent);
-  border-radius:12px; padding:10px 14px; margin:12px 0; }
-svg text { fill:var(--muted); font-size:11px; }
-"""
 
 
 def _tile(value: str, label: str) -> str:
@@ -211,7 +174,7 @@ def _run(run: RunStatus) -> str:
     )
 
 
-def page(
+def stats_body(
     now: datetime,
     kpis: Kpis,
     weeks: list[Week],
@@ -221,18 +184,11 @@ def page(
     applications: list[ApplicationRow],
     usage: list[UsageRow],
     run: RunStatus | None = None,
-    notice: str | None = None,
 ) -> str:
     digest, immediate = thresholds
-    # While a run is active the page reloads itself (no JavaScript needed).
-    refresh = '<meta http-equiv="refresh" content="15">' if run and run.running else ""
     return (
-        '<!doctype html><html lang="fr"><head><meta charset="utf-8">'
-        '<meta name="viewport" content="width=device-width, initial-scale=1">'
-        f"{refresh}<title>intern-radar</title><style>{CSS}</style></head><body>"
-        "<main><h1>intern-radar</h1>"
+        "<h1>Statistiques</h1>"
         f'<p class="muted">Mis à jour le {now:%d/%m/%Y à %H:%M} UTC</p>'
-        + (f'<div class="notice">{e(notice)}</div>' if notice else "")
         + (_run(run) if run else "")
         + _kpis(kpis)
         + _funnel(weeks)
@@ -240,5 +196,4 @@ def page(
         + _applications(applications)
         + _sources(sources)
         + _usage(usage)
-        + "</main></body></html>"
     )
