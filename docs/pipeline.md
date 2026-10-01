@@ -130,6 +130,16 @@ Common behaviour:
 Measured: first run (cold database, ~900 detail calls) 18 min; steady-state
 collection ~2 min.
 
+Collection runs 6 companies at a time (`FETCH_WORKERS`); the HTTP client
+still waits 1 s between two requests to the same host (thread-safe
+throttle), and every database write stays in the main thread, in company
+order. Greenhouse, Workday and SmartRecruiters download one detail page per
+new offer: they first check `prefilter.ListingRules` (title, location,
+publication date from the listing) and skip the detail request for offers
+the pre-filter would reject anyway; those are stored as rejected exactly as
+before. Measured on 2026-10-01: collection of the 82 companies with a feed
+129 s → 45 s.
+
 ### 3.2 Pre-filter (`prefilter.py`, pure)
 
 - Title: `\b(interns?|internships?|co-?ops?|stagiaires?|trainees?|placements?)\b`
@@ -224,6 +234,11 @@ of ~70 countries and regions) and punctuation; it is stored in
   raises `LLMError`: the whole run stops scoring, **no attempt is counted**,
   jobs are retried next run. The error message carries the envelope's
   `api_error_status`, `subtype` and `result`.
+- Up to 3 batches are scored concurrently (`SCORING_WORKERS`): the CLI
+  waits on the API, so the waits overlap; results are saved in order from
+  the main thread, and a failed batch counts no attempt and is retried next
+  run while the others are kept. Same prompts, model and decisions as
+  sequential scoring (tested on 50 offers).
 - Caps per run: `max_llm_batches_per_run` (5) × 10 jobs. The backlog is
   ordered tier S → A → B → unlisted, newest first.
 

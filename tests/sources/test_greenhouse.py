@@ -56,3 +56,40 @@ def test_fetch_returns_new_internship_jobs_with_details():
             posted_at="2026-09-10",
         )
     ]
+
+
+def test_offers_rejected_by_the_listing_rules_skip_the_detail_request():
+    from datetime import date
+
+    from intern_radar.prefilter import ListingRules
+    from intern_radar.sources.greenhouse import GreenhouseSource
+
+    listing = {
+        "jobs": [
+            {
+                "id": 1,
+                "title": "ML Intern",
+                "location": {"name": "Paris, France"},
+                "absolute_url": "https://x/1",
+                "first_published": "2026-09-20T00:00:00Z",
+            },
+            {
+                "id": 2,
+                "title": "ML Intern",
+                "location": {"name": "London"},
+                "absolute_url": "https://x/2",
+                "first_published": "2026-09-20T00:00:00Z",
+            },
+        ]
+    }
+    base = "https://boards-api.greenhouse.io/v1/boards/acme/jobs"
+    client = mock_client(
+        {f"GET {base}": listing, f"GET {base}/2": {"content": "Do ML"}}
+    )
+    rules = ListingRules(window_year=2027, max_age_days=60, today=date(2026, 9, 30))
+    company = Company("Acme", "A", "greenhouse", {"board": "acme"})
+    jobs = GreenhouseSource(client, rules).fetch(company, set())
+    assert [(j.id, j.description) for j in jobs] == [
+        ("greenhouse:acme:1", ""),  # France: no detail request (route not mocked)
+        ("greenhouse:acme:2", "Do ML"),
+    ]
