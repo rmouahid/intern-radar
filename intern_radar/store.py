@@ -116,6 +116,15 @@ CREATE TABLE IF NOT EXISTS search_hits (
     at TEXT NOT NULL,
     PRIMARY KEY (search_id, job_id)
 );
+CREATE TABLE IF NOT EXISTS runs (
+    id INTEGER PRIMARY KEY,
+    started_at TEXT NOT NULL,
+    duration REAL NOT NULL,
+    counters TEXT NOT NULL,
+    errors TEXT NOT NULL,
+    timings TEXT NOT NULL,
+    crash TEXT
+);
 CREATE TABLE IF NOT EXISTS meta (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
@@ -703,6 +712,29 @@ class Store:
                 "INSERT OR IGNORE INTO search_hits (search_id, job_id, at)"
                 " VALUES (?, ?, ?)",
                 (search_id, job_id, now.isoformat()),
+            )
+
+    def record_run(
+        self,
+        started: datetime,
+        duration: float,
+        counters: dict[str, int],
+        errors: list[str],
+        timings: dict[str, float],
+        crash: str | None,
+    ) -> None:
+        with self._db:
+            self._db.execute(
+                "INSERT INTO runs (started_at, duration, counters, errors, timings,"
+                " crash) VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    started.isoformat(),
+                    round(duration, 2),
+                    json.dumps(counters),
+                    json.dumps([e[:300] for e in errors[:50]]),
+                    json.dumps(timings),
+                    crash,
+                ),
             )
 
     def set_feedback(self, job_id: str, vote: int, reason: str, now: datetime) -> None:

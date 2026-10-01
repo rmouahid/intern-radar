@@ -4,8 +4,10 @@ import html
 from datetime import datetime
 
 from intern_radar.dashboard.queries import (
+    STEP_LABELS,
     ApplicationRow,
     Kpis,
+    RunSummary,
     SourceRow,
     UsageRow,
     Week,
@@ -174,6 +176,80 @@ def _run(run: RunStatus) -> str:
     )
 
 
+def _minutes(seconds: float) -> str:
+    return (
+        f"{int(seconds // 60)} min {int(seconds % 60):02d}"
+        if seconds >= 60
+        else (f"{seconds:.0f} s")
+    )
+
+
+def _runs(summary: RunSummary) -> str:
+    if not summary.runs:
+        return (
+            "<section><h2>Runs</h2><p class='muted'>Aucun run enregistré pour "
+            "l'instant.</p></section>"
+        )
+    timeline = list(reversed(summary.runs))  # oldest first
+    top = max(r.duration for r in timeline) or 1
+    width = 14
+    bars = "".join(
+        f'<rect x="{i * width + 1}" y="{80 - round(70 * r.duration / top)}" '
+        f'width="{width - 3}" height="{max(2, round(70 * r.duration / top))}" rx="2" '
+        f'fill="var(--{"warn" if r.crash or r.errors else "accent"})">'
+        f"<title>{e(r.started_at[:16].replace('T', ' '))} · "
+        f"{_minutes(r.duration)}"
+        + (f" · {len(r.errors)} erreur(s)" if r.errors else "")
+        + (" · plantage" if r.crash else "")
+        + "</title></rect>"
+        for i, r in enumerate(timeline)
+    )
+    chart = (
+        f'<svg viewBox="0 0 {width * len(timeline)} 84" width="100%" height="110" '
+        f'role="img">{bars}</svg>'
+    )
+    steps = " · ".join(
+        f"{STEP_LABELS.get(step, step)} {_minutes(seconds)}"
+        for step, seconds in summary.steps
+    )
+    failing = "".join(
+        f"<tr><td>{e(source)}</td><td class='n'>{count}</td>"
+        f"<td>{e(message[:90])}</td></tr>"
+        for source, count, message in summary.failing[:8]
+    )
+    latest = "".join(
+        f"<tr><td>{e(r.started_at[5:16].replace('T', ' '))}</td>"
+        f"<td class='n'>{_minutes(r.duration)}</td>"
+        f"<td class='n'>{r.counters.get('new', 0)}</td>"
+        f"<td class='n'>{r.counters.get('scored', 0)}</td>"
+        f"<td class='n'>{r.counters.get('notified', 0)}</td>"
+        + (
+            f"<td class='warn'>{e(r.crash[:60])}</td>"
+            if r.crash
+            else f"<td class='{'warn' if r.errors else 'ok'}'>"
+            f"{len(r.errors)} erreur(s)</td>"
+        )
+        + "</tr>"
+        for r in summary.runs[:10]
+    )
+    return (
+        "<section><h2>Runs</h2>"
+        f"<p class='muted'>{len(summary.runs)} derniers runs · durée médiane "
+        f"{_minutes(summary.median or 0)} · en orange : erreurs ou plantage</p>"
+        f"{chart}<p><b>Étapes (moyenne)</b> : {e(steps) or '—'}</p>"
+        + (
+            "<h2>Sources en échec</h2><table><tr><th>Source</th><th class='n'>Runs"
+            f"</th><th>Dernière erreur</th></tr>{failing}</table>"
+            if failing
+            else "<p class='ok'>Aucune source en échec sur ces runs.</p>"
+        )
+        + "<h2 style='margin-top:12px'>Derniers runs</h2><table><tr><th>Début (UTC)"
+        "</th><th class='n'>Durée</th><th class='n'>Nouv.</th><th class='n'>Notées"
+        "</th><th class='n'>Notif.</th><th>État</th></tr>"
+        f"{latest}</table></section>"
+    )
+
+
 def stats_body(
     now: datetime,
     kpis: Kpis,
@@ -184,6 +260,7 @@ def stats_body(
     applications: list[ApplicationRow],
     usage: list[UsageRow],
     run: RunStatus | None = None,
+    runs: RunSummary | None = None,
 ) -> str:
     digest, immediate = thresholds
     return (
@@ -195,5 +272,6 @@ def stats_body(
         + _histogram(histogram, digest, immediate)
         + _applications(applications)
         + _sources(sources)
+        + (_runs(runs) if runs is not None else "")
         + _usage(usage)
     )

@@ -1,10 +1,12 @@
 """Orchestrates one watch run and the evening digest."""
 
 import logging
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterator, Mapping
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
+from time import monotonic
 
 from intern_radar import prefilter, ranking
 from intern_radar.chance import Chance
@@ -51,7 +53,27 @@ class RunReport:
     notified: int = 0
     grouped: int = 0  # jobs that reused the result of their posting group
     search_alerts: int = 0  # saved-search matches sent
+    timings: dict[str, float] = field(default_factory=dict)  # seconds per step
     errors: list[str] = field(default_factory=list)
+
+
+COUNTERS = (
+    "fetched", "new", "candidates", "out_of_scope", "stale", "discovery",
+    "scored", "notified", "grouped", "search_alerts",
+)  # fmt: skip
+
+
+def report_counters(report: RunReport) -> dict[str, int]:
+    return {name: getattr(report, name) for name in COUNTERS}
+
+
+@contextmanager
+def _timed(report: RunReport, step: str) -> Iterator[None]:
+    start = monotonic()
+    try:
+        yield
+    finally:
+        report.timings[step] = round(monotonic() - start, 2)
 
 
 class Pipeline:
@@ -82,18 +104,37 @@ class Pipeline:
         self._tracking = tracking
 
     def run(self) -> RunReport:
+        """One run; recorded in the store with its step timings, even on a crash."""
         report = RunReport()
-        self._collect(report)
-        self._score(report)
-        if self._notify(report):
-            self._alert(report)
-        if self._searches is not None:
+        started, clock = self._clock(), monotonic()
+        crash = None
+        try:
+            with _timed(report, "collect"):
+                self._collect(report)
+            with _timed(report, "score"):
+                self._score(report)
+            with _timed(report, "notify"):
+                if self._notify(report):
+                    self._alert(report)
+            if self._searches is not None:
+                with _timed(report, "searches"):
+                    try:
+                        report.search_alerts = self._searches()
+                    except Exception as exc:  # alerts must not fail the run
+                        log.exception("saved-search alerts failed")
+                        report.errors.append(f"saved searches: {exc}")
+            return report
+        except BaseException as exc:
+            crash = f"{type(exc).__name__}: {exc}"[:500]
+            raise
+        finally:
             try:
-                report.search_alerts = self._searches()
-            except Exception as exc:  # alerts must not fail the run
-                log.exception("saved-search alerts failed")
-                report.errors.append(f"saved searches: {exc}")
-        return report
+                self._store.record_run(
+                    started, monotonic() - clock, report_counters(report),
+                    report.errors, report.timings, crash,
+                )  # fmt: skip
+            except Exception:
+                log.exception("run not recorded")
 
     def digest(self) -> int:
         thresholds = self._profile.thresholds
