@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from urllib.parse import parse_qs
 
 from intern_radar.candidate import candidate_text, load_candidate
 from intern_radar.config import Profile, VisaPenalties, Weights
@@ -30,7 +31,8 @@ from intern_radar.dashboard.pages.editing import letter_form, resume_form
 from intern_radar.dashboard.pages.feedback import feedback_body
 from intern_radar.dashboard.pages.insights import insights_body
 from intern_radar.dashboard.pages.offer import OfferView, offer_body
-from intern_radar.dashboard.pages.offers import offers_body
+from intern_radar.dashboard.pages.offers import offers_body, query_string
+from intern_radar.dashboard.pages.searches import searches_body
 from intern_radar.dashboard.render import stats_body
 from intern_radar.dashboard.runner import RunStatus
 from intern_radar.dashboard.worker import KINDS, Worker
@@ -42,6 +44,8 @@ NOTICES: dict[str, str] = {
     **ACTION_NOTICES,
     "feedback": "Avis enregistré.",
     "details": "Suivi enregistré.",
+    "search_saved": "Recherche enregistrée : alertes après chaque run.",
+    "search_name": "Donne un nom à la recherche.",
     "edited": "Document modifié : le PDF a été régénéré.",
     "edited_sent": "Document modifié : le PDF régénéré part sur Telegram.",
 }
@@ -343,6 +347,41 @@ def build_app(ctx: Context) -> App:
         body = insights_body(skills, offers, relevance, source)
         return html_response(page("Compétences", body, "insights"))
 
+    @app.route("GET", "/searches")
+    def searches_page(request: Request):
+        with ctx.store() as store:
+            body = searches_body(store.searches())
+        notice = NOTICES.get(request.arg("done"))
+        return html_response(page("Recherches", body, "more", notice))
+
+    @app.route("POST", "/searches")
+    def save_search(request: Request):
+        name = request.form.get("name", "").strip()
+        query = request.form.get("query", "")
+        if not name:
+            return redirect("/searches?done=search_name")
+        # Normalise through the filters: unknown keys and values are dropped.
+        filters = queries.OfferFilters.from_query(
+            {k: v[-1] for k, v in parse_qs(query).items()}, ctx.max_offer_age_days
+        )
+        with ctx.store() as store:
+            store.add_search(name, query_string(filters), ctx.clock())
+        return redirect("/searches?done=search_saved")
+
+    @app.route("POST", "/searches/<int:search_id>/<str:action>")
+    def change_search(request: Request, search_id: int, action: str):
+        with ctx.store() as store:
+            found = next((s for s in store.searches() if s.id == search_id), None)
+            if found is None:
+                return not_found("Recherche introuvable.")
+            if action == "toggle":
+                store.set_search_active(search_id, not found.active)
+            elif action == "delete":
+                store.delete_search(search_id)
+            else:
+                return not_found("Action inconnue.")
+        return redirect("/searches")
+
     @app.route("GET", "/applications")
     def applications_page(request: Request):
         days = ctx.profile.reminder_days if ctx.profile else 14
@@ -440,5 +479,6 @@ def build_app(ctx: Context) -> App:
 # Pages reachable from the "Plus" tab (extended by later pages).
 MORE_LINKS: list[tuple[str, str, str]] = [
     ("/stats", "Statistiques", "Entonnoir, scores, sources, usage LLM, runs"),
+    ("/searches", "Recherches", "Alertes Telegram sur des filtres enregistrés"),
     ("/feedback", "Mes avis", "Les offres notées 👍/👎, prises en compte au scoring"),
 ]

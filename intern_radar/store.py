@@ -103,6 +103,19 @@ CREATE TABLE IF NOT EXISTS application_details (
     next_action_date TEXT,
     updated_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS saved_searches (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    query TEXT NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS search_hits (
+    search_id INTEGER NOT NULL,
+    job_id TEXT NOT NULL,
+    at TEXT NOT NULL,
+    PRIMARY KEY (search_id, job_id)
+);
 CREATE TABLE IF NOT EXISTS meta (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
@@ -121,6 +134,16 @@ class ApplicationDetails:
     interviews: tuple[str, ...] = ()  # YYYY-MM-DDTHH:MM, sorted
     next_action: str = ""
     next_action_date: str | None = None  # YYYY-MM-DD
+
+
+@dataclass(frozen=True)
+class SavedSearch:
+    id: int
+    name: str
+    query: str  # offers filters, as the offers page encodes them
+    active: bool
+    created_at: str
+    hits: int = 0  # offers already alerted
 
 
 JOB_COLUMNS = (
@@ -624,6 +647,62 @@ class Store:
                     details.next_action_date,
                     now.isoformat(),
                 ),
+            )
+
+    def add_search(self, name: str, query: str, now: datetime) -> int:
+        """Saves offers filters (a query string) under a name; returns its id."""
+        with self._db:
+            cursor = self._db.execute(
+                "INSERT INTO saved_searches (name, query, created_at) VALUES (?, ?, ?)",
+                (name.strip()[:80], query[:1000], now.isoformat()),
+            )
+        return int(cursor.lastrowid or 0)
+
+    def searches(self, active_only: bool = False) -> list[SavedSearch]:
+        rows = self._db.execute(
+            "SELECT s.*, (SELECT count(*) FROM search_hits h WHERE h.search_id = s.id)"
+            " AS hits FROM saved_searches s"
+            + (" WHERE s.active = 1" if active_only else "")
+            + " ORDER BY s.id"
+        )
+        return [
+            SavedSearch(
+                row["id"],
+                row["name"],
+                row["query"],
+                bool(row["active"]),
+                row["created_at"],
+                row["hits"],
+            )  # fmt: skip
+            for row in rows
+        ]
+
+    def set_search_active(self, search_id: int, active: bool) -> None:
+        with self._db:
+            self._db.execute(
+                "UPDATE saved_searches SET active = ? WHERE id = ?",
+                (int(active), search_id),
+            )
+
+    def delete_search(self, search_id: int) -> None:
+        with self._db:
+            self._db.execute(
+                "DELETE FROM search_hits WHERE search_id = ?", (search_id,)
+            )
+            self._db.execute("DELETE FROM saved_searches WHERE id = ?", (search_id,))
+
+    def search_hit_ids(self, search_id: int) -> set[str]:
+        rows = self._db.execute(
+            "SELECT job_id FROM search_hits WHERE search_id = ?", (search_id,)
+        )
+        return {row["job_id"] for row in rows}
+
+    def add_search_hit(self, search_id: int, job_id: str, now: datetime) -> None:
+        with self._db:
+            self._db.execute(
+                "INSERT OR IGNORE INTO search_hits (search_id, job_id, at)"
+                " VALUES (?, ?, ?)",
+                (search_id, job_id, now.isoformat()),
             )
 
     def set_feedback(self, job_id: str, vote: int, reason: str, now: datetime) -> None:

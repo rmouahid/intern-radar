@@ -104,19 +104,34 @@ def vote_buttons(ref: int, vote: int | None, back: str) -> str:
     return f'<div class="votes">{button(1, "👍")}{button(-1, "👎")}</div>'
 
 
+def query_string(f: OfferFilters, page: int | None = None) -> str:
+    """The filters as a query string (without the page unless given)."""
+    params = {
+        "q": f.q,
+        "min": f"{f.min_score:g}",
+        "tier": f.tier,
+        "region": f.region,
+        "visa": f.visa,
+        "status": f.status,
+        "days": str(f.days),
+        "page": str(page) if page and page > 1 else "",
+    }
+    return urlencode({k: v for k, v in params.items() if v})
+
+
+def save_search_form(f: OfferFilters) -> str:
+    return (
+        '<form method="post" action="/searches" class="actions">'
+        f'<input type="hidden" name="query" value="{e(query_string(f))}">'
+        '<input name="name" required maxlength="80" '
+        'placeholder="Nommer cette recherche…" style="flex:1;min-width:150px">'
+        "<button>🔔 Alerte Telegram</button></form>"
+    )
+
+
 def offers_body(rows: list[OfferRow], total: int, f: OfferFilters) -> str:
     def link(page: int) -> str:
-        params = {
-            "q": f.q,
-            "min": f"{f.min_score:g}",
-            "tier": f.tier,
-            "region": f.region,
-            "visa": f.visa,
-            "status": f.status,
-            "days": str(f.days),
-            "page": str(page),
-        }
-        return "/offers?" + urlencode({k: v for k, v in params.items() if v})
+        return "/offers?" + query_string(f, page)
 
     pages = max(1, -(-total // PER_PAGE))
     pager = '<div class="pager">'
@@ -139,6 +154,6 @@ def offers_body(rows: list[OfferRow], total: int, f: OfferFilters) -> str:
     return (
         f"<h1>Offres</h1><p class='muted'>{total} offre(s) · "
         f"une carte par poste (les autres villes sont regroupées)</p>"
-        f"<section>{filters_form(f)}</section>{cards}"
+        f"<section>{filters_form(f)}{save_search_form(f)}</section>{cards}"
         + (pager if total > PER_PAGE else "")
     )
