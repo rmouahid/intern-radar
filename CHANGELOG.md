@@ -4,6 +4,45 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] — 2026-10-02
+
+### Added
+
+- **Web app** replacing the statistics page, mobile-first and served on the
+  Tailscale address only: navigation bar, filterable offers list (score,
+  tier, region, work authorisation, status, age, text) with one card per
+  posting, and an offer page with score breakdown, chance, other
+  locations, country conventions, application history and documents
+  (#79, #80).
+- **Actions from the web**: application status changes, letter and CV
+  generation and Telegram delivery on a background worker (#81); hand
+  edits of letters and CVs re-rendered as PDF (#83).
+- **👍/👎 feedback** on offers, summarised into the scoring prompt to
+  calibrate AI relevance (#82).
+- **Applications board** with follow-up fields (contact, deadline,
+  interviews, next action, notes), agenda and CSV export (#84, #92).
+- **Skills gap** page: skills requested by relevant offers that the profile
+  does not show, without any LLM call (#85).
+- **Saved searches** with Telegram alerts on new matching offers (#86).
+- **Profile page**: view `candidate.json`, edit `career.md`, regenerate the
+  profile in the background with warnings and diff (#87).
+- **Company pages** with offers seen per week, open offers, applications
+  and source health (#88).
+- **Run history** with per-step timings and failing sources, and **chance
+  calibration** against real outcomes on the stats page (#89, #90).
+- **Installable app**: manifest, icons and an offline-reading service
+  worker (active over HTTPS) (#91).
+
+### Changed
+
+- Runs fetch sources and score batches concurrently and skip detail
+  requests for offers the pre-filter rejects (#77).
+
+### Fixed
+
+- Concurrent scoring crashed when recording LLM usage from worker threads
+  (#93).
+
 ## [0.3.0] — 2026-10-01
 
 ### Added
@@ -96,6 +135,7 @@ All notable changes to this project are documented here. The format follows
   checks, one-page PDF delivered in the chat.
 - systemd units, logrotate configuration and complete documentation.
 
+[0.4.0]: https://github.com/rmouahid/intern-radar/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/rmouahid/intern-radar/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/rmouahid/intern-radar/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/rmouahid/intern-radar/releases/tag/v0.1.0
