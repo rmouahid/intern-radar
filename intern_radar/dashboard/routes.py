@@ -3,6 +3,7 @@
 import csv
 import hashlib
 import io
+import json
 import re
 import shutil
 from collections.abc import Callable, Iterator
@@ -32,6 +33,7 @@ from intern_radar.dashboard.app import (
     redirect,
     text_response,
 )
+from intern_radar.dashboard.kit_api import find_ref, kit_payload
 from intern_radar.dashboard.layout import e, page
 from intern_radar.dashboard.pages.actions import NOTICES as ACTION_NOTICES
 from intern_radar.dashboard.pages.actions import actions_html
@@ -155,6 +157,12 @@ def to_csv(header: tuple[str, ...], rows: list[tuple[str, ...]]) -> bytes:
     writer.writerow(header)
     writer.writerows([_cell(v) for v in row] for row in rows)
     return ("\ufeff" + buffer.getvalue()).encode("utf-8")
+
+
+def json_response(data: object, status: int = 200) -> Response:
+    return text_response(
+        json.dumps(data, ensure_ascii=False), status, "application/json"
+    )
 
 
 def not_found(message: str) -> Response:
@@ -658,6 +666,29 @@ def build_app(ctx: Context) -> App:
             "text/csv; charset=utf-8",
             (("Content-Disposition", f'attachment; filename="{name}"'),),
         )
+
+    @app.route("GET", "/api/kit/lookup")
+    def kit_lookup(request: Request):
+        with ctx.store() as store:
+            ref = find_ref(store, request.arg("url"))
+        if ref is None:
+            return json_response({"error": "offre inconnue"}, 404)
+        return json_response({"ref": ref})
+
+    @app.route("GET", "/api/kit/<int:ref>.json")
+    def kit_json(request: Request, ref: int):
+        if ctx.profile is None:
+            return json_response({"error": "profil introuvable"}, 404)
+        with ctx.store() as store:
+            group = store.group_by_ref(ref)
+            if not group:
+                return json_response({"error": "offre inconnue"}, 404)
+            payload = kit_payload(
+                store, group[0], ref, ctx.profile, ctx.candidate(),
+                "fr" if request.arg("lang") == "fr" else "en",
+                f"http://{request.headers.get('host', '')}",
+            )  # fmt: skip
+        return json_response(payload)
 
     @app.route("GET", "/answers")
     def answers_page(request: Request):

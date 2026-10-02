@@ -133,7 +133,8 @@ def kit_html(
 ) -> str:
     """`documents` maps "letter"/"cv" to (ready, stale)."""
     open_form = (
-        f'<a class="button" href="{e(url)}" target="_blank" rel="noopener">'
+        f'<a class="button" href="{e(url)}#radar={ref}" target="_blank" '
+        'rel="noopener">'
         "📝 Ouvrir le formulaire</a>"
         if url.startswith(("https://", "http://"))
         else ""
