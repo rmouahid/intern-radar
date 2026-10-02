@@ -1,8 +1,12 @@
 """Application kit: everything needed to fill the offer's form."""
 
+from collections.abc import Sequence
+
 from intern_radar.dashboard.layout import e
 from intern_radar.dashboard.worker import PENDING, RUNNING, TaskState
-from intern_radar.store import WhyText
+from intern_radar.store import Submission, WhyText
+
+DOCUMENT_NAMES = {"cv": "CV", "letter": "lettre"}
 
 
 def _copy_row(index: int, question: str, value: str) -> str:
@@ -73,6 +77,50 @@ def _why(ref: int, why: WhyText | None, state: TaskState | None) -> str:
     )
 
 
+def _submissions(submissions: Sequence[Submission]) -> str:
+    if not submissions:
+        return ""
+    items = "".join(
+        f'<li><a href="/submissions/{s.id}">Envoyée le '
+        f"{e(s.at[:16].replace('T', ' à '))}</a> · "
+        + (
+            ", ".join(DOCUMENT_NAMES[k] for k in ("cv", "letter") if k in s.files)
+            or "sans document"
+        )
+        + "</li>"
+        for s in submissions
+    )
+    return f"<h2>Envois archivés</h2><ul>{items}</ul>"
+
+
+def submission_body(s: Submission, company: str, title: str, ref: int) -> str:
+    files = "".join(
+        f'<a class="button ghost" href="/files/submission/{s.id}/{kind}">'
+        f"📄 {DOCUMENT_NAMES[kind].capitalize()} envoyé(e)</a>"
+        for kind in ("cv", "letter")
+        if kind in s.files
+    )
+    answers = "".join(
+        f"<tr><td style='white-space:normal'>{e(q)}</td>"
+        f"<td style='white-space:pre-wrap'>{e(v)}</td></tr>"
+        for q, v in s.answers
+    )
+    why = (
+        f"<section><h2>Pourquoi cette entreprise</h2>"
+        f'<p style="white-space:pre-wrap">{e(s.why)}</p></section>'
+        if s.why
+        else ""
+    )
+    return (
+        f'<p class="muted"><a href="/offers/{ref}#kit">← {e(company)}</a></p>'
+        f"<h1>Candidature envoyée</h1><p class='muted'>{e(title)} · le "
+        f"{e(s.at[:16].replace('T', ' à '))} (UTC)</p>"
+        f'<div class="actions">{files or "<span class=muted>Aucun PDF archivé.</span>"}'
+        "</div>"
+        f"{why}<section><h2>Réponses</h2><table>{answers}</table></section>"
+    )
+
+
 def kit_html(
     ref: int,
     url: str,
@@ -81,6 +129,7 @@ def kit_html(
     documents: dict[str, tuple[bool, bool]],
     why: WhyText | None,
     why_state: TaskState | None,
+    submissions: Sequence[Submission] = (),
 ) -> str:
     """`documents` maps "letter"/"cv" to (ready, stale)."""
     open_form = (
@@ -127,5 +176,10 @@ def kit_html(
         f"<h2 style='margin-top:12px'>Pourquoi cette entreprise</h2>"
         f"{_why(ref, why, why_state)}"
         f"<h2 style='margin-top:12px'>Avant d'envoyer</h2>{checklist}"
-        "</section>"
+        f'<form method="post" action="/offers/{ref}/submit" class="actions">'
+        f'<input type="hidden" name="lang" value="{language}">'
+        "<button>✅ J'ai postulé</button></form>"
+        "<p class='muted'>Passe la candidature en « Postulé » et archive le CV, la "
+        "lettre, les réponses et le « pourquoi nous » tels qu'ils sont maintenant."
+        "</p>" + _submissions(submissions) + "</section>"
     )

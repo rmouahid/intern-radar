@@ -398,6 +398,7 @@ class BoardCard:
     interviews: tuple[str, ...]
     reminder_due: bool
     liked: bool
+    submitted_at: str | None = None  # last "J'ai postulé" from the kit
 
 
 @dataclass(frozen=True)
@@ -430,8 +431,9 @@ def board(
         "SELECT j.rowid AS ref, j.company, j.title, j.score, j.notified_at,"
         " j.first_seen, j.group_key, j.id, a.status, a.updated_at, a.applied_at,"
         " a.reminded_at,"
-        " f.vote, d.deadline, d.next_action, d.next_action_date, d.interviews"
-        " FROM jobs j"
+        " f.vote, d.deadline, d.next_action, d.next_action_date, d.interviews,"
+        " (SELECT max(s.at) FROM submissions s WHERE s.job_id = j.id)"
+        " AS submitted_at FROM jobs j"
         " LEFT JOIN applications a ON a.job_id = j.id"
         " LEFT JOIN feedback f ON f.job_id = j.id"
         " LEFT JOIN application_details d ON d.job_id = j.id"
@@ -473,6 +475,7 @@ def board(
                 and row["reminded_at"] is None
                 and row["updated_at"] <= due_before,
                 liked=row["vote"] == 1,
+                submitted_at=row["submitted_at"],
             )
         )
     for key, cards in columns.items():
@@ -875,6 +878,7 @@ EXPORT_HEADER = (
     "Entreprise", "Poste", "Lieu", "Statut", "Mis à jour", "Candidature envoyée",
     "Date limite", "Entretiens", "Prochaine action", "Pour le", "Contact",
     "E-mail du contact", "Notes", "Score", "Chance (%)", "Lien",
+    "Envoyée le (kit)", "Documents envoyés",
 )  # fmt: skip
 
 
@@ -884,7 +888,9 @@ def applications_export(db: sqlite3.Connection) -> list[tuple[str, ...]]:
         "SELECT j.company, j.title, j.location, j.url, j.score, a.status,"
         " a.updated_at, a.applied_at, c.percent, d.deadline, d.interviews,"
         " d.next_action, d.next_action_date, d.contact_name, d.contact_email,"
-        " d.notes FROM applications a JOIN jobs j ON j.id = a.job_id"
+        " d.notes, (SELECT s.at || '|' || s.files FROM submissions s"
+        " WHERE s.job_id = a.job_id ORDER BY s.at DESC, s.id DESC LIMIT 1) AS sent"
+        " FROM applications a JOIN jobs j ON j.id = a.job_id"
         " LEFT JOIN chances c ON c.job_id = a.job_id"
         " LEFT JOIN application_details d ON d.job_id = a.job_id"
         " WHERE a.status != 'dismissed' ORDER BY a.updated_at DESC"
@@ -909,6 +915,17 @@ def applications_export(db: sqlite3.Connection) -> list[tuple[str, ...]]:
             f"{r['score']:.1f}" if r["score"] is not None else "",
             str(r["percent"]) if r["percent"] is not None else "",
             r["url"],
+            *_sent(r["sent"]),
         )
         for r in rows
     ]
+
+
+def _sent(value: str | None) -> tuple[str, str]:
+    """(date, documents) of the latest submission, from "at|files-json"."""
+    if not value:
+        return "", ""
+    at, _, files = value.partition("|")
+    names = {"cv": "CV", "letter": "lettre"}
+    sent = [names[k] for k in ("cv", "letter") if k in json.loads(files or "{}")]
+    return at[:10], ", ".join(sent)
