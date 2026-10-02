@@ -138,6 +138,14 @@ CREATE TABLE IF NOT EXISTS why_texts (
     edited INTEGER NOT NULL DEFAULT 0,
     updated_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS submissions (
+    id INTEGER PRIMARY KEY,
+    job_id TEXT NOT NULL,
+    at TEXT NOT NULL,
+    answers TEXT NOT NULL,
+    why TEXT NOT NULL,
+    files TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS meta (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
@@ -156,6 +164,16 @@ class ApplicationDetails:
     interviews: tuple[str, ...] = ()  # YYYY-MM-DDTHH:MM, sorted
     next_action: str = ""
     next_action_date: str | None = None  # YYYY-MM-DD
+
+
+@dataclass(frozen=True)
+class Submission:
+    id: int
+    job_id: str
+    at: str
+    answers: list[tuple[str, str]]
+    why: str
+    files: dict[str, str]  # "cv" / "letter" -> frozen PDF copy
 
 
 @dataclass(frozen=True)
@@ -757,6 +775,52 @@ class Store:
                     crash,
                 ),
             )
+
+    def record_submission(
+        self,
+        job_id: str,
+        answers: list[tuple[str, str]],
+        why: str,
+        files: dict[str, str],
+        now: datetime,
+    ) -> int:
+        """What was sent with an application; `files` maps "cv"/"letter" to the
+        frozen copy of the PDF. Returns the submission id."""
+        with self._db:
+            cursor = self._db.execute(
+                "INSERT INTO submissions (job_id, at, answers, why, files)"
+                " VALUES (?, ?, ?, ?, ?)",
+                (job_id, now.isoformat(), json.dumps(answers), why, json.dumps(files)),
+            )
+        return int(cursor.lastrowid or 0)
+
+    def submissions(self, job_id: str | None = None) -> list[Submission]:
+        """Submissions, latest first (of one offer when `job_id` is given)."""
+        sql = "SELECT * FROM submissions"
+        params: tuple[str, ...] = ()
+        if job_id is not None:
+            sql += " WHERE job_id = ?"
+            params = (job_id,)
+        rows = self._db.execute(sql + " ORDER BY at DESC, id DESC", params)
+        return [
+            Submission(
+                row["id"],
+                row["job_id"],
+                row["at"],
+                [tuple(pair) for pair in json.loads(row["answers"])],
+                row["why"],
+                json.loads(row["files"]),
+            )  # fmt: skip
+            for row in rows
+        ]
+
+    def submission(self, submission_id: int) -> Submission | None:
+        row = self._db.execute(
+            "SELECT job_id FROM submissions WHERE id = ?", (submission_id,)
+        ).fetchone()
+        if row is None:
+            return None
+        return next(s for s in self.submissions(row["job_id"]) if s.id == submission_id)
 
     def save_why(
         self,

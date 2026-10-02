@@ -21,6 +21,10 @@ def _card(card: BoardCard) -> str:
         chips.append('<span class="chip">👍</span>')
     if card.status in ("rejected", "no_answer"):
         chips.append(f'<span class="chip">{e(STATUS_TEXT[card.status])}</span>')
+    if card.submitted_at:
+        chips.append(
+            f'<span class="chip ok">📎 envoyée le {e(card.submitted_at[:10])}</span>'
+        )
     if card.deadline:
         chips.append(f'<span class="chip">⏳ {e(card.deadline)}</span>')
     if card.interviews:
@@ -33,7 +37,8 @@ def _card(card: BoardCard) -> str:
         action = f'<div class="muted">➡️ {e(card.next_action)}{e(when)}</div>'
     score = f"{card.score:.1f}" if card.score is not None else ""
     return (
-        f'<a class="card" href="/offers/{card.ref}"><div class="top"><div>'
+        f'<a class="card" href="/offers/{card.ref}'
+        f'{"#kit" if card.submitted_at else ""}"><div class="top"><div>'
         f'<div class="muted">{e(card.company)} · depuis le {e(card.since)}</div>'
         f'<div class="title">{e(card.title)}</div>{action}</div>'
         f'<div class="score">{score}</div></div>{"".join(chips)}</a>'

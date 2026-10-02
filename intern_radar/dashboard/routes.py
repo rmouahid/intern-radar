@@ -1,8 +1,10 @@
 """The web app's pages and actions."""
 
 import csv
+import hashlib
 import io
 import re
+import shutil
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -42,7 +44,7 @@ from intern_radar.dashboard.pages.companies import companies_body, company_body
 from intern_radar.dashboard.pages.editing import letter_form, resume_form
 from intern_radar.dashboard.pages.feedback import feedback_body
 from intern_radar.dashboard.pages.insights import insights_body
-from intern_radar.dashboard.pages.kit import kit_html
+from intern_radar.dashboard.pages.kit import kit_html, submission_body
 from intern_radar.dashboard.pages.offer import OfferView, offer_body
 from intern_radar.dashboard.pages.offers import offers_body, query_string
 from intern_radar.dashboard.pages.profile import (
@@ -55,6 +57,7 @@ from intern_radar.dashboard.render import stats_body
 from intern_radar.dashboard.runner import RunStatus
 from intern_radar.dashboard.worker import KINDS, PENDING, RUNNING, Worker
 from intern_radar.editing import DocumentEditor, EditError
+from intern_radar.models import ScoredJob
 from intern_radar.scorer import LLMBackend
 from intern_radar.store import ApplicationDetails, Store
 from intern_radar.tracking import can_move
@@ -66,6 +69,7 @@ NOTICES: dict[str, str] = {
     "search_saved": "Recherche enregistrée : alertes après chaque run.",
     "search_name": "Donne un nom à la recherche.",
     "answers_saved": "Réponses enregistrées.",
+    "submitted": "Candidature notée comme envoyée : documents et réponses archivés.",
     "why_saved": "« Pourquoi cette entreprise » enregistré.",
     "why_empty": "Le texte est vide : non enregistré.",
     "answers_missing": "Question et réponse sont obligatoires.",
@@ -224,11 +228,7 @@ def application_kit(ctx: "Context | None", store: Store, ref: int, lang: str) ->
     scored = store.group_by_ref(ref)[0]
     job = scored.job
     language = "fr" if lang == "fr" else "en"
-    standard = merged(store.answers(), ctx.profile, ctx.candidate())
-    answers = [(a.label if language == "fr" else a.question, a.value) for a in standard]
-    answers += offer_answers(
-        scored.assessment.work_authorisation, job.location, ctx.profile, language
-    )
+    answers = kit_answers(ctx, store, scored, language)
     profile_path = ctx.config_dir / "candidate.json" if ctx.config_dir else None
     profile_time = (
         profile_path.stat().st_mtime
@@ -243,8 +243,60 @@ def application_kit(ctx: "Context | None", store: Store, ref: int, lang: str) ->
         documents[kind] = (ready, stale)
     state = ctx.worker.state("why", ref) if ctx.worker else None
     return kit_html(
-        ref, job.url, answers, language, documents, store.why(job.id), state
+        ref, job.url, answers, language, documents, store.why(job.id), state,
+        store.submissions(job.id),
+    )  # fmt: skip
+
+
+def kit_answers(
+    ctx: "Context", store: Store, scored: ScoredJob, language: str
+) -> list[tuple[str, str]]:
+    """Standard then offer-dependent answers, as (question, answer)."""
+    assert ctx.profile is not None
+    standard = merged(store.answers(), ctx.profile, ctx.candidate())
+    answers = [
+        (a.label if language == "fr" else a.question, a.value)
+        for a in standard
+        if a.value
+    ]
+    return answers + offer_answers(
+        scored.assessment.work_authorisation, scored.job.location, ctx.profile,
+        language,
+    )  # fmt: skip
+
+
+def freeze_documents(
+    ctx: "Context", store: Store, job_id: str, now: datetime
+) -> dict[str, str]:
+    """Copies of the current CV and letter that later edits will not change."""
+    if ctx.data_dir is None:
+        return {}
+    folder = (
+        ctx.data_dir
+        / "submissions"
+        / hashlib.sha1(job_id.encode()).hexdigest()[:10]
+        / f"{now:%Y%m%d-%H%M%S}"
     )
+    files = {}
+    for kind, saved in (("cv", store.resume(job_id)), ("letter", store.letter(job_id))):
+        source = Path(saved[0]) if saved else None
+        if source is None or not source.is_file():
+            continue
+        folder.mkdir(parents=True, exist_ok=True)
+        target = folder / source.name
+        shutil.copy2(source, target)
+        files[kind] = str(target)
+    return files
+
+
+def serve_file(ctx: "Context", saved: str | None) -> Response:
+    """A PDF from the data directory only."""
+    if saved is None or ctx.data_dir is None:
+        return not_found("Document inconnu.")
+    path = Path(saved).resolve()
+    if not path.is_relative_to(ctx.data_dir.resolve()) or not path.is_file():
+        return not_found("Le fichier n'existe plus.")
+    return file_response(path.read_bytes(), "application/pdf", path.name)
 
 
 def serve_document(ctx: "Context", kind: str, ref: int) -> Response:
@@ -260,10 +312,7 @@ def serve_document(ctx: "Context", kind: str, ref: int) -> Response:
         )
     if saved is None:
         return not_found("Aucun document généré pour cette offre.")
-    path = Path(saved[0]).resolve()
-    if not path.is_relative_to(ctx.data_dir.resolve()) or not path.is_file():
-        return not_found("Le fichier n'existe plus.")
-    return file_response(path.read_bytes(), "application/pdf", path.name)
+    return serve_file(ctx, saved[0])
 
 
 def render_stats(ctx: Context, notice: str | None = None) -> str:
@@ -664,6 +713,48 @@ def build_app(ctx: Context) -> App:
         finally:
             db.close()
         return html_response(page("Candidatures", body, "applications"))
+
+    @app.route("POST", "/offers/<int:ref>/submit")
+    def submit(request: Request, ref: int):
+        if ctx.profile is None:
+            return not_found("Profil introuvable.")
+        now = ctx.clock()
+        with ctx.store() as store:
+            group = store.group_by_ref(ref)
+            if not group:
+                return not_found("Offre introuvable.")
+            scored = group[0]
+            job_id = scored.job.id
+            language = "fr" if request.form.get("lang") == "fr" else "en"
+            why = store.why(job_id)
+            store.record_submission(
+                job_id,
+                kit_answers(ctx, store, scored, language),
+                why.text if why else "",
+                freeze_documents(ctx, store, job_id, now),
+                now,
+            )
+            if can_move(store.application_status(job_id), "applied"):
+                store.set_application(job_id, "applied", now)
+        return redirect(f"/offers/{ref}?done=submitted#kit")
+
+    @app.route("GET", "/submissions/<int:submission_id>")
+    def submission_page(request: Request, submission_id: int):
+        with ctx.store() as store:
+            found = store.submission(submission_id)
+            job = store.get_job(found.job_id) if found else None
+            ref = store.job_ref(found.job_id) if found else None
+        if found is None or job is None or ref is None:
+            return not_found("Envoi introuvable.")
+        body = submission_body(found, job.company, job.title, ref)
+        return html_response(page("Envoi", body, "applications"))
+
+    @app.route("GET", "/files/submission/<int:submission_id>/<str:kind>")
+    def submission_file(request: Request, submission_id: int, kind: str):
+        with ctx.store() as store:
+            found = store.submission(submission_id)
+        path = found.files.get(kind) if found else None
+        return serve_file(ctx, path)
 
     @app.route("POST", "/offers/<int:ref>/feedback")
     def give_feedback(request: Request, ref: int):
