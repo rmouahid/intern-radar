@@ -131,6 +131,13 @@ CREATE TABLE IF NOT EXISTS answers (
     value TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS why_texts (
+    job_id TEXT PRIMARY KEY,
+    text TEXT NOT NULL,
+    warnings TEXT NOT NULL,
+    edited INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS meta (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
@@ -149,6 +156,14 @@ class ApplicationDetails:
     interviews: tuple[str, ...] = ()  # YYYY-MM-DDTHH:MM, sorted
     next_action: str = ""
     next_action_date: str | None = None  # YYYY-MM-DD
+
+
+@dataclass(frozen=True)
+class WhyText:
+    text: str
+    warnings: tuple[str, ...]
+    edited: bool  # rewritten by the candidate (warnings no longer apply)
+    updated_at: str
 
 
 @dataclass(frozen=True)
@@ -742,6 +757,34 @@ class Store:
                     crash,
                 ),
             )
+
+    def save_why(
+        self,
+        job_id: str,
+        text: str,
+        warnings: list[str],
+        now: datetime,
+        edited: bool = False,
+    ) -> None:
+        """The "why this company" answer of an offer (generated or edited)."""
+        with self._db:
+            self._db.execute(
+                "INSERT OR REPLACE INTO why_texts (job_id, text, warnings, edited,"
+                " updated_at) VALUES (?, ?, ?, ?, ?)",
+                (job_id, text.strip()[:3000], json.dumps(warnings), int(edited),
+                 now.isoformat()),
+            )  # fmt: skip
+
+    def why(self, job_id: str) -> WhyText | None:
+        row = self._db.execute(
+            "SELECT * FROM why_texts WHERE job_id = ?", (job_id,)
+        ).fetchone()
+        if row is None:
+            return None
+        return WhyText(
+            row["text"], tuple(json.loads(row["warnings"])), bool(row["edited"]),
+            row["updated_at"],
+        )  # fmt: skip
 
     def answers(self) -> dict[str, tuple[str, str]]:
         """Saved form answers: key -> (question, value)."""

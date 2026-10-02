@@ -17,7 +17,7 @@ from typing import Any
 log = logging.getLogger(__name__)
 
 PENDING, RUNNING, DONE, FAILED = "pending", "running", "done", "failed"
-KINDS = ("letter", "cv", "telegram")
+KINDS = ("letter", "cv", "telegram", "why")
 
 
 @dataclass(frozen=True)
@@ -27,6 +27,7 @@ class Services:
     letter: Callable[[str], Path | None]
     promote: Callable[[int], bool]
     resume: Callable[[str], Path | None] | None = None
+    why: Callable[[str], str | None] | None = None
 
 
 @dataclass(frozen=True)
@@ -121,4 +122,8 @@ class Worker:
             if services.resume is None:
                 raise RuntimeError("CV adapté non configuré (candidate.json)")
             return services.resume(job_id) is not None
+        if kind == "why":
+            if services.why is None:
+                raise RuntimeError("profil candidat (candidate.json) introuvable")
+            return services.why(job_id) is not None
         return services.promote(ref)

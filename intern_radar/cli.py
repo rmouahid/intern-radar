@@ -48,6 +48,7 @@ from intern_radar.sources import SOURCE_NAMES, build_sources
 from intern_radar.store import Store
 from intern_radar.telegram import TelegramClient
 from intern_radar.tracking import STATUS_TEXT, Tracker
+from intern_radar.why import WhyService, WhyWriter
 
 app = typer.Typer(
     help="Watch top AI/tech companies for internship offers.",
@@ -481,10 +482,24 @@ def _web_services(config_dir: Path, db: Path) -> Services:
         resumes=resumes is not None,
         tracking=True,
     )
+    candidate_path = config_dir / "candidate.json"
+    why = None
+    if candidate_path.exists():
+        backend = ClaudeCliBackend(
+            model=profile.letter_model,
+            effort=profile.letter_effort,
+            on_usage=_recorder(store, "why"),
+        )
+        why = WhyService(
+            store,
+            lambda: WhyWriter(backend, load_candidate(candidate_path)),
+            utcnow,
+        ).handle
     return Services(
         letter=service.handle,
         promote=promoter.promote,
         resume=resumes.handle if resumes else None,
+        why=why,
     )
 
 
