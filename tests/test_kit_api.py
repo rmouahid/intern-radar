@@ -101,7 +101,10 @@ def test_kit_json(tmp_path):
     fields = data["fields"]
     assert fields["first_name"] == "Alex" and fields["last_name"] == "Martin"
     assert fields["city"] == "Paris" and fields["linkedin"] == "https://li/alex"
-    assert (fields["start_month"], fields["start_year"]) == (3, 2027)
+    assert (fields["internship_start_month"], fields["internship_start_year"]) == (
+        3,
+        2027,
+    )
     assert data["offer"]["ats"] == "greenhouse" and data["why"] == "Because markets."
     assert data["documents"] == {"cv": f"http://100.1.2.3:8787/files/cv/{drw}"}
     assert data["offer"]["page"] == f"http://100.1.2.3:8787/offers/{drw}#kit"

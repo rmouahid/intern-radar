@@ -318,6 +318,11 @@ def dashboard(
         profile_backend=lambda: ClaudeCliBackend(
             model=profile.profile_model, timeout=900
         ),
+        form_backend=lambda store: ClaudeCliBackend(
+            model=profile.letter_model,
+            effort=profile.letter_effort,
+            on_usage=_recorder(store, "autofill"),
+        ),
     )
     server = make_server(
         str(db), address, port or profile.dashboard_port, thresholds, context=context

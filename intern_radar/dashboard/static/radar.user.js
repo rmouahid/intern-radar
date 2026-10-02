@@ -20,20 +20,25 @@
   "use strict";
 
   const BASE = "__BASE__";
+  const TOKEN = "__TOKEN__";
   const STORE_KEY = "radar-kit";
+  const REVIEW = "3px solid #facc15"; // answered by the LLM: to review
+  const MISSING = "3px solid #f59e0b"; // required and still empty
 
   // --- data -----------------------------------------------------------------
 
-  function request(url, binary) {
+  function request(url, binary, post) {
     const gm = (typeof GM !== "undefined" && GM.xmlHttpRequest) ||
       (typeof GM_xmlhttpRequest !== "undefined" && GM_xmlhttpRequest);
     if (!gm) return Promise.reject(new Error("API du gestionnaire de scripts absente"));
     return new Promise((resolve, reject) => {
       gm({
-        method: "GET",
+        method: post ? "POST" : "GET",
         url,
+        headers: post ? { "Content-Type": "application/json", "X-Radar-Token": TOKEN } : {},
+        data: post ? JSON.stringify(post) : undefined,
         responseType: binary ? "arraybuffer" : "text",
-        timeout: 15000,
+        timeout: post ? 150000 : 15000,
         onload: (r) => (r.status === 200 ? resolve(r.response) : reject(new Error("HTTP " + r.status))),
         onerror: () => reject(new Error("web app injoignable (Tailscale ?)")),
         ontimeout: () => reject(new Error("délai dépassé")),
@@ -87,6 +92,10 @@
 
   // --- form helpers -----------------------------------------------------------
 
+  // Question blocks (Lever, Greenhouse, Ashby), most specific first.
+  const CONTAINERS = "fieldset, .application-question, [class*='question'], [role='radiogroup'], [role='group'], [class*='fieldEntry'], [class*='field'], li";
+  const TITLES = "legend, .application-label, [class*='application-label'], [class*='label']:not(input), [class*='title']";
+
   function labelOf(el) {
     const aria = el.getAttribute("aria-label");
     if (aria) return aria;
@@ -99,10 +108,12 @@
       const label = document.getElementById(by.split(" ")[0]);
       if (label) return label.innerText;
     }
-    const box = el.closest("label, fieldset, li, .field, [class*='field'], [class*='question']");
+    const wrapping = el.closest("label");
+    if (wrapping && wrapping.innerText.trim()) return wrapping.innerText.slice(0, 200);
+    const box = el.closest(CONTAINERS);
     if (box) {
-      const title = box.querySelector("label, legend, .text, [class*='label'], [class*='title']");
-      return (title || box).innerText.slice(0, 200);
+      const title = box.querySelector(TITLES);
+      return ((title && title.innerText.trim()) ? title : box).innerText.slice(0, 200);
     }
     return el.name || el.placeholder || "";
   }
@@ -152,7 +163,7 @@
       [/linkedin/i, f.linkedin],
       [/github|website|portfolio|personal site|site web/i, f.github],
       [/current (location|city)|^location|city|ville|where are you (located|based)/i, f.location],
-      [/school|university|college|[ée]cole|institution/i, f.school],
+      [/^(?!.*(complete|graduat|studies|year|date)).*\b(school|university|college|[ée]cole|institution)\b/i, f.school],
       [/discipline|field of study|major|sp[ée]cialit/i, f.discipline],
       [/degree|dipl[ôo]me/i, f.degree],
       [/graduat/i, f.graduation_month && f.graduation_year
@@ -171,7 +182,7 @@
       first_name: f.first_name, last_name: f.last_name, email: f.email, phone: f.phone,
       name: f.full_name, _systemfield_name: f.full_name, _systemfield_email: f.email,
       _systemfield_phone: f.phone, "urls[LinkedIn]": f.linkedin, "urls[GitHub]": f.github,
-      "urls[Portfolio]": f.github, "urls[Other]": "",
+      "urls[Portfolio]": f.github, "urls[Other]": "", location: f.location,
     };
     for (const key of [el.name, el.id]) {
       if (key && Object.prototype.hasOwnProperty.call(known, key)) return known[key];
@@ -184,13 +195,14 @@
       "input[type=text], input[type=email], input[type=tel], input[type=url], input:not([type]), textarea"
     );
     for (const el of inputs) {
-      if (!visible(el) || !isEmpty(el)) continue;
-      if (isChoiceWidget(el)) continue;
+      if (!visible(el) || !isEmpty(el) || el.readOnly) continue;
       const label = labelOf(el);
       const known = byAttribute(kit, el);
+      if (known === undefined && isChoiceWidget(el)) continue;
       if (known !== undefined) {
         if (known) {
           setValue(el, known);
+          report.typed.push({ el, label: label || el.name, value: known });
           report.filled.push((label || el.name).trim().slice(0, 40));
         }
         continue;
@@ -199,6 +211,7 @@
         if (pattern.test(label)) {
           if (value) {
             setValue(el, value);
+            report.typed.push({ el, label, value });
             report.filled.push(label.trim().slice(0, 40));
           }
           break;
@@ -241,6 +254,10 @@
       const label = labelOf(input) + " " + (input.name || "") + " " + (input.id || "");
       const kind = slots.letter.test(label) ? "letter" : slots.cv.test(label) ? "cv" : null;
       const url = kind && kit.documents && kit.documents[kind];
+      if (kind === "cv" && !url) {
+        report.notes.push("CV adapté pas encore généré : génère-le depuis le kit de l'offre, puis « Remplir à nouveau ».");
+        continue;
+      }
       if (!url) continue;
       try {
         const data = await request(url, true);
@@ -260,21 +277,265 @@
   function outlineMissing(report) {
     for (const el of document.querySelectorAll("input, textarea, select")) {
       if (!visible(el) || ["hidden", "submit", "button", "radio", "checkbox"].includes(el.type)) continue;
-      const empty = el.type === "file" ? !(el.files && el.files.length) : isEmpty(el);
+      const empty = el.type === "file" ? !(el.files && el.files.length)
+        : el.tagName === "SELECT" ? isPlaceholder(el)
+        : isCombo(el) ? !comboHasValue(el)
+        : isEmpty(el);
       if (empty && isRequired(el)) {
-        el.style.outline = "3px solid #f59e0b";
+        el.style.outline = MISSING;
         el.style.outlineOffset = "2px";
         report.missing.push(labelOf(el).replace(/\s+/g, " ").trim().slice(0, 60));
       }
     }
   }
 
-  async function fill(kit) {
-    const report = { filled: [], missing: [] };
+  // --- widgets ----------------------------------------------------------------
+
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const norm = (t) => String(t || "").toLowerCase().replace(/\s+/g, " ").replace(/[*✱]/g, "").trim();
+
+  function questionOf(el) {
+    // The question a choice group answers: the title of its question block,
+    // not the label of one option.
+    const option = optionText(el);
+    let box = el.closest(CONTAINERS);
+    while (box) {
+      const title = box.querySelector(TITLES);
+      const text = (title ? title.innerText : box.innerText.split("\n")[0]).replace(/\s+/g, " ").trim();
+      if (text && norm(text) !== norm(option)) return text.slice(0, 300);
+      box = box.parentElement && box.parentElement.closest(CONTAINERS);
+    }
+    return labelOf(el).slice(0, 300);
+  }
+
+  function optionText(input) {
+    const label = input.closest("label") || (input.id && document.querySelector('label[for="' + CSS.escape(input.id) + '"]'));
+    return (label ? label.innerText : input.value || "").replace(/\s+/g, " ").trim();
+  }
+
+  function comboHasValue(el) {
+    const box = el.closest("[class*='container'], [class*='select'], [class*='control']") || el.parentElement;
+    return Boolean(box && box.querySelector("[class*='single-value'], [class*='multi-value'], [class*='singleValue']")) ||
+      Boolean(el.value && el.value.trim());
+  }
+
+  function isCombo(el) {
+    return el.getAttribute("role") === "combobox" || el.hasAttribute("aria-autocomplete");
+  }
+
+  function best(options, wanted) {
+    // The option that best matches the wanted text (exact, prefix, contains).
+    const w = norm(wanted);
+    if (!w) return null;
+    let found = options.find((o) => norm(o.text) === w);
+    found = found || options.find((o) => norm(o.text).startsWith(w));
+    found = found || options.find((o) => norm(o.text).includes(w));
+    found = found || options.find((o) => w.includes(norm(o.text)) && norm(o.text).length > 3);
+    return found || null;
+  }
+
+  function typeInto(el, text) {
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set;
+    setter.call(el, text);
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  async function pickCombo(el, wanted) {
+    // Searchable dropdown (React select): type, wait for options, click one.
+    el.focus();
+    el.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    const queries = [wanted, String(wanted).split(/[,(]/)[0].trim(), String(wanted).split(" ")[0]];
+    for (const query of [...new Set(queries)].filter((q) => q.length >= 2)) {
+      typeInto(el, query);
+      for (let i = 0; i < 25; i++) {
+        await sleep(150);
+        if (i === 5 && el.getAttribute("aria-expanded") === "false") break; // menu ignores scripted input
+        const options = [...document.querySelectorAll("[role='option']")]
+          .filter((o) => o.getBoundingClientRect().height > 0)
+          .map((o) => ({ el: o, text: o.innerText }));
+        const choice = best(options, wanted) || best(options, query);
+        if (choice) {
+          choice.el.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+          choice.el.click();
+          await sleep(250);
+          return true;
+        }
+        if (options.length && i > 12) break; // options shown, none matches
+      }
+    }
+    typeInto(el, "");
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    el.blur();
+    return false;
+  }
+
+  function pickSelect(el, wanted) {
+    const options = [...el.options].map((o) => ({ el: o, text: o.text }));
+    const choice = best(options, wanted);
+    if (!choice) return false;
+    const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value").set;
+    setter.call(el, choice.el.value);
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+    return true;
+  }
+
+  function isPlaceholder(select) {
+    const option = select.options[select.selectedIndex];
+    return !select.value || !option || /^(select|choose|please|--|sélection|choisi)/i.test(option.text.trim());
+  }
+
+  // --- the fields left after the rules --------------------------------------
+
+  function collect() {
+    const fields = [];
+    const add = (kind, label, options, els) => fields.push({
+      id: fields.length, kind, label, options, els,
+      required: els.some((el) => isRequired(el)) || /[*✱]/.test(label),
+    });
+    for (const el of document.querySelectorAll("input, textarea, select")) {
+      if (!visible(el) || el.disabled) continue;
+      const type = (el.type || "").toLowerCase();
+      if (el.tagName === "SELECT") {
+        if (isPlaceholder(el)) add("select", labelOf(el), [...el.options].map((o) => o.text.trim()).filter(Boolean), [el]);
+      } else if (isCombo(el)) {
+        if (!comboHasValue(el)) add("combobox", labelOf(el), [], [el]);
+      } else if (el.tagName === "TEXTAREA" || ["text", "email", "tel", "url", "number", ""].includes(type)) {
+        if (isEmpty(el) && !el.readOnly) add(type === "number" ? "number" : el.tagName === "TEXTAREA" ? "textarea" : "text", labelOf(el), [], [el]);
+      }
+    }
+    const groups = new Map();
+    for (const el of document.querySelectorAll("input[type=radio], input[type=checkbox]")) {
+      if (!el.name) continue;
+      const key = el.type + ":" + el.name;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(el);
+    }
+    for (const [key, els] of groups) {
+      if (els.some((el) => el.checked) || !els.some(visible)) continue;
+      const kind = key.startsWith("radio") ? "radio" : "checkbox";
+      if (kind === "checkbox" && els.length === 1) continue; // a lone box is a consent
+      add(kind, questionOf(els[0]), els.map(optionText), els);
+    }
+    return fields.filter((f) => f.label);
+  }
+
+  async function apply(field, answer) {
+    const els = field.els;
+    if (field.kind === "checkbox") {
+      let done = false;
+      for (const value of answer.values || []) {
+        const box = els.find((el) => norm(optionText(el)) === norm(value));
+        if (box && !box.checked) {
+          box.click();
+          done = true;
+        }
+      }
+      return done;
+    }
+    const value = answer.value;
+    if (!value) return false;
+    if (field.kind === "radio") {
+      const radio = els.find((el) => norm(optionText(el)) === norm(value));
+      if (radio) radio.click();
+      return Boolean(radio);
+    }
+    if (field.kind === "select") return pickSelect(els[0], value);
+    if (field.kind === "combobox") return pickCombo(els[0], value);
+    setValue(els[0], value);
+    return true;
+  }
+
+  async function fillCombos(kit, report) {
+    // Rule-based answers for the usual dropdowns (works offline too).
+    for (const el of document.querySelectorAll("input[role='combobox'], input[aria-autocomplete]")) {
+      if (!visible(el) || comboHasValue(el)) continue;
+      const label = labelOf(el);
+      const f = kit.fields;
+      const value = /country|pays/i.test(label) ? f.country
+        : /location|city|ville/i.test(label) ? f.city
+        : /^(?!.*(complete|graduat|studies|year|date)).*\b(school|university|college|[ée]cole)\b/i.test(label) ? f.school
+        : /discipline|field of study|major/i.test(label) ? f.discipline
+        : /degree|dipl/i.test(label) ? (f.degree_level || f.degree)
+        : null;
+      if (!value) continue;
+      if (await pickCombo(el, value)) report.filled.push(label.trim().slice(0, 40));
+      else report.choose.push({ el, label: label.trim(), value });
+    }
+  }
+
+  async function fillWithModel(kit, report, progress) {
+    const fields = collect();
+    if (!fields.length) return;
+    progress("L'IA répond à " + fields.length + " question(s)… (jusqu'à une minute)");
+    const lang = (document.documentElement.lang || "").startsWith("fr") ? "fr" : "en";
+    let reply;
+    try {
+      reply = JSON.parse(await request(BASE + "/api/kit/" + kit.ref + "/fill", false, {
+        lang,
+        fields: fields.map(({ id, kind, label, options, required }) => ({ id, kind, label, options, required })),
+      }));
+    } catch (error) {
+      report.notes.push("Questions de l'entreprise non traitées : " + error.message);
+      return;
+    }
+    for (const answer of reply.answers || []) {
+      const field = fields.find((f) => f.id === answer.id);
+      if (!field) continue;
+      if (report.choose.some((c) => c.el === field.els[0])) continue; // rule value kept
+      if (field.kind === "combobox" && !(await apply(field, answer))) {
+        report.choose.push({ el: field.els[0], label: field.label, value: answer.value || "" });
+        continue;
+      }
+      if (field.kind === "combobox" || (await apply(field, answer))) {
+        report.filled.push(field.label.slice(0, 40));
+        if (answer.review) {
+          report.review.push(field.label.slice(0, 60));
+          const target = field.els[0].closest("fieldset, li, [class*='question'], [class*='field']") || field.els[0];
+          target.style.outline = REVIEW;
+          target.style.outlineOffset = "2px";
+        }
+      }
+    }
+  }
+
+  async function fill(kit, online, progress) {
+    const report = { filled: [], missing: [], review: [], notes: [], choose: [], typed: [] };
+    progress = progress || (() => {});
+    progress("Champs habituels…");
     fillText(kit, report);
     fillYesNo(kit, report);
+    await fillCombos(kit, report);
     await attach(kit, report);
+    if (online && TOKEN && kit.ref) await fillWithModel(kit, report, progress);
+    await sleep(300);
+    // Fields the page emptied again (suggestion lists such as Lever's location
+    // keep only a picked suggestion): to choose by hand, with the value.
+    const already = (label) => report.choose.some((c) => norm(c.label) === norm(label));
+    for (const t of report.typed) {
+      if (!isEmpty(t.el) || already(t.label)) continue;
+      // Internal inputs of dropdowns, or a twin field that kept its value.
+      if (t.el.closest("[class*='select__'], [class*='container']")?.querySelector("[role='combobox']")) continue;
+      const twins = [...document.querySelectorAll("input, textarea")]
+        .filter((el) => el !== t.el && norm(labelOf(el)) === norm(t.label));
+      if (twins.some((el) => !isEmpty(el))) continue;
+      report.choose.push({ el: t.el, label: t.label.trim(), value: t.value });
+    }
+    report.choose = report.choose.filter(
+      (c, i, all) => all.findIndex((o) => norm(o.label) === norm(c.label)) === i
+    );
+    for (const c of report.choose) {
+      const yesNo = String(c.value).match(/^(yes|no|oui|non)\b/i);
+      if (yesNo) c.value = yesNo[1].charAt(0).toUpperCase() + yesNo[1].slice(1).toLowerCase();
+    }
     outlineMissing(report);
+    const chosen = new Set(report.choose.map((c) => c.el));
+    report.missing = report.missing.filter((m, i, all) => all.indexOf(m) === i);
+    for (const c of report.choose) {
+      const target = c.el.closest("[class*='container'], [class*='control']") || c.el;
+      target.style.outline = "3px solid #2f6fde";
+    }
+    report.missing = report.missing.filter((label) => ![...chosen].some((el) => labelOf(el).replace(/\s+/g, " ").trim().slice(0, 60) === label));
     return report;
   }
 
@@ -311,6 +572,7 @@
       (online ? '<p class="muted"><a href="' + escape(kit.offer.page) + '" target="_blank">Ouvrir le kit dans la web app</a></p>' : "") +
       '</div><button class="fab">📡 Radar</button></div>';
     const wrap = root.querySelector(".wrap");
+    let choices = [];
     root.querySelector(".fab").addEventListener("click", () => wrap.classList.toggle("open"));
     root.querySelector(".box").addEventListener("click", async (event) => {
       const button = event.target.closest("button");
@@ -318,15 +580,42 @@
       if (button.classList.contains("go")) {
         button.disabled = true;
         button.textContent = "Remplissage…";
-        const report = await fill(kit);
+        const result = root.querySelector(".result");
+        const report = await fill(kit, online, (text) => (result.innerHTML = "<p class='muted'>" + escape(text) + "</p>"));
         button.disabled = false;
         button.textContent = "Remplir à nouveau";
         root.querySelector(".result").innerHTML =
           "<p class='ok'>" + report.filled.length + " champ(s) rempli(s).</p>" +
+          (report.review.length ? "<p style='color:#a16207'>" + report.review.length +
+            " réponse(s) de l'IA à relire (en jaune).</p>" : "") +
+          report.notes.map((n) => "<p class='warn'>" + escape(n) + "</p>").join("") +
+          (report.choose.length
+            ? "<p><b>Listes à choisir (" + report.choose.length + ")</b> — « Aller » t'y amène et copie la valeur :</p>" +
+              report.choose.map((c, i) => '<div class="row"><div class="q">' + escape(c.label.slice(0, 80)) +
+                '</div><div class="a">' + escape(c.value || "(à toi de voir)") + '</div><button data-go="' + i +
+                '">Aller</button></div>').join("")
+            : "") +
           (report.missing.length
             ? "<p class='warn'>À compléter (" + report.missing.length + ") :</p><ul>" +
               report.missing.map((m) => "<li>" + escape(m) + "</li>").join("") + "</ul>"
             : "<p class='ok'>Aucun champ obligatoire vide détecté.</p>");
+        choices = report.choose;
+        return;
+      }
+      if (button.dataset.go !== undefined) {
+        const target = choices[Number(button.dataset.go)];
+        if (!target) return;
+        target.el.scrollIntoView({ block: "center", behavior: "smooth" });
+        if (target.value) {
+          try {
+            await navigator.clipboard.writeText(target.value);
+          } catch (e) {
+            /* the value stays visible in the panel */
+          }
+        }
+        wrap.classList.remove("open");
+        setTimeout(() => target.el.focus(), 400);
+        button.textContent = "✓";
         return;
       }
       const source = button.dataset.why ? root.getElementById("why") : root.getElementById("a" + button.dataset.i);
@@ -373,6 +662,6 @@
     panel(loaded.kit, loaded.online, warning);
   }
 
-  window.__radar = { fill, rules, setValue, labelOf, fromFragment };
+  window.__radar = { fill, rules, setValue, labelOf, fromFragment, collect };
   main();
 })();

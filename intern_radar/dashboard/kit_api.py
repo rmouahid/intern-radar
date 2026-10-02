@@ -97,6 +97,12 @@ def kit_payload(
     degree = standard["degree"]
     discipline = degree.rsplit(",", 1)[-1].strip() if "," in degree else degree
     graduation = month_year(standard["graduation"])
+    dates = candidate.education[0].dates if candidate and candidate.education else ""
+    parts = re.split(r"\s*[–-]\s*", dates) if dates else []
+    studies = (
+        month_year(parts[0]) if parts else (None, None),
+        month_year(parts[-1]) if len(parts) > 1 else graduation,
+    )
     why = store.why(job.id)
     documents = {
         kind: f"{base}/files/{kind}/{ref}"
@@ -132,10 +138,14 @@ def kit_payload(
             "discipline": discipline,
             "graduation_month": graduation[0],
             "graduation_year": graduation[1],
-            "start_month": profile.window_start.month,
-            "start_year": profile.window_start.year,
-            "end_month": profile.window_end.month,
-            "end_year": profile.window_end.year,
+            "education_start_month": studies[0][0],
+            "education_start_year": studies[0][1],
+            "education_end_month": studies[1][0],
+            "education_end_year": studies[1][1],
+            "internship_start_month": profile.window_start.month,
+            "internship_start_year": profile.window_start.year,
+            "internship_end_month": profile.window_end.month,
+            "internship_end_year": profile.window_end.year,
             "languages": standard["languages"],
             "heard_from": standard["heard_from"],
         },

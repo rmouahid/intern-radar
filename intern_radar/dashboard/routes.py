@@ -3,9 +3,11 @@
 import base64
 import csv
 import hashlib
+import hmac
 import io
 import json
 import re
+import secrets
 import shutil
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
@@ -62,6 +64,7 @@ from intern_radar.dashboard.render import stats_body
 from intern_radar.dashboard.runner import RunStatus
 from intern_radar.dashboard.worker import KINDS, PENDING, RUNNING, Worker
 from intern_radar.editing import DocumentEditor, EditError
+from intern_radar.form_answers import FormAnswerer, parse_fields
 from intern_radar.models import ScoredJob
 from intern_radar.scorer import LLMBackend
 from intern_radar.store import ApplicationDetails, Store
@@ -106,6 +109,7 @@ class Context:
     profile: Profile | None = None
     worker: Worker | None = None
     profile_backend: Callable[[], LLMBackend] | None = None
+    form_backend: Callable[[Store], LLMBackend] | None = None
     companies: tuple[tuple[str, str, str], ...] = ()  # watched: name, tier, source
 
     def editor(self, store: Store) -> DocumentEditor | None:
@@ -165,12 +169,25 @@ def to_csv(header: tuple[str, ...], rows: list[tuple[str, ...]]) -> bytes:
 USERSCRIPT = Path(__file__).parent / "static" / "radar.user.js"
 
 
-def render_userscript(base: str, host: str) -> str:
-    """The form filler with this app's address built in."""
+TOKEN_KEY = "autofill_token"
+
+
+def autofill_token(store: Store) -> str:
+    """The secret the userscript sends with its POSTs (created once)."""
+    token = store.get_meta(TOKEN_KEY)
+    if not token:
+        token = secrets.token_urlsafe(24)
+        store.set_meta(TOKEN_KEY, token)
+    return token
+
+
+def render_userscript(base: str, host: str, token: str = "") -> str:
+    """The form filler with this app's address and token built in."""
     return (
         USERSCRIPT.read_text(encoding="utf-8")
         .replace("__BASE__", base)
         .replace("__HOST__", host or "localhost")
+        .replace("__TOKEN__", token)
         .replace("__VERSION__", __version__)
     )
 
@@ -707,9 +724,47 @@ def build_app(ctx: Context) -> App:
     @app.route("GET", "/radar.user.js")
     def userscript(request: Request):
         host = request.headers.get("host", "")
+        with ctx.store() as store:
+            token = autofill_token(store)
         return text_response(
-            render_userscript(f"http://{host}", host.split(":")[0]),
+            render_userscript(f"http://{host}", host.split(":")[0], token),
             content_type="text/javascript",
+        )
+
+    @app.route("POST", "/api/kit/<int:ref>/fill", same_origin=False)
+    def kit_fill(request: Request, ref: int):
+        """Answers to the fields the filler could not fill by rule."""
+        with ctx.store() as store:
+            expected = autofill_token(store)
+            given = request.headers.get("x-radar-token", "")
+            if not hmac.compare_digest(given, expected):
+                return json_response({"error": "jeton invalide"}, 403)
+            if ctx.profile is None or ctx.form_backend is None:
+                return json_response({"error": "remplissage indisponible"}, 503)
+            group = store.group_by_ref(ref)
+            if not group:
+                return json_response({"error": "offre inconnue"}, 404)
+            try:
+                data = json.loads(request.body or b"{}")
+            except ValueError:
+                return json_response({"error": "JSON invalide"}, 400)
+            fields = parse_fields(
+                data.get("fields") if isinstance(data, dict) else None
+            )
+            language = "fr" if data.get("lang") == "fr" else "en"
+            base = f"http://{request.headers.get('host', '')}"
+            candidate = ctx.candidate()
+            kit = kit_payload(
+                store, group[0], ref, ctx.profile, candidate, language, base
+            )
+            profile = (
+                candidate_text(candidate)
+                if candidate
+                else ctx.profile.candidate_summary
+            )
+            answers = FormAnswerer(ctx.form_backend(store)).answer(kit, profile, fields)
+        return json_response(
+            {"answers": [{"id": k, **v} for k, v in sorted(answers.items())]}
         )
 
     @app.route("GET", "/autofill")
