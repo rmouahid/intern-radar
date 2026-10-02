@@ -125,6 +125,12 @@ CREATE TABLE IF NOT EXISTS runs (
     timings TEXT NOT NULL,
     crash TEXT
 );
+CREATE TABLE IF NOT EXISTS answers (
+    key TEXT PRIMARY KEY,
+    question TEXT NOT NULL,
+    value TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS meta (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
@@ -736,6 +742,28 @@ class Store:
                     crash,
                 ),
             )
+
+    def answers(self) -> dict[str, tuple[str, str]]:
+        """Saved form answers: key -> (question, value)."""
+        rows = self._db.execute("SELECT key, question, value FROM answers")
+        return {row["key"]: (row["question"], row["value"]) for row in rows}
+
+    def save_answer(self, key: str, question: str, value: str, now: datetime) -> None:
+        with self._db:
+            self._db.execute(
+                "INSERT OR REPLACE INTO answers (key, question, value, updated_at)"
+                " VALUES (?, ?, ?, ?)",
+                (
+                    key[:80],
+                    question.strip()[:300],
+                    value.strip()[:3000],
+                    now.isoformat(),
+                ),
+            )
+
+    def delete_answer(self, key: str) -> None:
+        with self._db:
+            self._db.execute("DELETE FROM answers WHERE key = ?", (key,))
 
     def set_feedback(self, job_id: str, vote: int, reason: str, now: datetime) -> None:
         """The candidate's 👍 (1) or 👎 (-1) on an offer, with an optional reason."""
