@@ -1,5 +1,6 @@
 """The web app's pages and actions."""
 
+import base64
 import csv
 import hashlib
 import io
@@ -13,6 +14,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import parse_qs, unquote
 
+from intern_radar import __version__
 from intern_radar.answers import CUSTOM_PREFIX, STANDARD, merged, offer_answers
 from intern_radar.candidate import (
     Candidate,
@@ -42,6 +44,7 @@ from intern_radar.dashboard.pages.applications import (
     applications_body,
     details_form,
 )
+from intern_radar.dashboard.pages.autofill import autofill_body
 from intern_radar.dashboard.pages.companies import companies_body, company_body
 from intern_radar.dashboard.pages.editing import letter_form, resume_form
 from intern_radar.dashboard.pages.feedback import feedback_body
@@ -159,6 +162,19 @@ def to_csv(header: tuple[str, ...], rows: list[tuple[str, ...]]) -> bytes:
     return ("\ufeff" + buffer.getvalue()).encode("utf-8")
 
 
+USERSCRIPT = Path(__file__).parent / "static" / "radar.user.js"
+
+
+def render_userscript(base: str, host: str) -> str:
+    """The form filler with this app's address built in."""
+    return (
+        USERSCRIPT.read_text(encoding="utf-8")
+        .replace("__BASE__", base)
+        .replace("__HOST__", host or "localhost")
+        .replace("__VERSION__", __version__)
+    )
+
+
 def json_response(data: object, status: int = 200) -> Response:
     return text_response(
         json.dumps(data, ensure_ascii=False), status, "application/json"
@@ -208,7 +224,11 @@ def parse_details(form: dict[str, str]) -> ApplicationDetails:
 
 
 def load_offer(
-    store: Store, ref: int, ctx: "Context | None" = None, lang: str = "en"
+    store: Store,
+    ref: int,
+    ctx: "Context | None" = None,
+    lang: str = "en",
+    base: str = "",
 ) -> OfferView | None:
     group = store.group_by_ref(ref)
     if not group:
@@ -224,12 +244,14 @@ def load_offer(
         has_resume=store.resume(job_id) is not None,
         sibling_refs=tuple(store.job_ref(s.job.id) or 0 for s in group[1:]),
         feedback=store.feedback(job_id),
-        kit=application_kit(ctx, store, ref, lang),
+        kit=application_kit(ctx, store, ref, lang, base),
         details_form=details_form(ref, store.application_details(job_id)),
     )
 
 
-def application_kit(ctx: "Context | None", store: Store, ref: int, lang: str) -> str:
+def application_kit(
+    ctx: "Context | None", store: Store, ref: int, lang: str, base: str = ""
+) -> str:
     """The "Postuler" section, when the profile is known."""
     if ctx is None or ctx.profile is None:
         return ""
@@ -250,9 +272,21 @@ def application_kit(ctx: "Context | None", store: Store, ref: int, lang: str) ->
         stale = ready and path.stat().st_mtime < profile_time
         documents[kind] = (ready, stale)
     state = ctx.worker.state("why", ref) if ctx.worker else None
+    # An offline copy of the kit in the form link's fragment, for when the
+    # Safari extension cannot reach the app; fragments never reach the ATS.
+    payload = kit_payload(
+        store, scored, ref, ctx.profile, ctx.candidate(), language, base
+    )
+    packed = (
+        base64.urlsafe_b64encode(
+            json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode()
+        )
+        .decode()
+        .rstrip("=")
+    )
     return kit_html(
         ref, job.url, answers, language, documents, store.why(job.id), state,
-        store.submissions(job.id),
+        store.submissions(job.id), f"radar={ref}.{packed}",
     )  # fmt: skip
 
 
@@ -375,7 +409,10 @@ def build_app(ctx: Context) -> App:
     @app.route("GET", "/offers/<int:ref>")
     def offer(request: Request, ref: int):
         with ctx.store() as store:
-            view = load_offer(store, ref, ctx, request.arg("lang") or "en")
+            view = load_offer(
+                store, ref, ctx, request.arg("lang") or "en",
+                f"http://{request.headers.get('host', '')}",
+            )  # fmt: skip
         if view is None:
             return not_found("Offre introuvable.")
         weights = ctx.profile.weights if ctx.profile else Weights()
@@ -667,6 +704,19 @@ def build_app(ctx: Context) -> App:
             (("Content-Disposition", f'attachment; filename="{name}"'),),
         )
 
+    @app.route("GET", "/radar.user.js")
+    def userscript(request: Request):
+        host = request.headers.get("host", "")
+        return text_response(
+            render_userscript(f"http://{host}", host.split(":")[0]),
+            content_type="text/javascript",
+        )
+
+    @app.route("GET", "/autofill")
+    def autofill(request: Request):
+        url = f"http://{request.headers.get('host', '')}/radar.user.js"
+        return html_response(page("Remplissage", autofill_body(url), "more"))
+
     @app.route("GET", "/api/kit/lookup")
     def kit_lookup(request: Request):
         with ctx.store() as store:
@@ -871,6 +921,7 @@ def build_app(ctx: Context) -> App:
 # Pages reachable from the "Plus" tab (extended by later pages).
 MORE_LINKS: list[tuple[str, str, str]] = [
     ("/stats", "Statistiques", "Entonnoir, scores, sources, usage LLM, runs"),
+    ("/autofill", "Remplissage automatique", "Installer le script Safari"),
     ("/answers", "Réponses types", "Tes réponses aux questions des formulaires"),
     ("/companies", "Entreprises", "Offres, candidatures et santé des sources"),
     ("/profile", "Profil", "candidate.json, career.md et régénération"),

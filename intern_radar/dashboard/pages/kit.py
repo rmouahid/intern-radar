@@ -130,10 +130,12 @@ def kit_html(
     why: WhyText | None,
     why_state: TaskState | None,
     submissions: Sequence[Submission] = (),
+    fragment: str = "",
 ) -> str:
     """`documents` maps "letter"/"cv" to (ready, stale)."""
     open_form = (
-        f'<a class="button" href="{e(url)}#radar={ref}" target="_blank" '
+        f'<a class="button" href="{e(url)}#{e(fragment or f"radar={ref}")}" '
+        'target="_blank" '
         'rel="noopener">'
         "📝 Ouvrir le formulaire</a>"
         if url.startswith(("https://", "http://"))

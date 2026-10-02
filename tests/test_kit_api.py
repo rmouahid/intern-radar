@@ -116,5 +116,11 @@ def test_kit_json(tmp_path):
 
 def test_form_link_carries_the_offer_ref(tmp_path):
     app, (drw, _) = make_app(tmp_path)
-    page = app.handle(Request("GET", f"/offers/{drw}", {})).body.decode()
-    assert f'jobs/7991171#radar={drw}"' in page
+    import base64
+    import re
+
+    page = app.handle(Request("GET", f"/offers/{drw}", {}, {}, HEADERS)).body.decode()
+    packed = re.search(rf'jobs/7991171#radar={drw}\.([A-Za-z0-9_-]+)"', page).group(1)
+    kit = json.loads(base64.urlsafe_b64decode(packed + "=" * (-len(packed) % 4)))
+    assert kit["fields"]["first_name"] == "Alex" and kit["why"] == "Because markets."
+    assert len(packed) < 16000  # comfortably within URL limits
