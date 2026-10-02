@@ -24,6 +24,7 @@ class Request:
     query: dict[str, str]
     form: dict[str, str] = field(default_factory=dict)
     headers: dict[str, str] = field(default_factory=dict)
+    body: bytes = b""
 
     def arg(self, name: str, default: str = "") -> str:
         return self.query.get(name, default).strip()
@@ -70,26 +71,30 @@ def _compile(pattern: str) -> re.Pattern[str]:
 
 class App:
     def __init__(self) -> None:
-        self._routes: list[tuple[str, re.Pattern[str], Handler]] = []
+        self._routes: list[tuple[str, re.Pattern[str], Handler, bool]] = []
 
-    def route(self, method: str, pattern: str) -> Callable[[Handler], Handler]:
+    def route(
+        self, method: str, pattern: str, same_origin: bool = True
+    ) -> Callable[[Handler], Handler]:
+        """`same_origin=False` is for API routes that check a token instead."""
+
         def register(handler: Handler) -> Handler:
-            self._routes.append((method, _compile(pattern), handler))
+            self._routes.append((method, _compile(pattern), handler, same_origin))
             return handler
 
         return register
 
     def handle(self, request: Request) -> Response:
-        if request.method == "POST" and not _same_origin(request):
-            return text_response("forbidden", 403)
         allowed = False
-        for method, pattern, handler in self._routes:
+        for method, pattern, handler, check_origin in self._routes:
             match = pattern.match(request.path)
             if not match:
                 continue
             if method != request.method:
                 allowed = True
                 continue
+            if request.method == "POST" and check_origin and not _same_origin(request):
+                return text_response("forbidden", 403)
             params = {
                 k: int(v) if v.isdigit() else v for k, v in match.groupdict().items()
             }
@@ -124,5 +129,10 @@ def parse_request(
             ).items()
         }
     return Request(
-        method, url.path or "/", query, form, {k.lower(): v for k, v in headers.items()}
+        method,
+        url.path or "/",
+        query,
+        form,
+        {k.lower(): v for k, v in headers.items()},
+        body,
     )

@@ -37,8 +37,15 @@ def test_userscript_never_submits_or_touches_captchas():
     source = USERSCRIPT.read_text().lower()
     assert "captcha" not in source
     assert ".submit(" not in source and "requestsubmit" not in source
-    # The only programmatic clicks are on radio choices.
-    assert re.findall(r"\b(\w+)\.click\(\)", source) == ["choice"]
+    # Programmatic clicks only pick options: radio choices, checkboxes and
+    # dropdown options (`choice.el`); never a button or a submit control.
+    assert set(re.findall(r"\b(\w+)\.click\(\)", source)) == {
+        "choice",
+        "box",
+        "radio",
+        "el",
+    }
+    assert "choice.el.click()" in source
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
