@@ -10,7 +10,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import parse_qs, unquote
 
+from intern_radar.answers import CUSTOM_PREFIX, STANDARD, merged, offer_answers
 from intern_radar.candidate import (
+    Candidate,
     CandidateError,
     Regeneration,
     candidate_text,
@@ -31,6 +33,7 @@ from intern_radar.dashboard.app import (
 from intern_radar.dashboard.layout import e, page
 from intern_radar.dashboard.pages.actions import NOTICES as ACTION_NOTICES
 from intern_radar.dashboard.pages.actions import actions_html
+from intern_radar.dashboard.pages.answers import answers_body
 from intern_radar.dashboard.pages.applications import (
     applications_body,
     details_form,
@@ -61,6 +64,8 @@ NOTICES: dict[str, str] = {
     "details": "Suivi enregistré.",
     "search_saved": "Recherche enregistrée : alertes après chaque run.",
     "search_name": "Donne un nom à la recherche.",
+    "answers_saved": "Réponses enregistrées.",
+    "answers_missing": "Question et réponse sont obligatoires.",
     "career_saved": "career.md enregistré (ancienne version : career.md.bak).",
     "career_invalid": "career.md vide ou trop long : non enregistré.",
     "edited": "Document modifié : le PDF a été régénéré.",
@@ -102,6 +107,16 @@ class Context:
             else None
         )
         return DocumentEditor(store, self.profile.contact, candidate)
+
+    def candidate(self) -> Candidate | None:
+        """The structured candidate profile, when it exists and is valid."""
+        path = self.config_dir / "candidate.json" if self.config_dir else None
+        if path is None or not path.exists():
+            return None
+        try:
+            return load_candidate(path)
+        except CandidateError:
+            return None
 
     def profile_text(self) -> tuple[str, str]:
         """The candidate's profile as text, and where it was read from."""
@@ -547,6 +562,48 @@ def build_app(ctx: Context) -> App:
             (("Content-Disposition", f'attachment; filename="{name}"'),),
         )
 
+    @app.route("GET", "/answers")
+    def answers_page(request: Request):
+        if ctx.profile is None:
+            return not_found("Profil introuvable.")
+        with ctx.store() as store:
+            saved = store.answers()
+        answers = merged(saved, ctx.profile, ctx.candidate())
+        examples = offer_answers("free", "Berlin, Germany", ctx.profile)
+        body = answers_body(answers, examples)
+        notice = NOTICES.get(request.arg("done"))
+        return html_response(page("Réponses types", body, "more", notice))
+
+    @app.route("POST", "/answers")
+    def save_answers(request: Request):
+        now = ctx.clock()
+        with ctx.store() as store:
+            for field in STANDARD:
+                if field.key in request.form:
+                    store.save_answer(
+                        field.key, field.question, request.form[field.key], now
+                    )
+        return redirect("/answers?done=answers_saved")
+
+    @app.route("POST", "/answers/custom")
+    def add_answer(request: Request):
+        question = request.form.get("question", "").strip()
+        answer = request.form.get("answer", "").strip()
+        if not question or not answer:
+            return redirect("/answers?done=answers_missing")
+        with ctx.store() as store:
+            key = f"{CUSTOM_PREFIX}{len(store.answers()) + 1}-{ctx.clock():%H%M%S%f}"
+            store.save_answer(key, question, answer, ctx.clock())
+        return redirect("/answers?done=answers_saved")
+
+    @app.route("POST", "/answers/delete")
+    def delete_answer(request: Request):
+        key = request.form.get("key", "")
+        if key.startswith(CUSTOM_PREFIX):
+            with ctx.store() as store:
+                store.delete_answer(key)
+        return redirect("/answers")
+
     @app.route("GET", "/applications")
     def applications_page(request: Request):
         days = ctx.profile.reminder_days if ctx.profile else 14
@@ -644,6 +701,7 @@ def build_app(ctx: Context) -> App:
 # Pages reachable from the "Plus" tab (extended by later pages).
 MORE_LINKS: list[tuple[str, str, str]] = [
     ("/stats", "Statistiques", "Entonnoir, scores, sources, usage LLM, runs"),
+    ("/answers", "Réponses types", "Tes réponses aux questions des formulaires"),
     ("/companies", "Entreprises", "Offres, candidatures et santé des sources"),
     ("/profile", "Profil", "candidate.json, career.md et régénération"),
     ("/searches", "Recherches", "Alertes Telegram sur des filtres enregistrés"),
