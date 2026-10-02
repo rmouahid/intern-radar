@@ -36,6 +36,7 @@ class OfferView:
     sibling_refs: tuple[int, ...] = ()  # refs of group[1:]
     feedback: tuple[int, str] | None = None  # vote and reason
     details_form: str = ""  # CRM fields form, rendered by the route
+    kit: str = ""  # application kit, rendered by the route
 
 
 def score_rows(
@@ -155,7 +156,12 @@ def offer_body(
         f"<th class='n'>{lead.score or 0:.1f}</th></tr></table>"
         "<p class='muted'>Score plancher à 0, arrondi au dixième.</p>"
     )
-    parts = [header, _section("Résumé", summary), _section("Score", breakdown)]
+    parts = [
+        header,
+        _section("Résumé", summary),
+        view.kit,
+        _section("Score", breakdown),
+    ]
     if view.chance is not None:
         reasons = "".join(
             f"<div>{'✅' if positive else '⚠️'} {e(text)}</div>"

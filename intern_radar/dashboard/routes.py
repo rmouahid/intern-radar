@@ -42,6 +42,7 @@ from intern_radar.dashboard.pages.companies import companies_body, company_body
 from intern_radar.dashboard.pages.editing import letter_form, resume_form
 from intern_radar.dashboard.pages.feedback import feedback_body
 from intern_radar.dashboard.pages.insights import insights_body
+from intern_radar.dashboard.pages.kit import kit_html
 from intern_radar.dashboard.pages.offer import OfferView, offer_body
 from intern_radar.dashboard.pages.offers import offers_body, query_string
 from intern_radar.dashboard.pages.profile import (
@@ -65,6 +66,8 @@ NOTICES: dict[str, str] = {
     "search_saved": "Recherche enregistrée : alertes après chaque run.",
     "search_name": "Donne un nom à la recherche.",
     "answers_saved": "Réponses enregistrées.",
+    "why_saved": "« Pourquoi cette entreprise » enregistré.",
+    "why_empty": "Le texte est vide : non enregistré.",
     "answers_missing": "Question et réponse sont obligatoires.",
     "career_saved": "career.md enregistré (ancienne version : career.md.bak).",
     "career_invalid": "career.md vide ou trop long : non enregistré.",
@@ -192,7 +195,9 @@ def parse_details(form: dict[str, str]) -> ApplicationDetails:
     )
 
 
-def load_offer(store: Store, ref: int) -> OfferView | None:
+def load_offer(
+    store: Store, ref: int, ctx: "Context | None" = None, lang: str = "en"
+) -> OfferView | None:
     group = store.group_by_ref(ref)
     if not group:
         return None
@@ -207,7 +212,38 @@ def load_offer(store: Store, ref: int) -> OfferView | None:
         has_resume=store.resume(job_id) is not None,
         sibling_refs=tuple(store.job_ref(s.job.id) or 0 for s in group[1:]),
         feedback=store.feedback(job_id),
+        kit=application_kit(ctx, store, ref, lang),
         details_form=details_form(ref, store.application_details(job_id)),
+    )
+
+
+def application_kit(ctx: "Context | None", store: Store, ref: int, lang: str) -> str:
+    """The "Postuler" section, when the profile is known."""
+    if ctx is None or ctx.profile is None:
+        return ""
+    scored = store.group_by_ref(ref)[0]
+    job = scored.job
+    language = "fr" if lang == "fr" else "en"
+    standard = merged(store.answers(), ctx.profile, ctx.candidate())
+    answers = [(a.label if language == "fr" else a.question, a.value) for a in standard]
+    answers += offer_answers(
+        scored.assessment.work_authorisation, job.location, ctx.profile, language
+    )
+    profile_path = ctx.config_dir / "candidate.json" if ctx.config_dir else None
+    profile_time = (
+        profile_path.stat().st_mtime
+        if profile_path is not None and profile_path.exists()
+        else 0.0
+    )
+    documents = {}
+    for kind, saved in (("letter", store.letter(job.id)), ("cv", store.resume(job.id))):
+        path = Path(saved[0]) if saved else None
+        ready = path is not None and path.is_file()
+        stale = ready and path.stat().st_mtime < profile_time
+        documents[kind] = (ready, stale)
+    state = ctx.worker.state("why", ref) if ctx.worker else None
+    return kit_html(
+        ref, job.url, answers, language, documents, store.why(job.id), state
     )
 
 
@@ -282,7 +318,7 @@ def build_app(ctx: Context) -> App:
     @app.route("GET", "/offers/<int:ref>")
     def offer(request: Request, ref: int):
         with ctx.store() as store:
-            view = load_offer(store, ref)
+            view = load_offer(store, ref, ctx, request.arg("lang") or "en")
         if view is None:
             return not_found("Offre introuvable.")
         weights = ctx.profile.weights if ctx.profile else Weights()
@@ -309,6 +345,18 @@ def build_app(ctx: Context) -> App:
                 return redirect(f"/offers/{ref}?done=refused")
             store.set_application(job.id, new, ctx.clock())
         return redirect(f"/offers/{ref}?done=status")
+
+    @app.route("POST", "/offers/<int:ref>/why/edit")
+    def save_why(request: Request, ref: int):
+        text = request.form.get("text", "").strip()
+        with ctx.store() as store:
+            job = store.job_by_ref(ref)
+            if job is None:
+                return not_found("Offre introuvable.")
+            if not text:
+                return redirect(f"/offers/{ref}?done=why_empty#kit")
+            store.save_why(job.id, text, [], ctx.clock(), edited=True)
+        return redirect(f"/offers/{ref}?done=why_saved#kit")
 
     @app.route("GET", "/offers/<int:ref>/<str:kind>/edit")
     def edit_form(request: Request, ref: int, kind: str):

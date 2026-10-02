@@ -28,7 +28,22 @@ HEAD = (
     '<meta name="apple-mobile-web-app-title" content="Radar">'
     '<meta name="apple-mobile-web-app-status-bar-style" content="default">'
     "<script>if('serviceWorker' in navigator&&window.isSecureContext)"
-    "navigator.serviceWorker.register('/sw.js')</script>"
+    "navigator.serviceWorker.register('/sw.js');"
+    # Copy buttons (data-copy="<element id>"); the textarea fallback also works
+    # over plain HTTP and on iPhone Safari, where the clipboard API is off.
+    "document.addEventListener('click',function(ev){"
+    "var b=ev.target.closest('[data-copy]');if(!b)return;ev.preventDefault();"
+    "var s=document.getElementById(b.dataset.copy);if(!s)return;"
+    "var t=s.value!==undefined?s.value:s.innerText;"
+    "function ok(){var l=b.textContent;b.textContent='✓ Copié';"
+    "setTimeout(function(){b.textContent=l},1500)}"
+    "if(navigator.clipboard&&window.isSecureContext){"
+    "navigator.clipboard.writeText(t).then(ok);return}"
+    "var a=document.createElement('textarea');a.value=t;"
+    "a.setAttribute('readonly','');a.style.position='fixed';a.style.opacity='0';"
+    "document.body.appendChild(a);a.select();a.setSelectionRange(0,t.length);"
+    "try{document.execCommand('copy');ok()}catch(e){}document.body.removeChild(a)"
+    "})</script>"
 )
 
 
