@@ -3,6 +3,7 @@
 import html
 import logging
 import re
+import time
 from collections.abc import Callable, Container, Iterable
 from html.parser import HTMLParser
 from typing import Any, Protocol
@@ -66,9 +67,33 @@ def require_param(company: Company, key: str) -> str:
     return str(value)
 
 
+# Statuses worth another try: rate limiting and temporary unavailability.
+TRANSIENT = {429, 502, 503, 504}
+RETRY_DELAYS = (3.0, 10.0)  # seconds before the 2nd and 3rd attempts
+MAX_RETRY_AFTER = 30.0
+retry_sleep: Callable[[float], None] = time.sleep  # replaced in tests
+
+
+def _delay(response: httpx.Response, default: float) -> float:
+    """The server's Retry-After (seconds form, capped), else `default`."""
+    value = response.headers.get("retry-after", "")
+    try:
+        return min(max(float(value), 0.0), MAX_RETRY_AFTER)
+    except ValueError:
+        return default
+
+
 def get_json(client: httpx.Client, method: str, url: str, **kwargs: Any) -> Any:
     try:
         response = client.request(method, url, **kwargs)
+        for default in RETRY_DELAYS:
+            if response.status_code not in TRANSIENT:
+                break
+            delay = _delay(response, default)
+            log.info("%s %s: HTTP %s, retrying in %.0f s", method, url,
+                     response.status_code, delay)  # fmt: skip
+            retry_sleep(delay)
+            response = client.request(method, url, **kwargs)
         response.raise_for_status()
         return response.json()
     except httpx.HTTPStatusError as exc:

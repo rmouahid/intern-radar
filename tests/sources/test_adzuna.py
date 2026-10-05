@@ -150,3 +150,28 @@ def test_discovery_query_keeps_only_employers_outside_the_watch_list():
         ("Google", "S"),
         ("Tiny AI Startup", "unlisted"),
     ]
+
+
+def test_a_failing_country_does_not_fail_the_source(monkeypatch):
+    from intern_radar.sources import base
+
+    monkeypatch.setattr(base, "retry_sleep", lambda seconds: None)
+    adzuna = Company("Adzuna", "unlisted", "adzuna", {"countries": ["gb", "de"]})
+    routes = {
+        f"GET {API}": search,
+        "GET https://api.adzuna.com/v1/api/jobs/de/search/1": 503,
+    }
+    source = AdzunaSource(
+        mock_client(routes), "id", "key", LOOKUP, search_terms(COMPANIES)
+    )
+    assert [job.id for job in source.fetch(adzuna, set())] == ["adzuna:555"]
+
+
+def test_the_source_fails_when_every_country_fails(monkeypatch):
+    from intern_radar.sources import base
+
+    monkeypatch.setattr(base, "retry_sleep", lambda seconds: None)
+    adzuna = Company("Adzuna", "unlisted", "adzuna", {"countries": ["gb", "de"]})
+    source = AdzunaSource(mock_client({f"GET {API}": 503}), "id", "key", LOOKUP, "x")
+    with pytest.raises(SourceError, match="503"):
+        source.fetch(adzuna, set())
