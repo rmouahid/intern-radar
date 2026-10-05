@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "intern-radar"
-version = "0.4.0"
+version = "0.5.0"
 description = "Watches top AI/tech career pages for internships, scores them with an LLM and notifies through Telegram"
 authors = ["rmouahid"]
 license = "MIT"

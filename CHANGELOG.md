@@ -4,6 +4,36 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.5.0] — 2026-10-05
+
+### Added
+
+- **Standard answers bank** (`/answers`): the usual application-form
+  answers, pre-filled from the profiles and validated by the candidate;
+  answers that depend on the offer (work authorisation, sponsorship,
+  relocation, dates) follow its work authorisation rules, in English or
+  French (#110).
+- **Application kit** on every offer page: link to the form, CV and letter
+  freshness, every answer with copy buttons, and a fact-checked "why this
+  company" draft written on the background worker (#111).
+- **Submission snapshots**: "J'ai postulé" sets the status to applied and
+  archives the answers, the text and frozen copies of the PDFs, shown on
+  the offer page and the board and exported in the CSV (#112).
+- **Safari form filling**: a userscript for the *Userscripts* extension (or
+  Tampermonkey) fills Greenhouse, Lever and Ashby forms in the candidate's
+  own browser from the kit JSON API. It handles text, selects, checkbox and
+  radio groups, and answers company-specific questions with one LLM call
+  among the given options. Consents and demographic questions are never
+  answered. Greenhouse dropdowns, which ignore scripted input, are listed
+  with the value to pick. The script never submits and never touches
+  captchas (#116, #117, #120).
+
+### Fixed
+
+- Transient source errors (429, 502–504) are retried with a backoff
+  honouring `Retry-After`; one failing Adzuna country no longer fails the
+  whole source; Wayve moved from Greenhouse to Ashby (#122).
+
 ## [0.4.0] — 2026-10-02
 
 ### Added
@@ -135,6 +165,7 @@ All notable changes to this project are documented here. The format follows
   checks, one-page PDF delivered in the chat.
 - systemd units, logrotate configuration and complete documentation.
 
+[0.5.0]: https://github.com/rmouahid/intern-radar/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/rmouahid/intern-radar/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/rmouahid/intern-radar/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/rmouahid/intern-radar/compare/v0.1.0...v0.2.0
