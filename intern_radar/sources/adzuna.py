@@ -6,6 +6,7 @@ offers whose employer is a watched company. Generic results (thousands of
 employers outside the watch list) would only cost LLM scoring.
 """
 
+import logging
 import re
 from collections.abc import Container
 from typing import Any
@@ -21,6 +22,8 @@ from intern_radar.sources.base import (
     html_to_text,
     iso_date,
 )
+
+log = logging.getLogger(__name__)
 
 API = "https://api.adzuna.com/v1/api/jobs/{country}/search/1"
 DISCOVERY_TERMS = "machine learning ai llm nlp genai data scientist deep learning"
@@ -129,29 +132,43 @@ class AdzunaSource:
         queries = [(self._terms or DISCOVERY_TERMS, False)]
         if self._discovery:
             queries.append((DISCOVERY_TERMS, True))
+        errors: list[SourceError] = []
+        attempts = 0
         for country in company.params.get("countries", DEFAULT_COUNTRIES):
             for terms, keep_unlisted in queries:
-                data = get_json(
-                    self._client,
-                    "GET",
-                    API.format(country=country),
-                    params={
-                        "app_id": self._app_id,
-                        "app_key": self._app_key,
-                        "results_per_page": 50,
-                        "what": "intern",
-                        "what_or": terms,
-                        "max_days_old": MAX_DAYS_OLD,
-                        "content-type": "application/json",
-                    },
-                )
+                attempts += 1
+                try:
+                    data = self._search(country, terms)
+                except SourceError as exc:
+                    # One country down must not cost every other country.
+                    log.warning("Adzuna %s skipped: %s", country, exc)
+                    errors.append(exc)
+                    continue
                 for job in collect(
                     company, data.get("results", []), converter(keep_unlisted)
                 ):
                     if job.id not in seen:
                         seen.add(job.id)
                         jobs.append(job)
+        if errors and len(errors) == attempts:
+            raise errors[0]
         return jobs
+
+    def _search(self, country: str, terms: str) -> dict[str, Any]:
+        return get_json(
+            self._client,
+            "GET",
+            API.format(country=country),
+            params={
+                "app_id": self._app_id,
+                "app_key": self._app_key,
+                "results_per_page": 50,
+                "what": "intern",
+                "what_or": terms,
+                "max_days_old": MAX_DAYS_OLD,
+                "content-type": "application/json",
+            },
+        )
 
     def _convert(
         self, item: dict[str, Any], known_ids: Container[str], keep_unlisted: bool

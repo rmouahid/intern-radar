@@ -87,7 +87,7 @@
 - {name: DeepL, tier: B, source: ashby, org: deepl}
 - {name: ElevenLabs, tier: B, source: ashby, org: elevenlabs}
 - {name: Synthesia, tier: B, source: ashby, org: synthesia}
-- {name: Wayve, tier: B, source: greenhouse, board: wayve}
+- {name: Wayve, tier: B, source: ashby, org: wayve}
 - {name: Helsing, tier: B, source: greenhouse, board: helsing}
 - {name: Canva, tier: B, source: smartrecruiters, company_id: Canva}
 - {name: Bosch, tier: B, source: smartrecruiters, company_id: BoschGroup}

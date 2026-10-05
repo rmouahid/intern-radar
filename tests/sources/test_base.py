@@ -1,3 +1,4 @@
+import httpx
 import pytest
 
 from intern_radar.models import Company
@@ -47,3 +48,46 @@ def test_get_json_errors_do_not_leak_query_parameters():
         get_json(client, "GET", "https://api.example/x", params={"app_key": "SECRET"})
     assert "SECRET" not in str(info.value)
     assert "404" in str(info.value)
+
+
+def test_get_json_retries_transient_errors(monkeypatch):
+    from intern_radar.sources import base
+
+    waits = []
+    monkeypatch.setattr(base, "retry_sleep", waits.append)
+    answers = iter(
+        [
+            httpx.Response(429, headers={"Retry-After": "7"}),
+            httpx.Response(503),
+            httpx.Response(200, json={"ok": True}),
+        ]
+    )
+    client = mock_client(
+        {"GET https://api.example/busy": lambda request: next(answers)}
+    )
+    assert get_json(client, "GET", "https://api.example/busy") == {"ok": True}
+    assert waits == [7.0, 10.0]  # Retry-After honoured, then the default backoff
+
+
+def test_get_json_gives_up_after_the_retries(monkeypatch):
+    from intern_radar.sources import base
+
+    waits = []
+    monkeypatch.setattr(base, "retry_sleep", waits.append)
+    client = mock_client({"GET https://api.example/down": 503})
+    with pytest.raises(SourceError, match="503"):
+        get_json(client, "GET", "https://api.example/down")
+    assert waits == [3.0, 10.0]
+    huge = httpx.Response(429, headers={"Retry-After": "3600"})
+    assert base._delay(huge, 3.0) == base.MAX_RETRY_AFTER
+    assert base._delay(httpx.Response(429, headers={"Retry-After": "soon"}), 3.0) == 3.0
+
+
+def test_get_json_does_not_retry_client_errors(monkeypatch):
+    from intern_radar.sources import base
+
+    waits = []
+    monkeypatch.setattr(base, "retry_sleep", waits.append)
+    with pytest.raises(SourceError, match="404"):
+        get_json(mock_client({}), "GET", "https://api.example/missing")
+    assert waits == []
