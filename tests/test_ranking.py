@@ -71,19 +71,27 @@ def test_offers_below_the_minimum_ai_relevance_are_excluded():
 
 
 @pytest.mark.parametrize(
-    "authorisation, penalty",
+    "authorisation",
     [
-        ("free", 0),
-        ("programme", 0.5),
-        ("sponsorship_stated", 0),
-        ("uncertain", 1),
-        ("unlikely", 3),
+        "free",
+        "self_arranged",
+        "programme",
+        "sponsorship_stated",
+        "uncertain",
+        "unlikely",
     ],
 )
-def test_work_authorisation_penalties(authorisation, penalty):
+def test_work_authorisation_is_neutral_by_default(authorisation):
     base = final_score("S", make_assessment(work_authorisation="free"), W)
     score = final_score("S", make_assessment(work_authorisation=authorisation), W)
-    assert score == pytest.approx(base - penalty)
+    assert score == pytest.approx(base)
+
+
+def test_explicit_visa_penalties_still_apply():
+    base = final_score("S", make_assessment(work_authorisation="free"), W)
+    unlikely = make_assessment(work_authorisation="unlikely")
+    score = final_score("S", unlikely, W, visa=VisaPenalties(unlikely=3))
+    assert score == pytest.approx(base - 3)
 
 
 def test_visa_penalties_are_configurable_and_never_exclude():

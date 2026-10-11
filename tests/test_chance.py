@@ -60,7 +60,6 @@ def test_estimate_prompt_carries_profile_offer_and_assessment():
     prompt, schema = backend.calls[0]
     assert schema is CHANCE_SCHEMA
     assert "Built a RAG agent" in prompt and "Offer age: 10 days" in prompt
-    assert 'work authorisation "programme"' in prompt
     assert "We grow." not in prompt  # cleaned description
     assert chance == Chance(
         12, ((True, "Expérience RAG en production"), (False, "Visa US requis"))
@@ -113,18 +112,24 @@ def test_notification_shows_the_chance_and_its_reasons():
     assert "🎯" not in format_immediate(scored()).html
 
 
-def test_prompt_uses_base_rates_bounded_adjustments_and_self_sponsored():
+def test_prompt_uses_base_rates_and_bounded_adjustments():
     backend = FakeBackend()
-    estimate = ChanceEstimator(
-        backend,
-        parse_candidate(profile_dict()),
-        "window",
-        today=lambda: date(2026, 9, 30),
-        self_sponsored=("Canada", "Japan"),
-    )
-    estimate(scored())
+    estimator(backend)(scored())
     prompt = backend.calls[0][0]
     assert "elite quant trading firms" in prompt and "20-40 %" in prompt
     assert "x0.5" in prompt and "Use the whole scale" in prompt
-    assert "without any\nemployer sponsorship: Canada, Japan" in prompt
-    assert '"self_arranged"' in prompt
+
+
+def test_prompt_is_visa_neutral():
+    backend = FakeBackend()
+    job = ScoredJob(
+        make_job(posted_at="2026-09-20"),
+        make_assessment(work_authorisation="unlikely", visa_note="Sponsoring exclu"),
+        8.0,
+    )
+    estimator(backend)(job)
+    prompt = backend.calls[0][0]
+    assert "unlikely" not in prompt and "Sponsoring exclu" not in prompt
+    assert "self_arranged" not in prompt and 'work authorisation "' not in prompt
+    assert "obtains any work authorisation" in prompt
+    assert "never mention visas or sponsorship" in prompt

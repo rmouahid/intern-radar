@@ -43,7 +43,7 @@ Runtime data lives in `data/` (gitignored): `intern-radar.db` (SQLite),
 | `llm_effort` | string | unset | `--effort` for triage; unset keeps the CLI default |
 | `max_llm_batches_per_run` | int | `5` | batches of 10 offers scored per run |
 | `max_immediate_per_run` | int | `10` | immediate notifications (posting groups) per run |
-| `visa_penalties` | mapping | `{free: 0, programme: 0.5, sponsorship_stated: 0, uncertain: 1, unlikely: 3}` | points removed from the final score per work-authorisation value |
+| `visa_penalties` | mapping | `{}` (every value 0) | points removed from the final score per work-authorisation value; the visa is neutral by default (e.g. `{uncertain: 1, unlikely: 3}` to penalise it again) |
 | `extra_excluded_title_words` | list of words | `[]` | extra out-of-scope title words, added to the built-in list (§3.2 of pipeline.md) |
 | `weights.tier` | float | `0.3` | weight of the company tier (S=10, A=8, B=6, unlisted=4) |
 | `weights.relevance` | float | `0.5` | weight of the LLM's AI relevance (0–10) |
@@ -86,7 +86,7 @@ Letters are enabled (button shown, commands usable) when `cv_url` and
 | `dashboard_host` | string | Tailscale IP | address the dashboard listens on |
 | `dashboard_port` | int | `8787` | dashboard port |
 | `discovery` | bool | `true` | also keep AI internships from employers outside the watch list (Adzuna), in the EU/EEA/Switzerland or a self-sponsored country, shown as *découverte* |
-| `self_sponsored_countries` | list of names | `[]` | countries where you obtain the visa without an employer sponsor (e.g. working holiday); offers there get `self_arranged`, no penalty |
+| `self_sponsored_countries` | list of names | `[]` | countries where you obtain the visa without an employer sponsor (e.g. working holiday); offers there get `self_arranged`; also widens the discovery prefilter |
 | `max_offer_age_days` | int | `60` | offers first published earlier are dropped and never sent; `0` disables |
 | `reminder_days` | int | `14` | days without news before an application reminder |
 | `max_resumes_per_day` | int | `10` | new tailored CVs per 24 h; re-sending a stored one is free |

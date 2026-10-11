@@ -1,6 +1,6 @@
 import pytest
 
-from intern_radar.config import Weights
+from intern_radar.config import VisaPenalties, Weights
 from intern_radar.countries import mentions_any
 from intern_radar.ranking import final_score, with_rule_based_visa
 from tests.factories import make_assessment
@@ -41,7 +41,10 @@ def test_self_arranged_visa_override():
     assert with_rule_based_visa(free, "Tokyo", PVT) == free
     w = Weights()
     assert final_score("A", moved, w) == final_score("A", free, w)
-    assert final_score("A", moved, w) > final_score("A", uncertain, w)
+    penalties = VisaPenalties(unlikely=3)
+    assert final_score("A", moved, w, visa=penalties) > final_score(
+        "A", uncertain, w, visa=penalties
+    )
 
 
 @pytest.mark.parametrize(
