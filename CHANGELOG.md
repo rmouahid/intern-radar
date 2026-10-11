@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- The visa is neutral in the ranking: every `visa_penalties` value now
+  defaults to 0, and the interview-chance prompt no longer carries the work
+  authorisation, the visa note or the working holiday countries. Run
+  `intern-radar rescore` after upgrading (#125).
+
 ## [0.5.0] — 2026-10-05
 
 ### Added

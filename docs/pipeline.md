@@ -282,8 +282,7 @@ excluded (score NULL) if: not an internship, dates incompatible, PhD only,
 score = 0.3·tier + 0.5·relevance + 0.2·dates      (tier S10 A8 B6 unlisted4;
                                                    dates fits10 unknown6 short4)
       − 2 if local students only                   rounded to 0.1
-      − visa penalty: free 0, self_arranged 0, programme 0.5, sponsorship_stated 0,
-                      uncertain 1, unlikely 3      (never excludes)
+      − visa penalty: 0 for every value by default (`visa_penalties`)
 ```
 
 Thresholds: ≥ 7.5 immediate, 5.5–7.5 digest (both configurable).
@@ -331,9 +330,11 @@ again as immediate offers.
   programmes 5–10 %, frontier AI labs 5–15 %, scale-ups 10–25 %, startups
   and mid-size European companies 20–40 %), a fit multiplier (×0.5 to ×2,
   judged on this candidate's profile), bounded adjustments (−30 % to +20 %
-  each) for work authorisation, eligibility, language and offer age, and an
-  instruction to use the whole scale. A `self_arranged` or `free` work
-  authorisation counts as a strength. `rescore` clears stored estimates so
+  each) for eligibility, language and offer age, and an instruction to use
+  the whole scale. Visa-neutral since #125: the prompt states that the
+  candidate obtains any work authorisation and carries no visa status, visa
+  note or working holiday list, so no adjustment or reason is about visas.
+  `rescore` clears stored estimates so
   they are recomputed with the current method. Stored in the `chances` table and reused on re-send; a failure
   only omits the line. Measured: ~$0.025–0.04 API-equivalent and 4–6 s per
   estimate (e.g. NVIDIA *Deep Learning*, Santa Clara: 3 %). It is an

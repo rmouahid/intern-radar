@@ -43,14 +43,17 @@ class Contact:
 
 @dataclass(frozen=True)
 class VisaPenalties:
-    """Points removed from the final score per work-authorisation value."""
+    """Points removed from the final score per work-authorisation value.
+
+    All zero by default: the candidate is a French citizen who obtains any
+    work authorisation, so the visa never changes the ranking."""
 
     free: float = 0.0
     self_arranged: float = 0.0  # the candidate gets the visa without a sponsor
-    programme: float = 0.5
+    programme: float = 0.0
     sponsorship_stated: float = 0.0
-    uncertain: float = 1.0
-    unlikely: float = 3.0
+    uncertain: float = 0.0
+    unlikely: float = 0.0
 
 
 @dataclass(frozen=True)

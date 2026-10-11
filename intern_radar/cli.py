@@ -127,12 +127,7 @@ def _chance(config_dir: Path, profile: Profile, store: Store) -> CachedChance | 
         effort=profile.chance_effort,
         on_usage=_recorder(store, "chance"),
     )
-    estimator = ChanceEstimator(
-        backend,
-        candidate,
-        window,
-        self_sponsored=profile.self_sponsored_countries,
-    )
+    estimator = ChanceEstimator(backend, candidate, window)
     return CachedChance(store, estimator)
 
 
