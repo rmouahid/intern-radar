@@ -83,25 +83,39 @@ def _delay(response: httpx.Response, default: float) -> float:
         return default
 
 
+def _send(client: httpx.Client, method: str, url: str, **kwargs: Any) -> httpx.Response:
+    response = client.request(method, url, **kwargs)
+    for default in RETRY_DELAYS:
+        if response.status_code not in TRANSIENT:
+            break
+        delay = _delay(response, default)
+        log.info("%s %s: HTTP %s, retrying in %.0f s", method, url,
+                 response.status_code, delay)  # fmt: skip
+        retry_sleep(delay)
+        response = client.request(method, url, **kwargs)
+    response.raise_for_status()
+    return response
+
+
 def get_json(client: httpx.Client, method: str, url: str, **kwargs: Any) -> Any:
     try:
-        response = client.request(method, url, **kwargs)
-        for default in RETRY_DELAYS:
-            if response.status_code not in TRANSIENT:
-                break
-            delay = _delay(response, default)
-            log.info("%s %s: HTTP %s, retrying in %.0f s", method, url,
-                     response.status_code, delay)  # fmt: skip
-            retry_sleep(delay)
-            response = client.request(method, url, **kwargs)
-        response.raise_for_status()
-        return response.json()
+        return _send(client, method, url, **kwargs).json()
     except httpx.HTTPStatusError as exc:
         # The message names the base URL only: query strings may hold API keys.
         status = exc.response.status_code
         raise SourceError(f"{method} {url}: HTTP {status}") from exc
     except (httpx.HTTPError, ValueError) as exc:
         raise SourceError(f"{method} {url}: {type(exc).__name__}") from exc
+
+
+def get_text(client: httpx.Client, url: str, **kwargs: Any) -> str:
+    """GET a non-JSON body (RSS feeds), with get_json's retries and errors."""
+    try:
+        return _send(client, "GET", url, **kwargs).text
+    except httpx.HTTPStatusError as exc:
+        raise SourceError(f"GET {url}: HTTP {exc.response.status_code}") from exc
+    except httpx.HTTPError as exc:
+        raise SourceError(f"GET {url}: {type(exc).__name__}") from exc
 
 
 # Errors raised by one malformed posting or one failed detail request.
