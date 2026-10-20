@@ -15,6 +15,7 @@ from intern_radar.sources.greenhouse import GreenhouseSource
 from intern_radar.sources.lever import LeverSource
 from intern_radar.sources.microsoft import MicrosoftSource
 from intern_radar.sources.smartrecruiters import SmartRecruitersSource
+from intern_radar.sources.teamtailor import TeamtailorSource
 from intern_radar.sources.workable import WorkableSource
 from intern_radar.sources.workday import WorkdaySource
 
@@ -25,6 +26,7 @@ SOURCE_NAMES = frozenset(
         "ashby",
         "workable",
         "smartrecruiters",
+        "teamtailor",
         "workday",
         "amazon",
         "microsoft",
@@ -49,6 +51,7 @@ def build_sources(
         "ashby": AshbySource(client),
         "workable": WorkableSource(client),
         "smartrecruiters": SmartRecruitersSource(client, rules),
+        "teamtailor": TeamtailorSource(client),
         "workday": WorkdaySource(client, rules),
         "amazon": AmazonSource(client),
         "microsoft": MicrosoftSource(client),

@@ -160,6 +160,7 @@ Adapter parameters:
 | `lever` | `site` | `jobs.lever.co/<site>` |
 | `ashby` | `org` | `jobs.ashbyhq.com/<org>` |
 | `workable` | `account` | `apply.workable.com/<account>` |
+| `teamtailor` | `account` | `<account>.teamtailor.com/jobs` |
 | `smartrecruiters` | `company_id` | `jobs.smartrecruiters.com/<company_id>` |
 | `workday` | `host`, `tenant`, `site` | `https://<host>/<site>` career site; `tenant` is the host's first label |
 | `amazon`, `microsoft` | none | fixed endpoints |

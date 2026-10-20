@@ -5,13 +5,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **An internship radar for AI roles.** intern-radar watches the career
-pages of 116 top AI/tech companies and large groups with strong AI teams,
+pages of 117 top AI/tech companies and large groups with strong AI teams,
 triages every new internship with an LLM against a candidate profile, pushes
 the relevant ones to Telegram, and writes a tailored, fact-checked cover
 letter as a PDF on demand from the notification itself.
 
-- **9 source adapters** (Greenhouse, Lever, Ashby, Workable, SmartRecruiters,
-  Workday, Amazon, Microsoft, Adzuna), polite by design (≥ 1 s per host).
+- **10 source adapters** (Greenhouse, Lever, Ashby, Workable, SmartRecruiters,
+  Teamtailor, Workday, Amazon, Microsoft, Adzuna), polite by design (≥ 1 s per host).
 - **Rules first, LLM second**: a pure pre-filter removes noise for free
   (France-only, out-of-scope fields, past cycles, bachelor-only titles),
   per-country copies of a posting are scored once, descriptions are
@@ -54,8 +54,8 @@ offer into a ready-to-review application in one tap.
 ```
  ┌─────────────┐   ┌─────────────┐   ┌──────────────┐   ┌─────────────┐   ┌───────────┐
  │  COLLECT     │ → │ PRE-FILTER  │ → │ LLM TRIAGE   │ → │ RANK        │ → │ NOTIFY    │
- │ 9 adapters   │   │ title, loc, │   │ JSON schema, │   │ AI·0.5 +    │   │ Telegram  │
- │116 companies │   │ duplicates  │   │ 10 per call  │   │ tier·0.3 +  │   │ + digest  │
+ │ 10 adapters  │   │ title, loc, │   │ JSON schema, │   │ AI·0.5 +    │   │ Telegram  │
+ │117 companies │   │ duplicates  │   │ 10 per call  │   │ tier·0.3 +  │   │ + digest  │
  └─────────────┘   └─────────────┘   └──────────────┘   │ dates·0.2   │   └─────┬─────┘
    every 2 h, 08:00–22:00 Europe/Paris (systemd timers)  └─────────────┘         │
                                                                      tap "✍️ Lettre"

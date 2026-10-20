@@ -14,7 +14,7 @@ intern-radar is a single-user batch pipeline plus one long-running listener:
             ▼                                                 │     ▼
   ┌──────────────────┐  ┌───────────┐  ┌──────────────┐  ┌────┴─────────┐  ┌────────┐
   │ 1. COLLECT        │→ │2. PRE-    │→ │3. SCORE (LLM) │→ │4. RANK +     │  │ DIGEST │
-  │ 9 source plugins  │  │  FILTER   │  │ haiku, 10/call│  │   NOTIFY     │  │        │
+  │ 10 source plugins │  │  FILTER   │  │ haiku, 10/call│  │   NOTIFY     │  │        │
   └──────────────────┘  └───────────┘  └──────────────┘  └──────────────┘  └────────┘
             │                 │                │                  │               │
             └───────────── SQLite (data/intern-radar.db) ─────────┴───────────────┘
@@ -72,8 +72,8 @@ are the bulk). Growth follows new postings (~30/day), i.e. well under
 
 ### 3.1 Collection (`intern_radar/sources/`)
 
-116 companies in `config/companies.yaml` (tiers: 8 S, 50 A, 58 B, plus the
-Adzuna catch-all). 82 have a live feed, 34 have none and rely on Adzuna
+117 companies in `config/companies.yaml` (tiers: 8 S, 50 A, 59 B, plus the
+Adzuna catch-all). 82 have a live feed, 35 have none and rely on Adzuna
 (list widened on 2026-09-30 with AI labs and startups, AI infrastructure,
 quant firms, fintechs and hardware groups, each board probed first).
 
@@ -108,6 +108,7 @@ canonical employer name (`Meta` → HTTP 400, `Apple` → 0 results).
 | lever (2) | `api.lever.co/v0/postings/{site}` | full list | none |
 | smartrecruiters (2) | `…/companies/{id}/postings?q=intern` | 100/page, 3 pages | 1 per new internship |
 | workable (1) | widget API `?details=true` | full list | none |
+| teamtailor (1) | RSS feed `{account}.teamtailor.com/jobs.rss` | full list | none |
 | amazon | `amazon.jobs/en/search.json?base_query=intern` | 100/page, 5 pages | none |
 | microsoft | `apply.careers.microsoft.com/api/pcsx/search` | 10 pages | none (no description available) |
 | adzuna | 12 countries, `what=intern`, `max_days_old=7` | 1 page × 50 per country | none |
