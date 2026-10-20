@@ -89,6 +89,7 @@
 - {name: Synthesia, tier: B, source: ashby, org: synthesia}
 - {name: Wayve, tier: B, source: ashby, org: wayve}
 - {name: Helsing, tier: B, source: greenhouse, board: helsing}
+- {name: Multiverse Computing, tier: B, source: teamtailor, account: multiversecomputing}
 - {name: Canva, tier: B, source: smartrecruiters, company_id: Canva}
 - {name: Bosch, tier: B, source: smartrecruiters, company_id: BoschGroup}
 - {name: Mastercard, tier: B, source: workday, host: mastercard.wd1.myworkdayjobs.com, tenant: mastercard, site: CorporateCareers}

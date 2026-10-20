@@ -66,12 +66,12 @@ Each decision lists the alternatives considered and the trade-off accepted.
 ### D1 — Job-board APIs instead of scraping
 
 Greenhouse, Lever, Ashby, Workable and SmartRecruiters expose public JSON
-boards; Workday, Amazon and Microsoft expose the JSON APIs their own career
-sites use. Adzuna covers the rest through an official API.
+boards and Teamtailor a public RSS feed; Workday, Amazon and Microsoft
+expose the JSON APIs their own career sites use. Adzuna covers the rest through an official API.
 
 - *Rejected*: HTML scraping (brittle, heavier), LinkedIn/Indeed scraping
   (terms of service, account risk), browser automation (does not fit 2 GB).
-- *Trade-off*: companies without a usable feed (34 of 116) are only seen
+- *Trade-off*: companies without a usable feed (35 of 117) are only seen
   through Adzuna. Each is marked `source: none` so coverage is explicit.
 
 ### D2 — Rules before the LLM
