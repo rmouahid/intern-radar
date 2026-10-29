@@ -66,6 +66,17 @@ def test_dismissed_offers_leave_the_default_list(tmp_path):
     assert "Acme" not in app.handle(Request("GET", "/offers", {})).body.decode()
 
 
+def test_expired_offers_leave_the_default_list(tmp_path):
+    path, ref = make_db(tmp_path)
+    app = build_app(Context(path, clock=lambda: NOW))
+    page = app.handle(Request("GET", f"/offers/{ref}", {})).body.decode()
+    assert "⌛ Expirée" in page
+    post(app, f"/offers/{ref}/status", status="expired")
+    assert "Acme" not in app.handle(Request("GET", "/offers", {})).body.decode()
+    page = app.handle(Request("GET", f"/offers/{ref}", {})).body.decode()
+    assert "Offre expirée" in page and "✅ Postulé" not in page
+
+
 def test_actions_require_same_origin(tmp_path):
     path, ref = make_db(tmp_path)
     app = build_app(Context(path, clock=lambda: NOW))

@@ -21,6 +21,10 @@ NOW = datetime(2026, 10, 1, tzinfo=UTC)
     [
         (None, "applied", True),
         (None, "dismissed", True),
+        (None, "expired", True),
+        ("dismissed", "expired", True),
+        ("expired", "applied", False),
+        ("applied", "expired", False),
         (None, "interview", False),
         ("applied", "interview", True),
         ("applied", "no_answer", True),
@@ -38,6 +42,7 @@ def test_tracking_rows_follow_the_state():
     assert [b.label for b in tracking_row(None, 7)] == [
         "✅ Postulé",
         "🙈 Pas intéressé",
+        "⌛ Expirée",
     ]
     assert [b.callback for b in tracking_row("applied", 7)] == ["I:7", "R:7", "N:7"]
     assert tracking_row("offer", 7) == ()
