@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Sort the offers list** by score (default), interview chance, publication
+  date, date found or company; offers without the value go last and the
+  sort is kept across pages and saved searches (#131).
+
 ### Changed
 
 - The visa is neutral in the ranking: every `visa_penalties` value now

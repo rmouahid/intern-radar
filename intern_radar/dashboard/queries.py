@@ -228,6 +228,11 @@ def region_key(location: str) -> str:
     return _REGION_KEY[id(convention_for(location))]
 
 
+# Sort orders of the offers list: offers without the value go last, and ties
+# keep the score order of `matching_offers`.
+SORTS = ("chance", "posted", "seen", "company")
+
+
 @dataclass(frozen=True)
 class OfferFilters:
     min_score: float = 5.5
@@ -238,6 +243,7 @@ class OfferFilters:
     days: int = 60  # publication age; 0 = any
     q: str = ""
     page: int = 1
+    sort: str = ""  # a SORTS key; "" = best score first
 
     @classmethod
     def from_query(cls, query: dict[str, str], default_days: int) -> "OfferFilters":
@@ -260,6 +266,7 @@ class OfferFilters:
             days=int(number("days", default_days)),
             q=query.get("q", "").strip()[:80],
             page=max(1, int(number("page", 1))),
+            sort=query.get("sort", "") if query.get("sort") in SORTS else "",
         )
 
 
@@ -297,7 +304,7 @@ def offers(
 def matching_offers(
     db: sqlite3.Connection, filters: OfferFilters, today: date
 ) -> list[OfferRow]:
-    """Every offer matching the filters, one per posting group, best first."""
+    """Every offer matching the filters, one per posting group, in sort order."""
     sql = [
         "SELECT j.rowid AS ref, j.*, a.status AS application, c.percent AS chance,"
         " json_extract(j.assessment, '$.work_authorisation') AS wa,"
@@ -361,7 +368,21 @@ def matching_offers(
                 url=lead["url"],
             )
         )
-    return selected
+    return _sorted(selected, filters.sort)
+
+
+def _sorted(rows: list[OfferRow], sort: str) -> list[OfferRow]:
+    # sorted() is stable, so equal values keep the score order
+    if sort == "chance":
+        return sorted(rows, key=lambda r: (r.chance is None, -(r.chance or 0)))
+    if sort == "posted":
+        rows = sorted(rows, key=lambda r: (r.posted_at or "")[:10], reverse=True)
+        return sorted(rows, key=lambda r: not r.posted_at)
+    if sort == "seen":
+        return sorted(rows, key=lambda r: r.first_seen, reverse=True)
+    if sort == "company":
+        return sorted(rows, key=lambda r: r.company.casefold())
+    return rows
 
 
 # --- applications board ----------------------------------------------------------

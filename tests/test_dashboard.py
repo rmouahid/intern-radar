@@ -299,6 +299,42 @@ def test_offers_filters(tmp_path, query, expected):
     assert offers_ids(offers_db(tmp_path), **query)[0] == expected
 
 
+def test_offers_sorting(tmp_path):
+    from intern_radar.chance import Chance
+
+    path = offers_db(tmp_path)
+    store = Store(path)
+    store.save_chance("de", Chance(40, ()))
+    store.save_chance("disc", Chance(60, ()))
+    store.add(make_job(id="new", company="Ab new", posted_at=None), "pending",
+              NOW + timedelta(hours=1))  # fmt: skip
+    store.save_assessment("new", make_assessment(), 6.0)
+    store.close()
+    assert offers_ids(path)[0] == ["Co ca", "Co de", "Co disc", "Ab new"]
+    # no chance estimated: last, in score order
+    assert offers_ids(path, sort="chance")[0] == ["Co disc", "Co de", "Co ca", "Ab new"]
+    # no publication date: last
+    assert offers_ids(path, sort="posted")[0] == ["Co disc", "Co ca", "Co de", "Ab new"]
+    newest_then_score = ["Ab new", "Co ca", "Co de", "Co disc"]
+    assert offers_ids(path, sort="seen")[0] == newest_then_score
+    assert offers_ids(path, sort="company")[0] == newest_then_score  # A to Z
+    assert offers_ids(path, sort="bogus")[0] == offers_ids(path)[0]
+
+
+def test_offers_page_keeps_the_sort(tmp_path):
+    from intern_radar.dashboard.app import Request
+    from intern_radar.dashboard.pages.offers import query_string
+    from intern_radar.dashboard.routes import Context, build_app
+
+    app = build_app(Context(offers_db(tmp_path), clock=lambda: NOW))
+    body = app.handle(Request("GET", "/offers", {"sort": "chance"})).body.decode()
+    assert '<select name="sort"' in body
+    assert '<option value="chance" selected>% de chance</option>' in body
+    filters = queries.OfferFilters.from_query({"sort": "chance"}, 60)
+    assert "sort=chance" in query_string(filters, 2)
+    assert "sort" not in query_string(queries.OfferFilters())
+
+
 def test_offers_page_route(tmp_path):
     from intern_radar.dashboard.app import Request
     from intern_radar.dashboard.routes import Context, build_app
