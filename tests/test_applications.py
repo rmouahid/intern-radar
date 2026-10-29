@@ -16,7 +16,7 @@ def make_db(tmp_path) -> str:
     path = str(tmp_path / "apps.db")
     store = Store(path)
     for job_id in ("liked", "notified", "old", "plain", "applied", "late",
-                   "interview", "offer", "rejected", "gone"):  # fmt: skip
+                   "interview", "offer", "rejected", "gone", "closed"):  # fmt: skip
         store.add(make_job(id=job_id, company=f"Co {job_id}"), "pending", NOW)
         store.save_assessment(job_id, make_assessment(), 7.0)
     store.set_feedback("liked", 1, "", NOW)
@@ -29,6 +29,7 @@ def make_db(tmp_path) -> str:
     store.set_application("offer", "offer", NOW)
     store.set_application("rejected", "rejected", NOW)
     store.set_application("gone", "dismissed", NOW)
+    store.set_application("closed", "expired", NOW)
     store.save_application_details(
         "interview",
         ApplicationDetails(
@@ -110,7 +111,7 @@ def test_applications_routes(tmp_path):
     body = app.handle(Request("GET", "/applications", {})).body.decode()
     assert "Agenda" in body and "Envoyer un merci" in body
     assert "1 relance(s) à faire" in body and "Co rejected" in body
-    assert "Co gone" not in body
+    assert "Co gone" not in body and "Co closed" not in body
     store = Store(path)
     ref = store.job_ref("applied")
     store.close()
@@ -182,6 +183,7 @@ def test_applications_csv_export(tmp_path):
     assert header[:4] == ["Entreprise", "Poste", "Lieu", "Statut"]
     companies = {line[0] for line in lines}
     assert "Co gone" not in companies  # dismissed
+    assert "Co closed" not in companies  # expired
     assert {"Co applied", "Co interview", "Co offer"} <= companies
     row = next(line for line in lines if line[0] == "Co interview")
     by = dict(zip(header, row, strict=True))

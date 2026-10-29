@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **⌛ Expirée** tracking status, on offer pages and Telegram notifications,
+  for postings that closed before the candidate applied: the offer leaves
+  the default list, the board and the agenda like a dismissed one, and is
+  never counted as an application (#129).
+
 ### Changed
 
 - The visa is neutral in the ranking: every `visa_penalties` value now

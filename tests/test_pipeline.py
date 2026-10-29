@@ -453,6 +453,7 @@ def test_tracking_buttons_and_reminders():
     assert [b.callback for b in notifier.sent[0].buttons[-1]] == [
         f"A:{ref}",
         f"D:{ref}",
+        f"E:{ref}",
     ]
 
     store.set_application("good", "applied", clock.now)
