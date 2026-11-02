@@ -48,16 +48,42 @@ def test_pending_respects_limit_and_attempts(store):
     assert [job.id for job in store.pending(limit=1)] == ["b"]
 
 
-def test_has_similar_ignores_case_and_adzuna_jobs(store):
-    store.add(make_job(id="gh:1", company="Stripe", title="ML Intern"), "pending", NOW)
+def test_has_duplicate_matches_title_or_posting_id_from_another_source(store):
+    store.add(
+        make_job(
+            id="gh:1", company="Stripe", title="ML Intern",
+            url="https://stripe.com/jobs/search?gh_jid=7311111",
+        ),
+        "pending",
+        NOW,
+    )  # fmt: skip
     store.add(
         make_job(id="adzuna:9", company="Google", title="AI Intern", source="adzuna"),
         "pending",
         NOW,
     )
-    assert store.has_similar("Stripe", "ml intern")
-    assert not store.has_similar("Stripe", "Data Intern")
-    assert not store.has_similar("Google", "AI Intern")
+
+    def simplify(**overrides):
+        values = {"id": "simplify:1", "company": "Stripe", "source": "simplify",
+                  "title": "Machine Learning Engineer Intern",
+                  "url": "https://example.com/other"}  # fmt: skip
+        values.update(overrides)
+        return make_job(**values)
+
+    assert store.has_duplicate(simplify(title="ml intern"))
+    assert store.has_duplicate(
+        simplify(url="https://boards.greenhouse.io/stripe/jobs/7311111")
+    )
+    assert not store.has_duplicate(simplify())
+    assert not store.has_duplicate(simplify(company="Meta", title="ML Intern"))
+    # An offer is never its own duplicate: rows of the same source are ignored.
+    assert not store.has_duplicate(
+        make_job(id="adzuna:10", company="Google", title="AI Intern", source="adzuna")
+    )
+    # Two aggregators hold each other's duplicates.
+    assert store.has_duplicate(
+        simplify(id="simplify:2", company="Google", title="AI intern")
+    )
 
 
 def test_scored_jobs_flow_through_immediate_and_digest(store):

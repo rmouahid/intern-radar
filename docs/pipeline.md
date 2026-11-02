@@ -14,7 +14,7 @@ intern-radar is a single-user batch pipeline plus one long-running listener:
             ▼                                                 │     ▼
   ┌──────────────────┐  ┌───────────┐  ┌──────────────┐  ┌────┴─────────┐  ┌────────┐
   │ 1. COLLECT        │→ │2. PRE-    │→ │3. SCORE (LLM) │→ │4. RANK +     │  │ DIGEST │
-  │ 10 source plugins │  │  FILTER   │  │ haiku, 10/call│  │   NOTIFY     │  │        │
+  │ 11 source plugins │  │  FILTER   │  │ haiku, 10/call│  │   NOTIFY     │  │        │
   └──────────────────┘  └───────────┘  └──────────────┘  └──────────────┘  └────────┘
             │                 │                │                  │               │
             └───────────── SQLite (data/intern-radar.db) ─────────┴───────────────┘
@@ -56,7 +56,7 @@ Job lifecycle (`jobs.status` plus timestamps):
 
 ```
 fetched ─┬─ pre-filter fails ─────────────► rejected   (description dropped)
-         ├─ Adzuna copy of an ATS offer ──► duplicate  (description dropped)
+         ├─ aggregator copy of an offer ──► duplicate  (description dropped)
          └─ passes ─► pending ─┬─ group already scored ─► scored (inherited, same dates)
                                ├─ LLM answer ─► scored ─┬─ score NULL  → excluded, never sent
                                │                        ├─ ≥ 7.5       → notified_at
@@ -100,6 +100,24 @@ outside the list, 43 kept by the rule (Cellbyte, OMMAX, Astrafy, alinia.ai,
 Axiomatic AI, Tether, Sanctuary AI…). The API's `company` filter was rejected: it needs Adzuna's
 canonical employer name (`Meta` → HTTP 400, `Apple` → 0 results).
 
+**Simplify** (`simplify`, every 6 h): Simplify publishes every internship it
+tracks as one JSON file on GitHub (`SimplifyJobs/Summer2027-Internships`,
+`.github/scripts/listings.json`, 13 MB, ~5,000 active entries), with the
+employer, title, locations, terms (`Summer 2027`), category, degrees and a
+direct link to the employer's ATS, but no description. The source keeps
+active listings of the AI categories whose terms overlap the internship
+window (Winter = Jan–Apr, Spring = Jan–May, Summer = May–Aug, Fall =
+Sep–Dec), not reserved to PhD students, then applies the listing rules.
+Employers are matched against the watch list like Adzuna offers; the
+others are discovery offers, and those located only in the United States
+are dropped in the source: Simplify writes `Vienna, VA` or `New Mexico`,
+which the country matcher would read as Austria or Mexico. The description
+is a short block built from the metadata, so the LLM judges the dates from
+the terms and the relevance from the title. Measured on 2026-11-02: 158
+listings returned, 53 already known through an ATS source (duplicates), 54
+discovery offers outside the EU/EEA and self-sponsored countries, 51 new
+offers to score (4 S, 30 A, 4 B, 13 discovery, mostly Canada).
+
 | Plugin | Endpoint | Paging / caps | Detail call |
 |---|---|---|---|
 | greenhouse (22) | `boards-api.greenhouse.io/v1/boards/{board}/jobs` | full list | 1 per **new** internship |
@@ -112,6 +130,7 @@ canonical employer name (`Meta` → HTTP 400, `Apple` → 0 results).
 | amazon | `amazon.jobs/en/search.json?base_query=intern` | 100/page, 5 pages | none |
 | microsoft | `apply.careers.microsoft.com/api/pcsx/search` | 10 pages | none (no description available) |
 | adzuna | 12 countries, `what=intern`, `max_days_old=7` | 1 page × 50 per country | none |
+| simplify | `raw.githubusercontent.com/{repo}/dev/.github/scripts/listings.json` | full list (one file) | none (no description available) |
 
 Common behaviour:
 
@@ -182,8 +201,12 @@ before. Measured on 2026-10-01: collection of the 82 companies with a feed
   (`Intern, Bachelor’s`, `Undergrad Intern`) are rejected unless they also
   name master's, graduate, MS or PhD students; descriptions stating it are
   handled by the LLM (`undergrad_only`, §3.3).
-- Adzuna offers whose company and title match an ATS offer are stored as
-  `duplicate`.
+- Aggregator offers (Adzuna, Simplify) are stored as `duplicate` when
+  another source already holds, for the same company, the same title (any
+  case) or the same posting identifier in the URL (`grouping.posting_key`:
+  Ashby or Lever UUID, Workday requisition, Greenhouse or other numeric id).
+  Simplify rewrites titles: on 2026-11-02, title equality found 25 of the
+  528 watched-company offers already stored, the posting identifier 168.
 
 ### 3.2b Posting groups (`grouping.py`, pure)
 
@@ -575,9 +598,10 @@ Delivery guarantees:
 
 Coverage:
 
-- 34 watched companies (Google, Meta, Apple, Mistral, Goldman, Citadel…)
+- 35 watched companies (Google, Meta, Apple, Mistral, Goldman, Citadel…)
   have no public feed and are only visible through Adzuna, which needs keys
-  and only sees what aggregators index.
+  and only sees what aggregators index, and Simplify, which covers North
+  American and UK internships and carries no descriptions.
 - Workday searches are relevance-sorted and capped at 100 results per
   tenant; Amazon at 500; Microsoft offers have no description (the LLM
   scores title and location only, ATS step skipped for letters).

@@ -6,12 +6,22 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Simplify source**: Simplify's public internship list (one JSON file on
+  GitHub, every 6 h) adds AI internships whose terms overlap the window,
+  mostly North American and UK, and reaches watched companies without a
+  feed (Tesla, JPMorgan…). Listings have no description; US-only discovery
+  offers are dropped (#133).
+
 ### Changed
 
 - The visa is neutral in the ranking: every `visa_penalties` value now
   defaults to 0, and the interview-chance prompt no longer carries the work
   authorisation, the visa note or the working holiday countries. Run
   `intern-radar rescore` after upgrading (#125).
+- Aggregator copies (Adzuna, Simplify) are recognised as duplicates by the
+  posting identifier in the URL as well as by the title (#133).
 
 ## [0.5.0] — 2026-10-05
 
