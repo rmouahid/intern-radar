@@ -14,6 +14,7 @@ from intern_radar.sources.base import Source
 from intern_radar.sources.greenhouse import GreenhouseSource
 from intern_radar.sources.lever import LeverSource
 from intern_radar.sources.microsoft import MicrosoftSource
+from intern_radar.sources.simplify import SimplifySource
 from intern_radar.sources.smartrecruiters import SmartRecruitersSource
 from intern_radar.sources.teamtailor import TeamtailorSource
 from intern_radar.sources.workable import WorkableSource
@@ -31,6 +32,7 @@ SOURCE_NAMES = frozenset(
         "amazon",
         "microsoft",
         "adzuna",
+        "simplify",
         "none",
     }
 )
@@ -62,5 +64,11 @@ def build_sources(
             company_lookup(companies),
             search_terms(companies),
             discovery=profile.discovery,
+        ),
+        "simplify": SimplifySource(
+            client,
+            company_lookup(companies),
+            (profile.window_start, profile.window_end),
+            rules,
         ),
     }

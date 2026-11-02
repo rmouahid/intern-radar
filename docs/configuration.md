@@ -148,9 +148,9 @@ A list of entries. Common keys:
 | Key | Required | Description |
 |---|---|---|
 | `name` | yes | display name, unique |
-| `tier` | yes | `S`, `A`, `B` (prestige used in the score) or `unlisted` (Adzuna catch-all only) |
+| `tier` | yes | `S`, `A`, `B` (prestige used in the score) or `unlisted` (Adzuna and Simplify catch-alls only) |
 | `source` | yes | adapter name, or `none` when the company has no usable feed |
-| `aliases` | no | other employer names used to attribute Adzuna offers (`[DeepMind, Google DeepMind]`) |
+| `aliases` | no | other employer names used to attribute Adzuna and Simplify offers (`[DeepMind, Google DeepMind]`) |
 
 Adapter parameters:
 
@@ -165,6 +165,7 @@ Adapter parameters:
 | `workday` | `host`, `tenant`, `site` | `https://<host>/<site>` career site; `tenant` is the host's first label |
 | `amazon`, `microsoft` | none | fixed endpoints |
 | `adzuna` | `countries` (optional list) | defaults to gb, us, ca, sg, de, nl, ch, es, it, at, be, pl |
+| `simplify` | `repo`, `categories` (both optional) | `repo` defaults to `SimplifyJobs/Summer2027-Internships` (change it for the next cycle); `categories` to `AI/ML/Data` and `Data Science, AI & Machine Learning` |
 
 Examples:
 
@@ -174,6 +175,7 @@ Examples:
    tenant: nvidia, site: NVIDIAExternalCareerSite}
 - {name: Google, tier: S, source: none, aliases: [DeepMind, Google DeepMind]}
 - {name: Adzuna, tier: unlisted, source: adzuna}
+- {name: Simplify, tier: unlisted, source: simplify, min_interval_hours: 6}
 ```
 
 Validate a change against the live APIs:

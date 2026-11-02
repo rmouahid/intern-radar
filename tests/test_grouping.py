@@ -1,6 +1,6 @@
 import pytest
 
-from intern_radar.grouping import group_key, group_scored
+from intern_radar.grouping import group_key, group_scored, posting_key
 from intern_radar.models import ScoredJob
 from tests.factories import make_assessment, make_job
 
@@ -60,3 +60,29 @@ def test_group_scored_keeps_first_seen_order_and_members():
 
 def test_group_scored_of_nothing_is_empty():
     assert group_scored([]) == []
+
+
+@pytest.mark.parametrize(
+    ("url", "key"),
+    [
+        ("https://boards.greenhouse.io/imc/jobs/4907430101", "4907430101"),
+        ("https://databricks.com/company/careers/job?gh_jid=7011263002", "7011263002"),
+        (
+            "https://jobs.ashbyhq.com/Perplexity/71168628-1998-47d3-87a9-be7bc56a430d/application",
+            "71168628-1998-47d3-87a9-be7bc56a430d",
+        ),
+        (
+            "https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite/job/"
+            "US-CA-Santa-Clara/PhD-Research-Intern---Generative-AI_JR2004567",
+            "jr2004567",
+        ),
+        (
+            "https://wd1.myworkdayjobs.com/x/job/Paris/ML-Intern_R-12345?source=y",
+            "r-12345",
+        ),
+        ("https://example.com/careers/ml-intern-2027", None),
+        ("https://example.com/v1.2.3456789/jobs", None),
+    ],
+)
+def test_posting_key(url, key):
+    assert posting_key(url) == key

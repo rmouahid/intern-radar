@@ -31,6 +31,8 @@ log = logging.getLogger(__name__)
 
 BATCH_SIZE = 10
 FETCH_WORKERS = 6  # companies fetched at the same time
+# Sources that repeat offers the ATS sources already find (rewritten titles).
+AGGREGATORS = frozenset({"adzuna", "simplify"})
 SCORING_WORKERS = 3  # LLM batches scored at the same time (memory, quota)
 SOURCE_ALERT_AFTER = timedelta(days=3)
 LLM_ALERT_AFTER = timedelta(days=1)
@@ -221,9 +223,7 @@ class Pipeline:
                     report.out_of_scope += prefilter.is_internship_title(
                         job.title
                     ) and prefilter.is_out_of_scope(job.title, extra)
-                elif job.source == "adzuna" and self._store.has_similar(
-                    job.company, job.title
-                ):
+                elif job.source in AGGREGATORS and self._store.has_duplicate(job):
                     status = "duplicate"
                 else:
                     status = "pending"
