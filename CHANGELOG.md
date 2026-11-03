@@ -6,8 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-11-03
+
 ### Added
 
+- **Teamtailor source**: career sites hosted on Teamtailor are read from
+  their public RSS feed (title, description, locations, date) without a
+  detail call; Multiverse Computing is the first company watched through
+  it (#127).
 - **Simplify source**: Simplify's public internship list (one JSON file on
   GitHub, every 6 h) adds AI internships whose terms overlap the window,
   mostly North American and UK, and reaches watched companies without a
@@ -190,6 +196,7 @@ All notable changes to this project are documented here. The format follows
   checks, one-page PDF delivered in the chat.
 - systemd units, logrotate configuration and complete documentation.
 
+[0.6.0]: https://github.com/rmouahid/intern-radar/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/rmouahid/intern-radar/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/rmouahid/intern-radar/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/rmouahid/intern-radar/compare/v0.2.0...v0.3.0
