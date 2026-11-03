@@ -135,3 +135,4 @@
 - {name: ASML, tier: B, source: none}
 
 - {name: Adzuna, tier: unlisted, source: adzuna, min_interval_hours: 6}
+- {name: Simplify, tier: unlisted, source: simplify, min_interval_hours: 6}

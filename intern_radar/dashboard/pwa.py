@@ -1,21 +1,21 @@
 """Installable web app: manifest, icons and an offline-reading service worker.
 
-Icons are drawn here as PNG with the standard library (no image dependency):
-a radar — rings and a sweep — on the accent colour. The service worker only
+The icons are the project's logo mark (radar and briefcase) on its navy
+background, stored as PNG files in `static/`. The service worker only
 registers in a secure context (HTTPS, e.g. `tailscale serve`); over plain
 HTTP the manifest and the apple-touch-icon still make the page installable
 on the home screen.
 """
 
 import json
-import math
-import struct
-import zlib
 from functools import cache
+from pathlib import Path
 
 ICON_SIZES = (180, 192, 512)
-THEME = "#2f6fde"
-BACKGROUND = "#f6f6f4"
+STATIC = Path(__file__).parent / "static"
+# The logo's navy: status bar, splash screen and icon background match.
+THEME = "#051123"
+BACKGROUND = "#051123"
 CACHE_PAGES = 40  # pages kept for offline reading
 
 HEAD = (
@@ -118,50 +118,9 @@ self.addEventListener('fetch', (event) => {
 """.replace("__LIMIT__", str(CACHE_PAGES))
 
 
-def _png(width: int, height: int, rows: list[bytes]) -> bytes:
-    def chunk(kind: bytes, data: bytes) -> bytes:
-        body = kind + data
-        return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body))
-
-    raw = b"".join(b"\x00" + row for row in rows)  # filter 0 on every row
-    header = struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)  # 8-bit RGB
-    return (
-        b"\x89PNG\r\n\x1a\n"
-        + chunk(b"IHDR", header)
-        + chunk(b"IDAT", zlib.compress(raw, 9))
-        + chunk(b"IEND", b"")
-    )
-
-
 @cache
 def icon(size: int) -> bytes:
-    """The app icon as PNG: rings, a sweep and a blip on the accent colour."""
+    """The app icon as PNG: the logo mark, kept inside the maskable safe zone."""
     if size not in ICON_SIZES:
         raise ValueError(size)
-    background = (0x2F, 0x6F, 0xDE)
-    light = (0xFF, 0xFF, 0xFF)
-    sweep_colour = (0x9B, 0xB8, 0xEF)
-    centre = (size - 1) / 2
-    radius = size * 0.36  # inside the maskable safe zone
-    line = max(1.5, size / 64)
-    rows = []
-    for y in range(size):
-        row = bytearray()
-        for x in range(size):
-            dx, dy = x - centre, centre - y
-            distance = math.hypot(dx, dy)
-            angle = math.degrees(math.atan2(dy, dx)) % 360
-            colour = background
-            if distance <= radius and 20 <= angle <= 75:
-                colour = sweep_colour  # the sweep sector
-            for ring in (radius, radius * 0.66, radius * 0.33):
-                if abs(distance - ring) <= line / 2:
-                    colour = light
-            if distance <= line * 1.2:
-                colour = light  # centre
-            blip = math.hypot(dx - radius * 0.3, dy - radius * 0.42)
-            if blip <= line * 2.2:
-                colour = light
-            row += bytes(colour)
-        rows.append(bytes(row))
-    return _png(size, size, rows)
+    return (STATIC / f"icon-{size}.png").read_bytes()

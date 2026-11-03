@@ -1,0 +1,9 @@
+[Unit]
+Description=intern-radar: back up the database
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/remote-claude/intern-radar
+Environment=HOME=/root
+Environment=PATH=/root/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/root/.local/bin/poetry run intern-radar backup

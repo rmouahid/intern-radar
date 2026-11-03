@@ -205,6 +205,44 @@ def test_adzuna_duplicates_of_ats_jobs_are_not_scored():
     assert scorer.batches == [["gh:1"]]
 
 
+def test_simplify_duplicates_are_found_by_posting_id():
+    simplify = Company("Simplify", "unlisted", "simplify", {})
+    companies = [ACME, simplify]
+    ats = make_job(
+        id="gh:1", company="Acme", title="ML Intern (Summer 2027) - MS",
+        url="https://boards.greenhouse.io/acme/jobs/7311111",
+    )  # fmt: skip
+    sources = {
+        "fake": FakeSource([ats]),
+        "simplify": FakeSource(
+            [
+                make_job(
+                    id="simplify:1",
+                    company="Acme",
+                    title="ML Intern - MS",
+                    url="https://job-boards.greenhouse.io/acme/jobs/7311111",
+                    source="simplify",
+                ),
+                make_job(
+                    id="simplify:2",
+                    company="Acme",
+                    title="Data Science Intern",
+                    url="https://boards.greenhouse.io/acme/jobs/7322222",
+                    source="simplify",
+                ),
+            ]  # fmt: skip
+        ),
+    }
+    scorer = FakeScorer({"gh:1": make_assessment(), "simplify:2": make_assessment()})
+    pipeline, _, _ = build(sources, scorer, companies=companies)
+    report = pipeline.run()
+    assert report.candidates == 2
+    assert sorted(job for batch in scorer.batches for job in batch) == [
+        "gh:1",
+        "simplify:2",
+    ]
+
+
 def test_source_alert_after_three_days():
     source = FakeSource(error=SourceError("HTTP 500"))
     notifier = FakeNotifier()

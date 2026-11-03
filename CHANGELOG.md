@@ -13,12 +13,34 @@ All notable changes to this project are documented here. The format follows
   the default list, the board and the agenda like a dismissed one, and is
   never counted as an application (#129).
 
+## [0.6.0] — 2026-11-03
+
+### Added
+
+- **Teamtailor source**: career sites hosted on Teamtailor are read from
+  their public RSS feed (title, description, locations, date) without a
+  detail call; Multiverse Computing is the first company watched through
+  it (#127).
+- **Simplify source**: Simplify's public internship list (one JSON file on
+  GitHub, every 6 h) adds AI internships whose terms overlap the window,
+  mostly North American and UK, and reaches watched companies without a
+  feed (Tesla, JPMorgan…). Listings have no description; US-only discovery
+  offers are dropped (#133).
+- **Logo**: the project logo heads the README; the web app shows a brand
+  header on every page, uses the logo mark as its icons (home screen,
+  favicon) and the logo's navy for the status bar and splash screen (#135).
+- **Nightly backups**: `intern-radar backup` copies the database (SQLite
+  online backup, integrity-checked, gzip) to `data/backups/` and keeps the
+  7 newest; `intern-radar-backup.timer` runs it every night at 03:30 (#137).
+
 ### Changed
 
 - The visa is neutral in the ranking: every `visa_penalties` value now
   defaults to 0, and the interview-chance prompt no longer carries the work
   authorisation, the visa note or the working holiday countries. Run
   `intern-radar rescore` after upgrading (#125).
+- Aggregator copies (Adzuna, Simplify) are recognised as duplicates by the
+  posting identifier in the URL as well as by the title (#133).
 
 ## [0.5.0] — 2026-10-05
 
@@ -181,6 +203,7 @@ All notable changes to this project are documented here. The format follows
   checks, one-page PDF delivered in the chat.
 - systemd units, logrotate configuration and complete documentation.
 
+[0.6.0]: https://github.com/rmouahid/intern-radar/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/rmouahid/intern-radar/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/rmouahid/intern-radar/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/rmouahid/intern-radar/compare/v0.2.0...v0.3.0
