@@ -10,6 +10,8 @@ import httpx
 import typer
 
 from intern_radar import ranking
+from intern_radar.backup import BackupError
+from intern_radar.backup import backup as backup_database
 from intern_radar.candidate import (
     CandidateError,
     candidate_text,
@@ -61,6 +63,7 @@ LETTERS_DIR = Path("data/letters")
 RESUMES_DIR = Path("data/cvs")
 CONFIG_DIR = typer.Option(Path("config"), "--config-dir", help="Configuration dir.")
 DB_PATH = typer.Option(Path("data/intern-radar.db"), "--db", help="SQLite file.")
+BACKUP_DIR = typer.Option(Path("data/backups"), "--dest", help="Backups directory.")
 DRY_RUN = typer.Option(False, "--dry-run", help="Print instead of notifying.")
 
 
@@ -342,6 +345,22 @@ def applications(db: Path = DB_PATH) -> None:
             )
     finally:
         store.close()
+
+
+@app.command()
+def backup(
+    db: Path = DB_PATH,
+    dest: Path = BACKUP_DIR,
+    keep: int = typer.Option(7, "--keep", min=1, help="Backups kept (newest)."),
+) -> None:
+    """Copy the database (checked, gzip) and keep the newest backups."""
+    _setup_logging()
+    try:
+        path = backup_database(db, dest, keep, datetime.now(UTC).date())
+    except BackupError as exc:
+        typer.echo(f"Backup failed: {exc}", err=True)
+        raise typer.Exit(1) from exc
+    typer.echo(f"Backup written: {path} ({path.stat().st_size // 1024} KiB)")
 
 
 @app.command("check-sources")

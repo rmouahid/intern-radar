@@ -16,6 +16,9 @@ All notable changes to this project are documented here. The format follows
 - **Logo**: the project logo heads the README; the web app shows a brand
   header on every page, uses the logo mark as its icons (home screen,
   favicon) and the logo's navy for the status bar and splash screen (#135).
+- **Nightly backups**: `intern-radar backup` copies the database (SQLite
+  online backup, integrity-checked, gzip) to `data/backups/` and keeps the
+  7 newest; `intern-radar-backup.timer` runs it every night at 03:30 (#137).
 
 ### Changed
 

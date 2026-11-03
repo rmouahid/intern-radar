@@ -158,7 +158,7 @@ poetry run intern-radar listen               # wait for letter and 🔔 button t
 ln -sf "$PWD"/deploy/intern-radar-*.service "$PWD"/deploy/intern-radar-*.timer /etc/systemd/system/
 cp deploy/logrotate.conf /etc/logrotate.d/intern-radar
 systemctl daemon-reload
-systemctl enable --now intern-radar-run.timer intern-radar-digest.timer
+systemctl enable --now intern-radar-run.timer intern-radar-digest.timer intern-radar-backup.timer
 systemctl enable --now intern-radar-letters.service
 systemctl enable --now intern-radar-dashboard.service   # Tailscale address only
 ```
