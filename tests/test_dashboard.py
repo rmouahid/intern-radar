@@ -249,6 +249,7 @@ def offers_db(tmp_path):
         ("low", "Ops Intern", "Paris", "B", 3.0, "free", "2026-09-25"),
         ("disc", "AI Intern", "Munich", "unlisted", 7.5, "free", "2026-09-28"),
         ("gone", "Research Intern", "Oslo", "A", 7.2, "free", "2026-09-28"),
+        ("closed", "Vision Intern", "Zurich", "A", 7.1, "free", "2026-09-28"),
     )
     for job_id, title, location, tier, score, visa, posted in rows:
         store.add(
@@ -260,6 +261,7 @@ def offers_db(tmp_path):
         store.save_assessment(job_id, make_assessment(work_authorisation=visa), score)
     store.set_application("ca", "applied", NOW)
     store.set_application("gone", "dismissed", NOW)
+    store.set_application("closed", "expired", NOW)
     store.close()
     return path
 
@@ -276,7 +278,7 @@ def offers_ids(path, **query):
 def test_offers_default_view_groups_postings_and_hides_noise(tmp_path):
     path = offers_db(tmp_path)
     companies, total = offers_ids(path)
-    # score >= 5.5, within 60 days, not dismissed, one card per posting group
+    # score >= 5.5, within 60 days, not dismissed or expired, one card per posting group
     assert companies == ["Co ca", "Co de", "Co disc"] and total == 3
     rows, _ = queries.offers(queries.connect(path), queries.OfferFilters(), NOW.date())
     assert rows[1].other_places == 1
@@ -290,6 +292,7 @@ def test_offers_default_view_groups_postings_and_hides_noise(tmp_path):
         ({"visa": "none", "tier": "S"}, ["Co ca"]),
         ({"status": "applied"}, ["Co ca"]),
         ({"status": "dismissed"}, ["Co gone"]),
+        ({"status": "expired"}, ["Co closed"]),
         ({"days": 0}, ["Co ca", "Co de", "Co disc", "Co old"]),
         ({"q": "ai intern"}, ["Co disc"]),
         ({"min": 8.5}, ["Co ca"]),

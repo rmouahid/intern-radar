@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from intern_radar.chance import Chance
-from intern_radar.grouping import group_key
+from intern_radar.grouping import group_key, posting_key
 from intern_radar.models import Assessment, Job, ScoredJob
 
 MAX_ATTEMPTS = 3
@@ -299,13 +299,20 @@ class Store:
         ).fetchall()
         return [_row_to_scored(row) for row in (lead, *others)]
 
-    def has_similar(self, company: str, title: str) -> bool:
-        row = self._db.execute(
-            "SELECT 1 FROM jobs WHERE company = ? AND lower(title) = lower(?)"
-            " AND source != 'adzuna' LIMIT 1",
-            (company, title),
-        ).fetchone()
-        return row is not None
+    def has_duplicate(self, job: Job) -> bool:
+        """True when another source already holds this offer for the same
+        company: same title (any case) or same posting identifier in the URL.
+        Used for aggregator offers, which repeat what the ATS sources find."""
+        key = posting_key(job.url)
+        rows = self._db.execute(
+            "SELECT title, url FROM jobs WHERE company = ? AND source != ?",
+            (job.company, job.source),
+        )
+        title = job.title.lower()
+        return any(
+            row["title"].lower() == title or (key and posting_key(row["url"]) == key)
+            for row in rows
+        )
 
     def pending(self, limit: int | None = None) -> list[Job]:
         """Jobs to score, one per posting group; the others inherit its result."""

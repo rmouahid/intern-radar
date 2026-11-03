@@ -1,4 +1,6 @@
-# intern-radar
+<h1 align="center">
+  <img src="docs/assets/logo.png" alt="intern-radar" width="260">
+</h1>
 
 [![Tests](https://github.com/rmouahid/intern-radar/actions/workflows/tests.yml/badge.svg)](https://github.com/rmouahid/intern-radar/actions/workflows/tests.yml)
 [![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg)](pyproject.toml)
@@ -10,8 +12,9 @@ triages every new internship with an LLM against a candidate profile, pushes
 the relevant ones to Telegram, and writes a tailored, fact-checked cover
 letter as a PDF on demand from the notification itself.
 
-- **10 source adapters** (Greenhouse, Lever, Ashby, Workable, SmartRecruiters,
-  Teamtailor, Workday, Amazon, Microsoft, Adzuna), polite by design (≥ 1 s per host).
+- **11 source adapters** (Greenhouse, Lever, Ashby, Workable, SmartRecruiters,
+  Teamtailor, Workday, Amazon, Microsoft, Adzuna, Simplify), polite by design
+  (≥ 1 s per host).
 - **Rules first, LLM second**: a pure pre-filter removes noise for free
   (France-only, out-of-scope fields, past cycles, bachelor-only titles),
   per-country copies of a posting are scored once, descriptions are
@@ -54,7 +57,7 @@ offer into a ready-to-review application in one tap.
 ```
  ┌─────────────┐   ┌─────────────┐   ┌──────────────┐   ┌─────────────┐   ┌───────────┐
  │  COLLECT     │ → │ PRE-FILTER  │ → │ LLM TRIAGE   │ → │ RANK        │ → │ NOTIFY    │
- │ 10 adapters  │   │ title, loc, │   │ JSON schema, │   │ AI·0.5 +    │   │ Telegram  │
+ │ 11 adapters  │   │ title, loc, │   │ JSON schema, │   │ AI·0.5 +    │   │ Telegram  │
  │117 companies │   │ duplicates  │   │ 10 per call  │   │ tier·0.3 +  │   │ + digest  │
  └─────────────┘   └─────────────┘   └──────────────┘   │ dates·0.2   │   └─────┬─────┘
    every 2 h, 08:00–22:00 Europe/Paris (systemd timers)  └─────────────┘         │
@@ -68,7 +71,8 @@ offer into a ready-to-review application in one tap.
    titles only and skip postings already seen; one broken posting or source
    never stops the run.
 2. **Pre-filter** — whole-word internship regex, France-only locations
-   dropped, Adzuna copies of ATS postings marked as duplicates.
+   dropped, Adzuna and Simplify copies of ATS postings (same title or same
+   posting id in the URL) marked as duplicates.
 3. **LLM triage** — a headless LLM CLI (`claude -p`, no tools) returns, per
    offer, internship status, AI relevance, fit with the internship window,
    eligibility, visa note, language requirement and a summary, validated
@@ -154,7 +158,7 @@ poetry run intern-radar listen               # wait for letter and 🔔 button t
 ln -sf "$PWD"/deploy/intern-radar-*.service "$PWD"/deploy/intern-radar-*.timer /etc/systemd/system/
 cp deploy/logrotate.conf /etc/logrotate.d/intern-radar
 systemctl daemon-reload
-systemctl enable --now intern-radar-run.timer intern-radar-digest.timer
+systemctl enable --now intern-radar-run.timer intern-radar-digest.timer intern-radar-backup.timer
 systemctl enable --now intern-radar-letters.service
 systemctl enable --now intern-radar-dashboard.service   # Tailscale address only
 ```
@@ -223,8 +227,9 @@ docs/                 technical documentation
 
 ## Limitations
 
-34 watched companies (Google, Meta, Apple, Mistral…) publish no usable feed
-and are only reachable through Adzuna. The LLM triage is a filter, not a
+35 watched companies (Google, Meta, Apple, Mistral…) publish no usable feed
+and are only reachable through Adzuna and Simplify's internship list (mostly
+North American and UK offers, without descriptions). The LLM triage is a filter, not a
 verdict: repeated scoring of the same offers disagrees on about 3 in 10
 categorical judgements, and ~40 % of postings do not state their dates.
 The full list is in [docs/pipeline.md §6](docs/pipeline.md#6-limits-and-known-gaps).

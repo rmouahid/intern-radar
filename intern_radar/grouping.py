@@ -27,6 +27,13 @@ PLACE_SUFFIX_RE = re.compile(
 DASHES_RE = re.compile(r"[‐-―]")
 NON_WORD_RE = re.compile(r"[^0-9a-z]+")
 
+# Identifiers of one posting in its ATS URL, whatever the domain in front:
+# Ashby and Lever UUIDs, Workday requisitions ("..._JR2004567", "..._R-12345"),
+# Greenhouse and other numeric ids ("/jobs/7311111", "?gh_jid=7311111").
+UUID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
+WORKDAY_REQ_RE = re.compile(r"_([A-Z]{1,4}-?\d{4,}(?:-\d+)?)(?=[/?#]|$)")
+NUMERIC_ID_RE = re.compile(r"(?<![\d.])(\d{7,})(?![\d.])")
+
 
 def group_key(company: str, title: str) -> str:
     text = DASHES_RE.sub("-", title.lower()).strip()
@@ -34,6 +41,21 @@ def group_key(company: str, title: str) -> str:
         text = stripped
     words = NON_WORD_RE.sub(" ", text).strip()
     return f"{company.lower()}|{words}"
+
+
+def posting_key(url: str) -> str | None:
+    """The posting identifier found in an offer URL, or None.
+
+    Aggregators (Adzuna, Simplify) rewrite titles but often link to the
+    employer's ATS: the same identifier then names the same offer.
+    """
+    if match := UUID_RE.search(url.lower()):
+        return match[0]
+    if match := WORKDAY_REQ_RE.search(url):
+        return match[1].lower()
+    if match := NUMERIC_ID_RE.search(url):
+        return match[1]
+    return None
 
 
 def group_scored(jobs: Iterable[ScoredJob]) -> list[list[ScoredJob]]:

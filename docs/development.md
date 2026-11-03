@@ -19,7 +19,7 @@ No network, LLM, Telegram or SMTP access is needed to run the tests.
 | `tests/` | mirrors the package: `tests/sources/`, `tests/letters/`, `tests/test_<module>.py` |
 | `tests/factories.py` | `make_job`, `make_assessment`, `make_profile`, `mock_client` |
 | `config/` | `companies.yaml`, `profile.example.yaml` |
-| `deploy/` | systemd units, logrotate |
+| `deploy/` | systemd units (run, digest, backup, listener, dashboard), logrotate |
 | `docs/` | this documentation; `docs/superpowers/` holds the design specs and implementation plans of each feature |
 
 ## Conventions
@@ -117,6 +117,26 @@ git switch develop && git pull --ff-only
 poetry install --only main
 systemctl restart intern-radar-letters.service   # timers pick up the code on their next run
 journalctl -u intern-radar-run -n 20
+```
+
+### Backups
+
+`intern-radar-backup.timer` runs `intern-radar backup` every night at 03:30
+(Paris), outside the run window. The command copies `data/intern-radar.db`
+through SQLite's online backup API (consistent even during a run), checks
+the copy with `PRAGMA integrity_check`, compresses it to
+`data/backups/intern-radar-YYYY-MM-DD.db.gz` and keeps the 7 newest
+(`--keep`). A failed check exits non-zero and keeps the previous backups.
+
+Restore:
+
+```bash
+systemctl stop intern-radar-run.timer intern-radar-digest.timer \
+  intern-radar-letters.service intern-radar-dashboard.service
+cp data/intern-radar.db data/intern-radar.db.before-restore
+gunzip -c data/backups/intern-radar-2026-11-03.db.gz > data/intern-radar.db
+systemctl start intern-radar-run.timer intern-radar-digest.timer \
+  intern-radar-letters.service intern-radar-dashboard.service
 ```
 
 Releases to `main` follow Git Flow (`release/x.y.z` branch, version bump,

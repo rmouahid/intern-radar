@@ -28,11 +28,11 @@ def decode_png(data: bytes) -> tuple[int, int, bytes]:
 
 
 @pytest.mark.parametrize("size", pwa.ICON_SIZES)
-def test_icons_are_valid_png(size):
-    width, height, raw = decode_png(pwa.icon(size))
+def test_icons_are_the_logo_mark_files(size):
+    data = pwa.icon(size)
+    assert data == (pwa.STATIC / f"icon-{size}.png").read_bytes()
+    width, height, _ = decode_png(data)
     assert (width, height) == (size, size)
-    assert len(raw) == size * (1 + 3 * size)  # one filter byte + RGB per row
-    assert b"\xff\xff\xff" in raw and b"\x2f\x6f\xde" in raw  # rings on accent
     with pytest.raises(ValueError):
         pwa.icon(64)
 
@@ -40,6 +40,8 @@ def test_icons_are_valid_png(size):
 def test_manifest_and_head():
     manifest = json.loads(pwa.manifest())
     assert manifest["display"] == "standalone" and manifest["start_url"] == "/offers"
+    # The logo's navy, so the splash screen matches the icon background.
+    assert manifest["theme_color"] == manifest["background_color"] == "#051123"
     assert [i["sizes"] for i in manifest["icons"]] == ["180x180", "192x192", "512x512"]
     assert 'rel="apple-touch-icon" href="/icon-180.png"' in pwa.HEAD
     assert "window.isSecureContext" in pwa.HEAD  # no registration over plain HTTP
@@ -60,3 +62,13 @@ def test_pwa_routes(tmp_path):
     assert app.handle(Request("GET", "/icon-64.png", {})).status == 404
     page = app.handle(Request("GET", "/offers", {})).body.decode()
     assert 'href="/manifest.webmanifest"' in page
+
+
+def test_every_page_carries_the_brand_header(tmp_path):
+    path = str(tmp_path / "p.db")
+    Store(path).close()
+    app = build_app(Context(path))
+    for route in ("/offers", "/applications", "/stats"):
+        body = app.handle(Request("GET", route, {})).body.decode()
+        assert '<header class="brand">' in body
+        assert 'src="/icon-192.png"' in body and "intern-<b>radar</b>" in body
