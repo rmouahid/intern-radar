@@ -1,4 +1,6 @@
-# intern-radar
+<h1 align="center">
+  <img src="docs/assets/logo.png" alt="intern-radar" width="260">
+</h1>
 
 [![Tests](https://github.com/rmouahid/intern-radar/actions/workflows/tests.yml/badge.svg)](https://github.com/rmouahid/intern-radar/actions/workflows/tests.yml)
 [![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg)](pyproject.toml)

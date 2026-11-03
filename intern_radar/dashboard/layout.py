@@ -1,4 +1,5 @@
-"""Shared page shell: mobile-first CSS, light/dark themes, bottom navigation."""
+"""Shared page shell: mobile-first CSS, light/dark themes, brand header and
+bottom navigation."""
 
 import html
 
@@ -16,16 +17,22 @@ NAV = (
 
 CSS = """
 :root { --bg:#f6f6f4; --card:#fff; --text:#1d1d1f; --muted:#6b6b70;
-  --line:#e3e3e0; --accent:#2f6fde; --accent2:#9bb8ef; --warn:#c2410c;
-  --ok:#15803d; --chip:#eef2fb; }
+  --brand:#0a7f50; --line:#e3e3e0; --accent:#2f6fde; --accent2:#9bb8ef;
+  --warn:#c2410c; --ok:#15803d; --chip:#eef2fb; }
 @media (prefers-color-scheme: dark) { :root { --bg:#141416; --card:#1e1e21;
-  --text:#ececec; --muted:#9a9aa0; --line:#2e2e33; --accent:#6c9bf0;
-  --accent2:#34507f; --warn:#fb923c; --ok:#4ade80; --chip:#262a33; } }
+  --text:#ececec; --muted:#9a9aa0; --brand:#20e395; --line:#2e2e33;
+  --accent:#6c9bf0; --accent2:#34507f; --warn:#fb923c; --ok:#4ade80;
+  --chip:#262a33; } }
 * { box-sizing:border-box; }
 body { margin:0; background:var(--bg); color:var(--text);
   font:15px/1.45 -apple-system, "Segoe UI", Roboto, sans-serif;
   padding-bottom:76px; }
 main { max-width:960px; margin:0 auto; padding:14px; }
+.brand { max-width:960px; margin:0 auto; padding:12px 14px 0; }
+.brand a { display:inline-flex; align-items:center; gap:8px; color:var(--text);
+  font-weight:700; font-size:17px; letter-spacing:-0.01em; }
+.brand img { width:28px; height:28px; border-radius:7px; }
+.brand b { color:var(--brand); }
 h1 { font-size:21px; margin:6px 0 4px; } h2 { font-size:16px; margin:0 0 10px; }
 .muted { color:var(--muted); font-size:13px; }
 section, .card { background:var(--card); border:1px solid var(--line);
@@ -107,10 +114,17 @@ def page(
         '<meta name="viewport" content="width=device-width, initial-scale=1, '
         'viewport-fit=cover">'
         f"{meta}{HEAD_EXTRA}<title>{e(title)} · intern-radar</title>"
-        f"<style>{CSS}</style></head><body><main>{banner}{body}</main>"
+        f"<style>{CSS}</style></head><body>{BRAND}<main>{banner}{body}</main>"
         f'<nav class="bottom">{links}</nav></body></html>'
     )
 
+
+# The logo mark and word mark, as on the logo: "intern-" plain, "radar" green.
+BRAND = (
+    '<header class="brand"><a href="/offers">'
+    '<img src="/icon-192.png" alt="" width="28" height="28">'
+    "<span>intern-<b>radar</b></span></a></header>"
+)
 
 # Manifest, icons and service worker registration (installable app).
 HEAD_EXTRA = pwa.HEAD
