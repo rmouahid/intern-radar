@@ -32,15 +32,25 @@ DAYS = (
     ("7", "7 jours"),
     ("0", "Toutes dates"),
 )
+SORT_LABELS = (
+    ("", "Score"),
+    ("chance", "% de chance"),
+    ("posted", "Publication récente"),
+    ("seen", "Ajout récent"),
+    ("company", "Entreprise"),
+)
 
 
-def _select(name: str, options, current: str) -> str:
+def _select(name: str, options, current: str, title: str = "") -> str:
     items = "".join(
         f'<option value="{e(value)}"{" selected" if value == current else ""}>'
         f"{e(label)}</option>"
         for value, label in options
     )
-    return f'<select name="{name}" onchange="this.form.submit()">{items}</select>'
+    attrs = f' title="{e(title)}"' if title else ""
+    return (
+        f'<select name="{name}"{attrs} onchange="this.form.submit()">{items}</select>'
+    )
 
 
 def filters_form(f: OfferFilters) -> str:
@@ -56,6 +66,7 @@ def filters_form(f: OfferFilters) -> str:
         + _select("visa", VISAS, f.visa)
         + _select("status", STATUSES, f.status)
         + _select("days", DAYS, str(f.days))
+        + _select("sort", SORT_LABELS, f.sort, "Trier par")
         + '<button type="submit">Filtrer</button></form>'
     )
 
@@ -114,6 +125,7 @@ def query_string(f: OfferFilters, page: int | None = None) -> str:
         "visa": f.visa,
         "status": f.status,
         "days": str(f.days),
+        "sort": f.sort,
         "page": str(page) if page and page > 1 else "",
     }
     return urlencode({k: v for k, v in params.items() if v})

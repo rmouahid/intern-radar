@@ -12,6 +12,9 @@ All notable changes to this project are documented here. The format follows
   for postings that closed before the candidate applied: the offer leaves
   the default list, the board and the agenda like a dismissed one, and is
   never counted as an application (#129).
+- **Sort the offers list** by score (default), interview chance, publication
+  date, date found or company; offers without the value go last and the
+  sort is kept across pages and saved searches (#131).
 
 ## [0.6.0] — 2026-11-03
 
