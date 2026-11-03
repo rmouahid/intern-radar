@@ -9,7 +9,9 @@ from datetime import date, datetime, timedelta
 from intern_radar.conventions import CONVENTIONS, convention_for
 from intern_radar.description import clean_description
 from intern_radar.skills import BY_NAME, find_skills
-from intern_radar.tracking import STATUS_TEXT
+from intern_radar.tracking import SET_ASIDE, STATUS_TEXT
+
+_SET_ASIDE_SQL = "(" + ", ".join(f"'{status}'" for status in SET_ASIDE) + ")"
 
 
 def connect(path: str) -> sqlite3.Connection:
@@ -234,7 +236,7 @@ class OfferFilters:
     tier: str = ""  # S, A, B or unlisted (discovery)
     region: str = ""  # a CONVENTIONS key
     visa: str = ""  # a VISA_GROUPS key
-    status: str = ""  # an application status, "none" or "dismissed"
+    status: str = ""  # an application status or "none"
     days: int = 60  # publication age; 0 = any
     q: str = ""
     page: int = 1
@@ -337,8 +339,8 @@ def matching_offers(
             continue
         if filters.status not in ("", "none") and status != filters.status:
             continue
-        if not filters.status and status == "dismissed":
-            continue  # dismissed offers are hidden unless asked for
+        if not filters.status and status in SET_ASIDE:
+            continue  # dismissed and expired offers are hidden unless asked for
         selected.append(
             OfferRow(
                 ref=lead["ref"],
@@ -450,7 +452,7 @@ def board(
     for row in rows:
         status = row["status"]
         column = "to_apply" if status is None else COLUMN_OF.get(status)
-        if column is None:  # dismissed
+        if column is None:  # dismissed or expired
             continue
         group = row["group_key"] or row["id"]
         if column == "to_apply":
@@ -501,7 +503,7 @@ def calendar(
     ).fetchall()
     events: list[Event] = []
     for row in rows:
-        closed = row["status"] in ("rejected", "offer", "dismissed")
+        closed = row["status"] in ("rejected", "offer", *SET_ASIDE)
         base = (row["ref"], row["company"], row["title"])
         if row["interviews"]:
             for when in json.loads(row["interviews"]):
@@ -609,7 +611,7 @@ class CompanyRow:
     source: str
     seen: int  # offers ever collected
     open: int  # posting groups currently in the offers list
-    applications: int  # tracked applications (dismissed excluded)
+    applications: int  # tracked applications (dismissed and expired excluded)
     best: float | None  # best score of the open offers
     last_new: str | None  # date of the last new offer
     failing_since: str | None
@@ -643,7 +645,8 @@ def companies(
         row["company"]: row["n"]
         for row in db.execute(
             "SELECT j.company, count(*) AS n FROM applications a JOIN jobs j"
-            " ON j.id = a.job_id WHERE a.status != 'dismissed' GROUP BY j.company"
+            f" ON j.id = a.job_id WHERE a.status NOT IN {_SET_ASIDE_SQL}"
+            " GROUP BY j.company"
         )
     }
     open_offers: dict[str, list[OfferRow]] = {}
@@ -727,7 +730,7 @@ def company_detail(
         for r in db.execute(
             "SELECT j.rowid AS ref, j.title, a.status, a.updated_at FROM applications a"
             " JOIN jobs j ON j.id = a.job_id WHERE j.company = ?"
-            " AND a.status != 'dismissed' ORDER BY a.updated_at DESC",
+            f" AND a.status NOT IN {_SET_ASIDE_SQL} ORDER BY a.updated_at DESC",
             (name,),
         )
     ]
@@ -836,7 +839,7 @@ def calibration(db: sqlite3.Connection) -> Calibration:
         " AND ev.status IN ('interview', 'offer')) AS reached"
         " FROM applications a JOIN chances c ON c.job_id = a.job_id"
         " JOIN jobs j ON j.id = a.job_id"
-        " WHERE a.status NOT IN ('dismissed')"
+        f" WHERE a.status NOT IN {_SET_ASIDE_SQL}"
     ).fetchall()
     decided = [
         (r["tier"], r["percent"], bool(r["reached"]) or r["status"] in REACHED)
@@ -883,7 +886,7 @@ EXPORT_HEADER = (
 
 
 def applications_export(db: sqlite3.Connection) -> list[tuple[str, ...]]:
-    """One row per tracked application (dismissed offers excluded), latest first."""
+    """One row per tracked application (offers set aside excluded), latest first."""
     rows = db.execute(
         "SELECT j.company, j.title, j.location, j.url, j.score, a.status,"
         " a.updated_at, a.applied_at, c.percent, d.deadline, d.interviews,"
@@ -893,7 +896,7 @@ def applications_export(db: sqlite3.Connection) -> list[tuple[str, ...]]:
         " FROM applications a JOIN jobs j ON j.id = a.job_id"
         " LEFT JOIN chances c ON c.job_id = a.job_id"
         " LEFT JOIN application_details d ON d.job_id = a.job_id"
-        " WHERE a.status != 'dismissed' ORDER BY a.updated_at DESC"
+        f" WHERE a.status NOT IN {_SET_ASIDE_SQL} ORDER BY a.updated_at DESC"
     )
     return [
         (

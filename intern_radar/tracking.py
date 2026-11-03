@@ -6,7 +6,9 @@ Each notified offer can move through a small state machine:
       │             │ │               └──❌──► rejected
       │             │ └──❌──► rejected
       │             └──🔕──► no_answer ──🗣/❌──► interview / rejected
-      └──🙈──► dismissed ──✅──► applied
+      ├──🙈──► dismissed ──✅──► applied
+      │            └──⌛──► expired
+      └──⌛──► expired
 
 A tap updates the store and replaces the tracking row of the tapped
 message's keyboard with the next possible steps. Applications without news
@@ -31,17 +33,22 @@ ACTIONS = {
     "O": "offer",
     "R": "rejected",
     "N": "no_answer",
+    "E": "expired",
 }
 CODES = {status: code for code, status in ACTIONS.items()}
 TRANSITIONS: dict[str | None, tuple[str, ...]] = {
-    None: ("applied", "dismissed"),
-    "dismissed": ("applied",),
+    None: ("applied", "dismissed", "expired"),
+    "dismissed": ("applied", "expired"),
     "applied": ("interview", "rejected", "no_answer"),
     "no_answer": ("interview", "rejected"),
     "interview": ("offer", "rejected"),
     "offer": (),
     "rejected": (),
+    "expired": (),
 }
+# Statuses of offers set aside without applying: hidden from the offers list,
+# the board and the agenda, and never counted as applications.
+SET_ASIDE = ("dismissed", "expired")
 LABELS = {
     "applied": "✅ Postulé",
     "dismissed": "🙈 Pas intéressé",
@@ -49,6 +56,7 @@ LABELS = {
     "offer": "🎉 Offre",
     "rejected": "❌ Refusé",
     "no_answer": "🔕 Pas de réponse",
+    "expired": "⌛ Expirée",
 }
 STATUS_TEXT = {
     "applied": "Candidature envoyée",
@@ -57,6 +65,7 @@ STATUS_TEXT = {
     "offer": "Offre reçue",
     "rejected": "Candidature refusée",
     "no_answer": "Sans réponse",
+    "expired": "Offre expirée",
 }
 
 
