@@ -13,6 +13,9 @@ All notable changes to this project are documented here. The format follows
   mostly North American and UK, and reaches watched companies without a
   feed (Tesla, JPMorgan…). Listings have no description; US-only discovery
   offers are dropped (#133).
+- **Logo**: the project logo heads the README; the web app shows a brand
+  header on every page, uses the logo mark as its icons (home screen,
+  favicon) and the logo's navy for the status bar and splash screen (#135).
 
 ### Changed
 
