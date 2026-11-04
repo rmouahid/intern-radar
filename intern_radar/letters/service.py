@@ -118,6 +118,11 @@ def _plain(caption: str) -> str:
     return html.unescape(re.sub(r"<[^>]+>", "", caption))
 
 
+class LetterUnavailable(Exception):
+    """No letter can be written now (daily cap), for callers that do not
+    deliver on Telegram."""
+
+
 class LetterService:
     def __init__(
         self,
@@ -141,7 +146,13 @@ class LetterService:
         self._max_per_day = max_per_day
         self._clock = clock
 
-    def handle(self, job_id: str) -> Path | None:
+    def handle(self, job_id: str, deliver: bool = True) -> Path | None:
+        """The letter's PDF, written once then reused.
+
+        With `deliver` (Telegram buttons) it is sent on Telegram and by
+        e-mail and failures are notified there; without it (the web app)
+        nothing is sent and failures raise `LetterUnavailable`.
+        """
         job_id = job_id.strip()
         job = self._store.get_job(job_id)
         if job is None:
@@ -150,20 +161,27 @@ class LetterService:
         stored = self._store.letter(job_id)
         if stored and Path(stored[0]).exists():
             path = Path(stored[0])
-            self._deliver(job, path, stored[1])
+            if deliver:
+                self._deliver(job, path, stored[1])
             return path
         now = self._clock()
         if self._store.letters_since(now - timedelta(days=1)) >= self._max_per_day:
+            if not deliver:
+                raise LetterUnavailable(
+                    f"limite de {self._max_per_day} lettres sur 24 h atteinte"
+                )
             self._cap_notice(now)
             return None
         try:
-            return self._generate(job, now)
+            return self._generate(job, now, deliver)
         except Exception as exc:  # the user must hear back, whatever failed
             log.exception("letter for %s failed", job_id)
+            if not deliver:
+                raise
             self._notify_failure(job, exc)
             return None
 
-    def _generate(self, job: Job, now: datetime) -> Path:
+    def _generate(self, job: Job, now: datetime, deliver: bool = True) -> Path:
         letter, report = self._make_writer(job).write(job)
         convention = convention_for(job.location)
         pdf, dropped, pages = render(letter, job, self._contact, now.date(), convention)
@@ -180,7 +198,8 @@ class LetterService:
             "letter": letter_to_dict(letter),
         }
         self._store.save_letter(job.id, str(path), data, now)
-        self._deliver(job, path, data)
+        if deliver:
+            self._deliver(job, path, data)
         return path
 
     def _notify_failure(self, job: Job, exc: Exception) -> None:

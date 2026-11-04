@@ -25,7 +25,7 @@ def config(tmp_path, with_candidate=True):
 def site(tmp_path, backend=None, with_candidate=True):
     db = str(tmp_path / "p.db")
     Store(db).close()
-    worker = Worker(lambda: Services(letter=lambda j: None, promote=bool))
+    worker = Worker(lambda: Services(letter=lambda j, d: None, promote=bool))
     ctx = Context(
         db, clock=lambda: NOW, config_dir=config(tmp_path, with_candidate),
         worker=worker, profile_backend=(lambda: backend) if backend else None,

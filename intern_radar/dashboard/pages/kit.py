@@ -34,7 +34,7 @@ def _document(label: str, ready: bool, stale: bool, href: str, edit: str) -> str
         else ' <span class="chip ok">prêt</span>'
     )
     return (
-        f'<li>{e(label)}{warning} · <a href="{href}">PDF</a> · '
+        f'<li>{e(label)}{warning} · <a href="{href}" target="_blank">PDF</a> · '
         f'<a href="{edit}">modifier</a></li>'
     )
 

@@ -46,6 +46,11 @@ def format_resume_caption(job: Job, report: dict[str, Any]) -> str:
     return "\n".join(lines)[:1024]
 
 
+class ResumeUnavailable(Exception):
+    """No CV can be written now (daily cap), for callers that do not
+    deliver on Telegram."""
+
+
 class ResumeService:
     def __init__(
         self,
@@ -69,26 +74,38 @@ class ResumeService:
         self._max_per_day = max_per_day
         self._clock = clock
 
-    def handle(self, job_id: str) -> Path | None:
+    def handle(self, job_id: str, deliver: bool = True) -> Path | None:
+        """The tailored CV's PDF, written once then reused.
+
+        With `deliver` it is sent on Telegram and failures are notified
+        there; without it (the web app) nothing is sent and failures raise.
+        """
         job = self._store.get_job(job_id)
         if job is None:
             log.warning("CV request for unknown job %r", job_id[:80])
             return None
         stored = self._store.resume(job_id)
         if stored and Path(stored[0]).exists():
-            self._send(job, Path(stored[0]), stored[1])
+            if deliver:
+                self._send(job, Path(stored[0]), stored[1])
             return Path(stored[0])
         now = self._clock()
         if self._store.resumes_since(now - timedelta(days=1)) >= self._max_per_day:
+            if not deliver:
+                raise ResumeUnavailable(
+                    f"limite de {self._max_per_day} CV sur 24 h atteinte"
+                )
             self._notify(
                 "⚠️ <b>Limite de CV atteinte</b>\n"
                 f"{self._max_per_day} CV sur les dernières 24 h."
             )
             return None
         try:
-            return self._generate(job, now)
+            return self._generate(job, now, deliver)
         except Exception as exc:  # the user must hear back, whatever failed
             log.exception("CV for %s failed", job_id)
+            if not deliver:
+                raise
             reason = str(exc) if isinstance(exc, LLMError) else type(exc).__name__
             self._notify(
                 f"❌ <b>CV non généré · {e(job.company)}</b>\n{e(job.title)}\n"
@@ -96,7 +113,7 @@ class ResumeService:
             )
             return None
 
-    def _generate(self, job: Job, now: datetime) -> Path:
+    def _generate(self, job: Job, now: datetime, deliver: bool = True) -> Path:
         candidate = self._candidate()
         convention = convention_for(job.location)
         scored = self._store.scored_job(job.id)
@@ -121,7 +138,8 @@ class ResumeService:
             "resume": resume_to_dict(resume),
         }
         self._store.save_resume(job.id, str(path), report, now)
-        self._send(job, path, report)
+        if deliver:
+            self._send(job, path, report)
         return path
 
     def _send(self, job: Job, path: Path, report: dict[str, Any]) -> None:

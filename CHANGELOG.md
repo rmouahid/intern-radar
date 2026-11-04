@@ -16,6 +16,13 @@ All notable changes to this project are documented here. The format follows
   date, date found or company; offers without the value go last and the
   sort is kept across pages and saved searches (#131).
 
+### Changed
+
+- **Letters and CVs generated from the web app open in a new tab**: the tab
+  waits for the generation then shows the PDF, and nothing is sent on
+  Telegram nor by e-mail; errors and the daily cap appear in that tab. An
+  existing document opens directly (#141).
+
 ### Fixed
 
 - A Telegram button tapped twice (a retry while the interview chance was

@@ -141,7 +141,7 @@ def post(app, path, **form):
 def test_letter_edit_routes(tmp_path):
     calls = []
     worker = Worker(
-        lambda: Services(letter=lambda j: calls.append(j) or tmp_path, promote=bool)
+        lambda: Services(letter=lambda j, d: calls.append(j) or tmp_path, promote=bool)
     )
     app, ref, path, db = make_site(tmp_path, worker)
     detail = app.handle(Request("GET", f"/offers/{ref}", {})).body.decode()

@@ -1,4 +1,8 @@
-"""Action buttons of an offer page: tracking, documents, Telegram."""
+"""Action buttons of an offer page: tracking, documents, Telegram.
+
+Letters and CVs are generated in a new tab that shows the PDF once ready;
+only the Telegram button sends anything to Telegram.
+"""
 
 from intern_radar.dashboard.layout import e
 from intern_radar.dashboard.worker import FAILED, PENDING, RUNNING, Worker
@@ -24,11 +28,14 @@ NOTICES = {
 }
 
 
-def _post(action: str, label: str, name: str = "", value: str = "", ghost=False):
+def _post(
+    action: str, label: str, name: str = "", value: str = "", ghost=False, tab=False
+):
     field = f'<input type="hidden" name="{name}" value="{e(value)}">' if name else ""
     css = ' class="ghost"' if ghost else ""
+    target = ' target="_blank"' if tab else ""
     return (
-        f'<form class="inline" method="post" action="{e(action)}">{field}'
+        f'<form class="inline" method="post" action="{e(action)}"{target}>{field}'
         f"<button{css}>{e(label)}</button></form>"
     )
 
@@ -53,11 +60,16 @@ def actions_html(
             busy = state is not None and state.state in (PENDING, RUNNING)
             if busy:
                 tasks.append(f"<button disabled>{e(short)} · en cours…</button>")
+            elif kind == "telegram":
+                tasks.append(_post(f"/offers/{ref}/{kind}", label))
+            elif done[kind]:
+                # Letters and CVs open in a new tab, never on Telegram.
+                tasks.append(
+                    f'<a class="button" href="/files/{kind}/{ref}" '
+                    f'target="_blank">{e(short)} · ouvrir</a>'
+                )
             else:
-                text = label
-                if done[kind]:
-                    text = f"{short} · renvoyer"
-                tasks.append(_post(f"/offers/{ref}/{kind}", text))
+                tasks.append(_post(f"/offers/{ref}/{kind}", label, tab=True))
             if state is not None:
                 detail = f" : {state.error}" if state.error else ""
                 lines.append(f"{short} {STATE_TEXT[state.state]}{detail}")

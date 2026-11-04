@@ -548,6 +548,16 @@ and timeout, and systemd never starts a second instance while one is active
 request is accepted only when its `Origin` (or `Referer`) is the dashboard
 itself; otherwise it gets HTTP 403. The data stays read-only.
 
+**Letters and CVs from the web**: on an offer page, *Générer la lettre* and
+*Générer le CV* post to `/offers/<ref>/<letter|cv>` in a new tab. The
+background worker writes the document with `deliver=False` (nothing sent on
+Telegram nor by e-mail; the daily cap and failures raise instead of being
+notified) and the tab lands on `/offers/<ref>/<kind>/open`, which reloads
+every 3 s while the task runs, then redirects to the PDF (`/files/<kind>/<ref>`)
+or shows the error. Once a document exists the button opens it directly.
+Only *Envoyer sur Telegram* and "renvoyer sur Telegram" after an edit still
+deliver on Telegram.
+
 Sections: key figures (offers seen, scored, immediate, digest, applications,
 interviews, offers, LLM cost over 7 days), weekly funnel by cohort (seen →
 pre-filter → scored → sent → applied → interview) with a bar chart, score
@@ -574,7 +584,7 @@ cost and duration of every successful call, tagged `scoring`, `letter`,
 | Run killed (timeout 1 h, reboot) | systemd | each write is committed; at most the current company is refetched | `Persistent=true` catches missed runs |
 | Listener crash | systemd `Restart=always` (10 s) | resumes from persisted offset | automatic |
 | CV download fails | `CvError` / stale cache | stale text used, else failure message | automatic |
-| Duplicate tap | stored letter | PDF re-sent (known: twice on a fast double tap) | none needed |
+| Duplicate tap | same button within 2 min | answered "Déjà demandé", ignored (#140) | none needed |
 
 Delivery guarantees:
 
