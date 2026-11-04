@@ -69,7 +69,7 @@ def make_site(tmp_path, why=None):
     config.mkdir()
     save_candidate(CANDIDATE, config / "candidate.json")
     os.utime(letter, (1, 1))  # older than the candidate profile
-    worker = Worker(lambda: Services(letter=lambda j: None, promote=bool, why=why))
+    worker = Worker(lambda: Services(letter=lambda j, d: None, promote=bool, why=why))
     ctx = Context(db, clock=lambda: NOW, profile=PROFILE, config_dir=config,
                   worker=worker, data_dir=tmp_path)  # fmt: skip
     return build_app(ctx), ref, worker, db

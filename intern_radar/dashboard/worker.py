@@ -22,11 +22,15 @@ KINDS = ("letter", "cv", "telegram", "why")
 
 @dataclass(frozen=True)
 class Services:
-    """What the background tasks call, keyed by job id or offer ref."""
+    """What the background tasks call, keyed by job id or offer ref.
 
-    letter: Callable[[str], Path | None]
+    `letter` and `resume` take the job id and `deliver`: True sends the
+    document on Telegram, False only writes it (opened in the browser).
+    """
+
+    letter: Callable[[str, bool], Path | None]
     promote: Callable[[int], bool]
-    resume: Callable[[str], Path | None] | None = None
+    resume: Callable[[str, bool], Path | None] | None = None
     why: Callable[[str], str | None] | None = None
 
 
@@ -45,8 +49,10 @@ class Worker:
         self._lock = threading.Lock()
         self._states: dict[tuple[str, int], TaskState] = {}
 
-    def submit(self, kind: str, ref: int, job_id: str) -> bool:
-        """Queue a task; False when the same one is already queued or running."""
+    def submit(self, kind: str, ref: int, job_id: str, deliver: bool = True) -> bool:
+        """Queue a task; False when the same one is already queued or running.
+
+        `deliver` only matters to letters and CVs (see `Services`)."""
         if kind not in KINDS:
             raise ValueError(kind)
         key = (kind, ref)
@@ -55,7 +61,7 @@ class Worker:
             if current and current.state in (PENDING, RUNNING):
                 return False
             self._states[key] = TaskState(PENDING)
-        self._pool.submit(self._run, kind, ref, job_id)
+        self._pool.submit(self._run, kind, ref, job_id, deliver)
         return True
 
     def submit_call(self, name: str, call: Callable[[], Any]) -> bool:
@@ -102,26 +108,30 @@ class Worker:
         with self._lock:
             self._states[(kind, ref)] = state
 
-    def _run(self, kind: str, ref: int, job_id: str) -> None:
+    def _run(self, kind: str, ref: int, job_id: str, deliver: bool) -> None:
         self._set(kind, ref, TaskState(RUNNING))
         try:
             if self._services is None:
                 self._services = self._build()
-            ok = self._call(self._services, kind, ref, job_id)
+            ok = self._call(self._services, kind, ref, job_id, deliver)
             error = "" if ok else "échec (détail envoyé sur Telegram)"
+            if not ok and not deliver:
+                error = "échec (offre introuvable)"
         except Exception as exc:
             log.exception("web task %s for %s failed", kind, job_id)
             ok, error = False, str(exc) or type(exc).__name__
         self._set(kind, ref, TaskState(DONE) if ok else TaskState(FAILED, error[:300]))
 
     @staticmethod
-    def _call(services: Services, kind: str, ref: int, job_id: str) -> bool:
+    def _call(
+        services: Services, kind: str, ref: int, job_id: str, deliver: bool
+    ) -> bool:
         if kind == "letter":
-            return services.letter(job_id) is not None
+            return services.letter(job_id, deliver) is not None
         if kind == "cv":
             if services.resume is None:
                 raise RuntimeError("CV adapté non configuré (candidate.json)")
-            return services.resume(job_id) is not None
+            return services.resume(job_id, deliver) is not None
         if kind == "why":
             if services.why is None:
                 raise RuntimeError("profil candidat (candidate.json) introuvable")

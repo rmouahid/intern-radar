@@ -8,7 +8,11 @@ from intern_radar.candidate import parse_candidate
 from intern_radar.config import Contact
 from intern_radar.conventions import CONVENTIONS
 from intern_radar.resume.pdf import file_name, render
-from intern_radar.resume.service import ResumeService, format_resume_caption
+from intern_radar.resume.service import (
+    ResumeService,
+    ResumeUnavailable,
+    format_resume_caption,
+)
 from intern_radar.resume.writer import RESUME_SCHEMA, Resume, ResumeWriter
 from intern_radar.scorer import LLMError
 from intern_radar.store import Store
@@ -239,3 +243,18 @@ def test_caption_fits_telegram():
     report = {"items": 3, "fact_dropped": 0, "fit_removed": 2, "dropped_chars": []}
     caption = format_resume_caption(make_job(company="A" * 900), report)
     assert len(caption) <= 1024 and "pour tenir sur 1 page" in caption
+
+
+def test_service_without_delivery_only_writes_and_raises(tmp_path):
+    backend = FakeBackend(answer())
+    svc, _, documents, notifier = service(tmp_path, backend)
+    path = svc.handle("j1", deliver=False)
+    assert path.exists() and svc.handle("j1", deliver=False) == path
+    assert documents.sent == [] and notifier.sent == []
+    svc, _, _, notifier = service(tmp_path, FakeBackend(LLMError("quota")))
+    with pytest.raises(LLMError):
+        svc.handle("j1", deliver=False)
+    svc, _, _, notifier = service(tmp_path, FakeBackend(answer()), max_per_day=0)
+    with pytest.raises(ResumeUnavailable, match="limite de 0 CV"):
+        svc.handle("j1", deliver=False)
+    assert notifier.sent == []

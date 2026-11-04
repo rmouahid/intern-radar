@@ -27,10 +27,10 @@ def post(app, path, **form):
 
 
 def recording_services(calls, gate=None, letter_ok=True):
-    def letter(job_id):
+    def letter(job_id, deliver):
         if gate is not None:
             gate.wait(5)
-        calls.append(("letter", job_id))
+        calls.append(("letter", job_id, deliver))
         return Path("letter.pdf") if letter_ok else None
 
     def promote(ref):
@@ -87,25 +87,47 @@ def test_actions_require_same_origin(tmp_path):
     assert app.handle(request).status == 403
 
 
-def test_documents_are_generated_in_the_background(tmp_path):
+def test_documents_open_in_a_new_tab_without_telegram(tmp_path):
     path, ref = make_db(tmp_path)
     calls, gate = [], threading.Event()
     worker = Worker(lambda: recording_services(calls, gate))
-    app = build_app(Context(path, clock=lambda: NOW, worker=worker))
-    response = post(app, f"/offers/{ref}/letter")
-    assert response.headers == (("Location", f"/offers/{ref}?done=queued"),)
-    # A second tap while the first runs is not queued twice.
-    again = post(app, f"/offers/{ref}/letter")
-    assert again.headers == (("Location", f"/offers/{ref}?done=already"),)
+    app = build_app(Context(path, clock=lambda: NOW, worker=worker, data_dir=tmp_path))
     page = app.handle(Request("GET", f"/offers/{ref}", {})).body.decode()
-    assert 'http-equiv="refresh"' in page and "en cours" in page
+    assert f'action="/offers/{ref}/letter" target="_blank"' in page
+    response = post(app, f"/offers/{ref}/letter")
+    assert response.headers == (("Location", f"/offers/{ref}/letter/open"),)
+    # A second tap while the first runs is not queued twice.
+    post(app, f"/offers/{ref}/letter")
+    waiting = app.handle(Request("GET", f"/offers/{ref}/letter/open", {}))
+    body = waiting.body.decode()
+    assert 'http-equiv="refresh"' in body and "en préparation" in body
     gate.set()
     worker.wait()
-    assert calls == [("letter", "j1")]
+    assert calls == [("letter", "j1", False)]  # generated, not delivered
     assert worker.state("letter", ref).state == DONE
+    pdf = tmp_path / "letter.pdf"
+    pdf.write_bytes(b"%PDF-1.4")
+    store = Store(path)
+    store.save_letter("j1", str(pdf), {}, NOW)
+    store.close()
+    opened = app.handle(Request("GET", f"/offers/{ref}/letter/open", {}))
+    assert opened.headers == (("Location", f"/files/letter/{ref}"),)
+    page = app.handle(Request("GET", f"/offers/{ref}", {})).body.decode()
+    assert f'href="/files/letter/{ref}" target="_blank">✍️ Lettre · ouvrir' in page
     post(app, f"/offers/{ref}/telegram")
     worker.wait()
     assert calls[-1] == ("telegram", ref)
+
+
+def test_failed_documents_are_explained_in_their_tab(tmp_path):
+    path, ref = make_db(tmp_path)
+    worker = Worker(lambda: recording_services([], letter_ok=False))
+    app = build_app(Context(path, clock=lambda: NOW, worker=worker))
+    post(app, f"/offers/{ref}/cv")  # no candidate profile: resume is None
+    worker.wait()
+    page = app.handle(Request("GET", f"/offers/{ref}/cv/open", {}))
+    assert page.status == 500 and "non configuré" in page.body.decode()
+    assert app.handle(Request("GET", f"/offers/{ref}/why/open", {})).status == 404
 
 
 def test_failed_tasks_are_reported(tmp_path):

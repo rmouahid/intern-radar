@@ -62,7 +62,7 @@ from intern_radar.dashboard.pages.profile import (
 from intern_radar.dashboard.pages.searches import searches_body
 from intern_radar.dashboard.render import stats_body
 from intern_radar.dashboard.runner import RunStatus
-from intern_radar.dashboard.worker import KINDS, PENDING, RUNNING, Worker
+from intern_radar.dashboard.worker import FAILED, KINDS, PENDING, RUNNING, Worker
 from intern_radar.editing import DocumentEditor, EditError
 from intern_radar.form_answers import FormAnswerer, parse_fields
 from intern_radar.models import ScoredJob
@@ -87,6 +87,8 @@ NOTICES: dict[str, str] = {
     "edited_sent": "Document modifié : le PDF régénéré part sur Telegram.",
 }
 VOTES = {"up": 1, "down": -1}
+# Documents the web generates and opens in a new tab, never on Telegram.
+DOCUMENTS = {"letter": "Lettre de motivation", "cv": "CV adapté"}
 RUN_NOTICES = {
     "started": "Run lancé : les résultats apparaîtront à la fin (environ une minute).",
     "busy": "Un run est déjà en cours.",
@@ -930,8 +932,48 @@ def build_app(ctx: Context) -> App:
             job = store.job_by_ref(ref)
         if job is None:
             return not_found("Offre introuvable.")
+        if kind in DOCUMENTS:
+            # Opened in a new tab: generate without Telegram, then show it.
+            ctx.worker.submit(kind, ref, job.id, deliver=False)
+            return redirect(f"/offers/{ref}/{kind}/open")
         queued = ctx.worker.submit(kind, ref, job.id)
         return redirect(f"/offers/{ref}?done={'queued' if queued else 'already'}")
+
+    @app.route("GET", "/offers/<int:ref>/<str:kind>/open")
+    def open_document(request: Request, ref: int, kind: str):
+        """Waits for a letter or CV started from the web, then shows it."""
+        if kind not in DOCUMENTS:
+            return not_found("Document inconnu.")
+        label = DOCUMENTS[kind]
+        state = ctx.worker.state(kind, ref) if ctx.worker else None
+        if state is not None and state.state in (PENDING, RUNNING):
+            body = (
+                f"<h1>{e(label)} en préparation…</h1>"
+                "<p>Compte une à deux minutes. Le PDF s'ouvre dans cet onglet "
+                "dès qu'il est prêt.</p>"
+                f'<p><a href="/offers/{ref}">← Retour à l\'offre</a></p>'
+            )
+            return html_response(page(label, body, "offers", refresh=3))
+        with ctx.store() as store:
+            job = store.job_by_ref(ref)
+            saved = (
+                (store.letter if kind == "letter" else store.resume)(job.id)
+                if job
+                else None
+            )
+        if saved is not None and Path(saved[0]).is_file():
+            return redirect(f"/files/{kind}/{ref}")
+        reason = state.error if state is not None and state.state == FAILED else ""
+        body = (
+            f"<h1>{e(label)} indisponible</h1>"
+            + (
+                f"<p>{e(reason)}</p>"
+                if reason
+                else "<p>Aucun document pour cette offre.</p>"
+            )
+            + f'<p><a href="/offers/{ref}">← Retour à l\'offre</a></p>'
+        )
+        return html_response(page(label, body, "offers"), 404 if not reason else 500)
 
     @app.route("GET", "/files/<str:kind>/<int:ref>")
     def files(request: Request, ref: int, kind: str):

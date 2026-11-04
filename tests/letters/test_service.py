@@ -1,9 +1,15 @@
 from datetime import UTC, datetime
 
+import pytest
+
 from intern_radar.config import Contact
 from intern_radar.letters.cv import CvError
 from intern_radar.letters.delivery import DeliveryError
-from intern_radar.letters.service import LetterService, format_letter_caption
+from intern_radar.letters.service import (
+    LetterService,
+    LetterUnavailable,
+    format_letter_caption,
+)
 from intern_radar.letters.writer import Letter, LetterReport
 from intern_radar.store import Store
 from tests.factories import make_job
@@ -88,6 +94,24 @@ def test_second_request_redelivers_without_llm(tmp_path):
     second = service.handle("j1")
     assert first == second and FakeWriter.calls == 1
     assert len(documents.sent) == 2
+
+
+def test_without_delivery_nothing_is_sent_and_failures_raise(tmp_path):
+    mail = Recorder()
+    service, store, documents, notifier = build(tmp_path, mail=mail)
+    path = service.handle("j1", deliver=False)
+    assert service.handle("j1", deliver=False) == path and FakeWriter.calls == 1
+    assert store.letter("j1")[0] == str(path)
+    assert documents.sent == [] and mail.sent == [] and notifier.sent == []
+    service, _, _, notifier = build(
+        tmp_path, writer=FakeWriter(CvError("CV unavailable"))
+    )
+    with pytest.raises(CvError):
+        service.handle("j1", deliver=False)
+    service, _, _, notifier = build(tmp_path, max_per_day=0)
+    with pytest.raises(LetterUnavailable, match="limite de 0 lettres"):
+        service.handle("j1", deliver=False)
+    assert notifier.sent == []
 
 
 def test_unknown_job_is_ignored(tmp_path):
