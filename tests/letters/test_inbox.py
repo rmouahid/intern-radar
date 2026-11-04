@@ -72,16 +72,47 @@ def test_tap_answers_then_writes_the_letter():
     assert service.handled == ["job-1"]
 
 
-def test_promotion_taps_are_routed_to_the_promoter():
-    store = Store(":memory:")
-    telegram, service = FakeTelegram(), FakeService()
-    promoter = FakePromoter(known={5})
+def test_promotion_taps_are_answered_then_routed_to_the_promoter():
+    store, telegram, service, _ = setup()
+    ref = store.job_ref("job-1")
+    promoter = FakePromoter(known={ref})
+
+    seen = []
+
+    class Recorder(FakeTelegram):
+        def answer_callback(self, callback_id, text):
+            super().answer_callback(callback_id, text)
+            seen.append(list(promoter.refs))
+
+    telegram = Recorder()
     requests = ButtonRequests(telegram, store, service, CHAT, promoter)
-    requests(callback("P:5", cid="a"))
-    requests(callback("P:6", cid="b"))
-    assert promoter.refs == [5, 6]
-    assert telegram.answers == [("a", "🔔 Offre envoyée"), ("b", "Offre introuvable")]
+    requests(callback(f"P:{ref}", cid="a"))
+    assert seen == [[]]  # answered before the slow work
+    requests(callback("P:999", cid="b"))
+    assert promoter.refs == [ref]
+    assert telegram.answers == [
+        ("a", "🔔 Envoi de l'offre…"),
+        ("b", "Offre introuvable"),
+    ]
     assert service.handled == []
+
+
+def test_repeated_taps_are_ignored_within_the_window():
+    store, telegram, service, _ = setup()
+    ref = store.job_ref("job-1")
+    promoter, now = FakePromoter(known={ref}), [0.0]
+    requests = ButtonRequests(
+        telegram, store, service, CHAT, promoter, clock=lambda: now[0]
+    )
+    requests(callback(f"P:{ref}", cid="a"))
+    now[0] = 30.0
+    requests(callback(f"P:{ref}", cid="b"))
+    requests(callback(f"L:{ref}", cid="c"))  # another button is not a repeat
+    now[0] = 200.0
+    requests(callback(f"P:{ref}", cid="d"))
+    assert promoter.refs == [ref, ref]
+    assert service.handled == ["job-1"]
+    assert telegram.answers[1] == ("b", "Déjà demandé, patiente un instant")
 
 
 def test_cv_taps_are_routed_to_the_resume_service():

@@ -14,6 +14,8 @@ log = logging.getLogger(__name__)
 LAST_UPDATE_KEY = "last_update_id"
 FIRST_DELAY = 5
 MAX_DELAY = 300
+# A tap repeated within this window is a retry of a slow one: ignore it.
+REPEAT_WINDOW = 120
 
 
 class TelegramUpdates:
@@ -31,7 +33,9 @@ class ButtonRequests:
 
     `L:<ref>` writes a cover letter; `P:<ref>` promotes a digest offer to a
     full notification and `C:<ref>` writes a tailored CV (each only when its
-    handler is given).
+    handler is given). Each tap is answered before the slow work, and the
+    same one repeated within `REPEAT_WINDOW` seconds is ignored, so a retry
+    of a slow tap does not send the offer or document twice.
     """
 
     def __init__(
@@ -43,6 +47,7 @@ class ButtonRequests:
         promoter: Any | None = None,
         resumes: Any | None = None,
         tracker: Any | None = None,
+        clock: Callable[[], float] = time.monotonic,
     ) -> None:
         self._telegram = telegram
         self._store = store
@@ -51,6 +56,8 @@ class ButtonRequests:
         self._promoter = promoter
         self._resumes = resumes
         self._tracker = tracker
+        self._clock = clock
+        self._recent: dict[str, float] = {}
 
     def __call__(self, callback: dict) -> None:
         chat = ((callback.get("message") or {}).get("chat") or {}).get("id")
@@ -71,23 +78,33 @@ class ButtonRequests:
         if action[0] in TRACKING_CODES and self._tracker is not None:
             self._answer(callback, self._tracker.handle(action[0], int(ref), callback))
             return
-        if action == "P:":
-            found = self._promoter.promote(int(ref))
-            self._answer(callback, "🔔 Offre envoyée" if found else "Offre introuvable")
-            return
         job = self._store.job_by_ref(int(ref))
-        if action == "C:":
-            if job is None:
-                self._answer(callback, "Offre introuvable")
-                return
-            self._answer(callback, "⏳ CV en préparation…")
-            self._resumes.handle(job.id)
-            return
         if job is None:
             self._answer(callback, "Offre introuvable")
             return
+        if self._repeated(data):
+            self._answer(callback, "Déjà demandé, patiente un instant")
+            return
+        if action == "P:":
+            self._answer(callback, "🔔 Envoi de l'offre…")
+            self._promoter.promote(int(ref))
+            return
+        if action == "C:":
+            self._answer(callback, "⏳ CV en préparation…")
+            self._resumes.handle(job.id)
+            return
         self._answer(callback, "⏳ Lettre en préparation…")
         self._service.handle(job.id)
+
+    def _repeated(self, data: str) -> bool:
+        now = self._clock()
+        self._recent = {
+            k: at for k, at in self._recent.items() if now - at < REPEAT_WINDOW
+        }
+        if data in self._recent:
+            return True
+        self._recent[data] = now
+        return False
 
     def _answer(self, callback: dict, text: str) -> None:
         try:

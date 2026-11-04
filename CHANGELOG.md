@@ -16,6 +16,12 @@ All notable changes to this project are documented here. The format follows
   date, date found or company; offers without the value go last and the
   sort is kept across pages and saved searches (#131).
 
+### Fixed
+
+- A Telegram button tapped twice (a retry while the interview chance was
+  being estimated) no longer sends the offer, letter or CV twice: taps are
+  answered at once and the same tap within 2 minutes is ignored (#140).
+
 ## [0.6.0] — 2026-11-03
 
 ### Added
