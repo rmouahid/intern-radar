@@ -104,7 +104,7 @@ The full per-day table, run time per step and LLM usage per purpose are in
 - The LLM triage is a filter, not a verdict: scoring the same offers twice
   does not always give the same categorical answers, and many postings do
   not state their dates. Its precision and recall have not been measured
-  against hand labels yet.
+  against hand labels.
 - Single user, single Telegram chat; letters are generated one at a time.
 - The triage uses the `claude` CLI and its subscription quota, shared with
   interactive use.
