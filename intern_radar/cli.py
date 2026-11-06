@@ -32,6 +32,17 @@ from intern_radar.dashboard.runner import run_status, start_run
 from intern_radar.dashboard.server import make_server, tailscale_ip
 from intern_radar.dashboard.worker import Services, Worker
 from intern_radar.description import clean_description
+from intern_radar.evaluation import (
+    Run,
+    load_offers,
+    load_run,
+    render_report,
+    run_prompt,
+    sample_offers,
+    save_offers,
+    save_run,
+    usage_recorder,
+)
 from intern_radar.feedback import feedback_summary
 from intern_radar.http import make_client
 from intern_radar.letters.cv import CvSource
@@ -47,7 +58,7 @@ from intern_radar.notifier import ConsoleNotifier, NotifyError, TelegramNotifier
 from intern_radar.pipeline import Pipeline, utcnow
 from intern_radar.promotion import Promoter
 from intern_radar.resume.service import ResumeService
-from intern_radar.scorer import ClaudeCliBackend, LLMError, Scorer
+from intern_radar.scorer import PROMPTS, ClaudeCliBackend, LLMError, Scorer
 from intern_radar.searches import SearchAlerts
 from intern_radar.sources import SOURCE_NAMES, build_sources
 from intern_radar.store import Store
@@ -317,6 +328,7 @@ def dashboard(
         profile=profile,
         worker=Worker(lambda: _web_services(config_dir, db)),
         companies=tuple((c.name, c.tier, c.source) for c in watched),
+        eval_path=config_dir.parent / "eval" / "triage" / "offers.jsonl",
         profile_backend=lambda: ClaudeCliBackend(
             model=profile.profile_model, timeout=900
         ),
@@ -574,3 +586,89 @@ def listen(config_dir: Path = CONFIG_DIR, db: Path = DB_PATH) -> None:
     finally:
         store.close()
         client.close()
+
+
+eval_app = typer.Typer(
+    help="Precision and recall of the LLM triage against hand labels.",
+    no_args_is_help=True,
+)
+app.add_typer(eval_app, name="eval")
+
+EVAL_OFFERS = typer.Option(
+    Path("eval/triage/offers.jsonl"), "--offers", help="Sampled offers and labels."
+)
+EVAL_RUNS = typer.Option(Path("eval/triage/runs"), "--runs", help="Runs directory.")
+EVAL_REPORT = typer.Option(Path("docs/eval.md"), "--out", help="Report to write.")
+
+
+@eval_app.command("sample")
+def eval_sample(
+    config_dir: Path = CONFIG_DIR,
+    db: Path = DB_PATH,
+    offers: Path = EVAL_OFFERS,
+    n: int = typer.Option(100, "--n", min=1, help="Offers to draw."),
+    seed: int = typer.Option(0, "--seed"),
+    force: bool = typer.Option(False, "--force", help="Replace existing labels."),
+) -> None:
+    """Draw triaged offers from the database, to be labelled in the web app."""
+    if offers.exists() and not force:
+        typer.echo(f"{offers} exists (labels inside); --force to replace it.", err=True)
+        raise typer.Exit(1)
+    profile, _ = _load(config_dir)
+    thresholds = profile.thresholds
+    drawn = sample_offers(str(db), n, thresholds.digest, thresholds.immediate, seed)
+    save_offers(offers, drawn)
+    typer.echo(f"{len(drawn)} offers written to {offers}; label them at /eval.")
+
+
+@eval_app.command("run")
+def eval_run(
+    config_dir: Path = CONFIG_DIR,
+    offers: Path = EVAL_OFFERS,
+    runs: Path = EVAL_RUNS,
+    prompt: str = typer.Option("v1", "--prompt", help="Prompt variant: v1 or v2."),
+    model: str | None = typer.Option(None, "--model", help="Default: llm_model."),
+) -> None:
+    """Triage the labelled offers with one prompt variant and save predictions."""
+    if prompt not in PROMPTS:
+        typer.echo(f"Unknown prompt {prompt!r}: {', '.join(PROMPTS)}", err=True)
+        raise typer.Exit(2)
+    profile, _ = _load(config_dir)
+    labelled = [o for o in load_offers(offers) if o.label is not None]
+    if not labelled:
+        typer.echo("No labelled offer yet: label them at /eval first.", err=True)
+        raise typer.Exit(1)
+    model = model or profile.llm_model
+    usage, on_usage = usage_recorder()
+    scorer = Scorer(
+        ClaudeCliBackend(model=model, effort=profile.llm_effort, on_usage=on_usage),
+        profile.candidate_summary,
+        profile.window_start,
+        profile.window_end,
+        profile.min_months,
+        instructions=PROMPTS[prompt],
+    )
+    predictions = run_prompt(labelled, scorer, profile)
+    path = runs / f"{prompt}-{model}.json"
+    save_run(path, Run(prompt, model, predictions, usage))
+    typer.echo(
+        f"{len(predictions)} offers triaged, {int(usage['calls'])} calls: {path}"
+    )
+
+
+@eval_app.command("report")
+def eval_report(
+    offers: Path = EVAL_OFFERS,
+    runs: Path = EVAL_RUNS,
+    out: Path = EVAL_REPORT,
+) -> None:
+    """Compare the saved runs in a Markdown report."""
+    saved = [load_run(path) for path in sorted(runs.glob("*.json"))]
+    command = "\n".join(
+        [f"poetry run intern-radar eval run --prompt {r.prompt} --model {r.model}"
+         for r in saved]
+        + ["poetry run intern-radar eval report"]
+    )  # fmt: skip
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(render_report(load_offers(offers), saved, command), encoding="utf-8")
+    typer.echo(f"Report written: {out}")
