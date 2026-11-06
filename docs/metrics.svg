@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 300" width="820" height="300" font-family="Helvetica, Arial, sans-serif" font-size="11" role="img" aria-labelledby="t">
+<title id="t">New internship postings per day, 2026-10-07 to 2026-11-05</title>
+<rect width="820" height="300" fill="#ffffff"/>
+<text x="48" y="22" font-size="14" font-weight="bold" fill="#1f2328">New internship postings per day, 2026-10-07 to 2026-11-05</text>
+<line x1="48" x2="804" y1="256.0" y2="256.0" stroke="#d0d7de" stroke-width="1"/>
+<text x="42" y="260.0" text-anchor="end" fill="#57606a">0</text>
+<line x1="48" x2="804" y1="212.8" y2="212.8" stroke="#d0d7de" stroke-width="1"/>
+<text x="42" y="216.8" text-anchor="end" fill="#57606a">50</text>
+<line x1="48" x2="804" y1="169.6" y2="169.6" stroke="#d0d7de" stroke-width="1"/>
+<text x="42" y="173.6" text-anchor="end" fill="#57606a">100</text>
+<line x1="48" x2="804" y1="126.4" y2="126.4" stroke="#d0d7de" stroke-width="1"/>
+<text x="42" y="130.4" text-anchor="end" fill="#57606a">150</text>
+<line x1="48" x2="804" y1="83.2" y2="83.2" stroke="#d0d7de" stroke-width="1"/>
+<text x="42" y="87.2" text-anchor="end" fill="#57606a">200</text>
+<line x1="48" x2="804" y1="40.0" y2="40.0" stroke="#d0d7de" stroke-width="1"/>
+<text x="42" y="44.0" text-anchor="end" fill="#57606a">250</text>
+<rect x="51.8" y="228.4" width="17.6" height="27.6" fill="#0969da"><title>2026-10-07: 32 sent to the LLM</title></rect>
+<rect x="51.8" y="157.5" width="17.6" height="70.8" fill="#afb8c1"><title>2026-10-07: 82 removed by the rules</title></rect>
+<text x="60.6" y="272" text-anchor="middle" fill="#57606a">07 Oct</text>
+<rect x="77.0" y="211.9" width="17.6" height="44.1" fill="#0969da"><title>2026-10-08: 51 sent to the LLM</title></rect>
+<rect x="77.0" y="103.1" width="17.6" height="108.9" fill="#afb8c1"><title>2026-10-08: 126 removed by the rules</title></rect>
+<circle cx="85.8" cy="96.1" r="4" fill="#cf222e"><title>2026-10-08: 2 notified</title></circle>
+<rect x="102.2" y="208.5" width="17.6" height="47.5" fill="#0969da"><title>2026-10-09: 55 sent to the LLM</title></rect>
+<rect x="102.2" y="115.2" width="17.6" height="93.3" fill="#afb8c1"><title>2026-10-09: 108 removed by the rules</title></rect>
+<circle cx="111.0" cy="108.2" r="4" fill="#cf222e"><title>2026-10-09: 2 notified</title></circle>
+<rect x="127.4" y="220.6" width="17.6" height="35.4" fill="#0969da"><title>2026-10-10: 41 sent to the LLM</title></rect>
+<rect x="127.4" y="141.1" width="17.6" height="79.5" fill="#afb8c1"><title>2026-10-10: 92 removed by the rules</title></rect>
+<rect x="152.6" y="229.2" width="17.6" height="26.8" fill="#0969da"><title>2026-10-11: 31 sent to the LLM</title></rect>
+<rect x="152.6" y="187.7" width="17.6" height="41.5" fill="#afb8c1"><title>2026-10-11: 48 removed by the rules</title></rect>
+<circle cx="161.4" cy="180.7" r="4" fill="#cf222e"><title>2026-10-11: 6 notified</title></circle>
+<rect x="177.8" y="200.7" width="17.6" height="55.3" fill="#0969da"><title>2026-10-12: 64 sent to the LLM</title></rect>
+<rect x="177.8" y="167.0" width="17.6" height="33.7" fill="#afb8c1"><title>2026-10-12: 39 removed by the rules</title></rect>
+<circle cx="186.6" cy="160.0" r="4" fill="#cf222e"><title>2026-10-12: 2 notified</title></circle>
+<rect x="203.0" y="199.8" width="17.6" height="56.2" fill="#0969da"><title>2026-10-13: 65 sent to the LLM</title></rect>
+<rect x="203.0" y="116.9" width="17.6" height="82.9" fill="#afb8c1"><title>2026-10-13: 96 removed by the rules</title></rect>
+<circle cx="211.8" cy="109.9" r="4" fill="#cf222e"><title>2026-10-13: 3 notified</title></circle>
+<rect x="228.2" y="208.5" width="17.6" height="47.5" fill="#0969da"><title>2026-10-14: 55 sent to the LLM</title></rect>
+<rect x="228.2" y="114.3" width="17.6" height="94.2" fill="#afb8c1"><title>2026-10-14: 109 removed by the rules</title></rect>
+<circle cx="237.0" cy="107.3" r="4" fill="#cf222e"><title>2026-10-14: 2 notified</title></circle>
+<text x="237.0" y="272" text-anchor="middle" fill="#57606a">14 Oct</text>
+<rect x="253.4" y="220.6" width="17.6" height="35.4" fill="#0969da"><title>2026-10-15: 41 sent to the LLM</title></rect>
+<rect x="253.4" y="152.3" width="17.6" height="68.3" fill="#afb8c1"><title>2026-10-15: 79 removed by the rules</title></rect>
+<circle cx="262.2" cy="145.3" r="4" fill="#cf222e"><title>2026-10-15: 2 notified</title></circle>
+<rect x="278.6" y="224.0" width="17.6" height="32.0" fill="#0969da"><title>2026-10-16: 37 sent to the LLM</title></rect>
+<rect x="278.6" y="139.4" width="17.6" height="84.7" fill="#afb8c1"><title>2026-10-16: 98 removed by the rules</title></rect>
+<circle cx="287.4" cy="132.4" r="4" fill="#cf222e"><title>2026-10-16: 5 notified</title></circle>
+<rect x="303.8" y="241.3" width="17.6" height="14.7" fill="#0969da"><title>2026-10-17: 17 sent to the LLM</title></rect>
+<rect x="303.8" y="188.6" width="17.6" height="52.7" fill="#afb8c1"><title>2026-10-17: 61 removed by the rules</title></rect>
+<circle cx="312.6" cy="181.6" r="4" fill="#cf222e"><title>2026-10-17: 1 notified</title></circle>
+<rect x="329.0" y="249.1" width="17.6" height="6.9" fill="#0969da"><title>2026-10-18: 8 sent to the LLM</title></rect>
+<rect x="329.0" y="216.3" width="17.6" height="32.8" fill="#afb8c1"><title>2026-10-18: 38 removed by the rules</title></rect>
+<rect x="354.2" y="216.3" width="17.6" height="39.7" fill="#0969da"><title>2026-10-19: 46 sent to the LLM</title></rect>
+<rect x="354.2" y="175.6" width="17.6" height="40.6" fill="#afb8c1"><title>2026-10-19: 47 removed by the rules</title></rect>
+<circle cx="363.0" cy="168.6" r="4" fill="#cf222e"><title>2026-10-19: 2 notified</title></circle>
+<rect x="379.4" y="214.5" width="17.6" height="41.5" fill="#0969da"><title>2026-10-20: 48 sent to the LLM</title></rect>
+<rect x="379.4" y="183.4" width="17.6" height="31.1" fill="#afb8c1"><title>2026-10-20: 36 removed by the rules</title></rect>
+<circle cx="388.2" cy="176.4" r="4" fill="#cf222e"><title>2026-10-20: 3 notified</title></circle>
+<rect x="404.6" y="218.8" width="17.6" height="37.2" fill="#0969da"><title>2026-10-21: 43 sent to the LLM</title></rect>
+<rect x="404.6" y="189.5" width="17.6" height="29.4" fill="#afb8c1"><title>2026-10-21: 34 removed by the rules</title></rect>
+<circle cx="413.4" cy="182.5" r="4" fill="#cf222e"><title>2026-10-21: 1 notified</title></circle>
+<text x="413.4" y="272" text-anchor="middle" fill="#57606a">21 Oct</text>
+<rect x="429.8" y="225.8" width="17.6" height="30.2" fill="#0969da"><title>2026-10-22: 35 sent to the LLM</title></rect>
+<rect x="429.8" y="176.5" width="17.6" height="49.2" fill="#afb8c1"><title>2026-10-22: 57 removed by the rules</title></rect>
+<rect x="455.0" y="206.8" width="17.6" height="49.2" fill="#0969da"><title>2026-10-23: 57 sent to the LLM</title></rect>
+<rect x="455.0" y="144.5" width="17.6" height="62.2" fill="#afb8c1"><title>2026-10-23: 72 removed by the rules</title></rect>
+<circle cx="463.8" cy="137.5" r="4" fill="#cf222e"><title>2026-10-23: 3 notified</title></circle>
+<rect x="480.2" y="239.6" width="17.6" height="16.4" fill="#0969da"><title>2026-10-24: 19 sent to the LLM</title></rect>
+<rect x="480.2" y="196.4" width="17.6" height="43.2" fill="#afb8c1"><title>2026-10-24: 50 removed by the rules</title></rect>
+<rect x="505.4" y="235.3" width="17.6" height="20.7" fill="#0969da"><title>2026-10-25: 24 sent to the LLM</title></rect>
+<rect x="505.4" y="202.4" width="17.6" height="32.8" fill="#afb8c1"><title>2026-10-25: 38 removed by the rules</title></rect>
+<rect x="530.6" y="225.8" width="17.6" height="30.2" fill="#0969da"><title>2026-10-26: 35 sent to the LLM</title></rect>
+<rect x="530.6" y="193.8" width="17.6" height="32.0" fill="#afb8c1"><title>2026-10-26: 37 removed by the rules</title></rect>
+<rect x="555.8" y="226.6" width="17.6" height="29.4" fill="#0969da"><title>2026-10-27: 34 sent to the LLM</title></rect>
+<rect x="555.8" y="182.6" width="17.6" height="44.1" fill="#afb8c1"><title>2026-10-27: 51 removed by the rules</title></rect>
+<rect x="581.0" y="220.6" width="17.6" height="35.4" fill="#0969da"><title>2026-10-28: 41 sent to the LLM</title></rect>
+<rect x="581.0" y="167.0" width="17.6" height="53.6" fill="#afb8c1"><title>2026-10-28: 62 removed by the rules</title></rect>
+<text x="589.8" y="272" text-anchor="middle" fill="#57606a">28 Oct</text>
+<rect x="606.2" y="224.9" width="17.6" height="31.1" fill="#0969da"><title>2026-10-29: 36 sent to the LLM</title></rect>
+<rect x="606.2" y="170.5" width="17.6" height="54.4" fill="#afb8c1"><title>2026-10-29: 63 removed by the rules</title></rect>
+<rect x="631.4" y="208.5" width="17.6" height="47.5" fill="#0969da"><title>2026-10-30: 55 sent to the LLM</title></rect>
+<rect x="631.4" y="167.0" width="17.6" height="41.5" fill="#afb8c1"><title>2026-10-30: 48 removed by the rules</title></rect>
+<circle cx="640.2" cy="160.0" r="4" fill="#cf222e"><title>2026-10-30: 2 notified</title></circle>
+<rect x="656.6" y="246.5" width="17.6" height="9.5" fill="#0969da"><title>2026-10-31: 11 sent to the LLM</title></rect>
+<rect x="656.6" y="191.2" width="17.6" height="55.3" fill="#afb8c1"><title>2026-10-31: 64 removed by the rules</title></rect>
+<rect x="681.8" y="229.2" width="17.6" height="26.8" fill="#0969da"><title>2026-11-01: 31 sent to the LLM</title></rect>
+<rect x="681.8" y="159.2" width="17.6" height="70.0" fill="#afb8c1"><title>2026-11-01: 81 removed by the rules</title></rect>
+<rect x="707.0" y="237.9" width="17.6" height="18.1" fill="#0969da"><title>2026-11-02: 21 sent to the LLM</title></rect>
+<rect x="707.0" y="208.5" width="17.6" height="29.4" fill="#afb8c1"><title>2026-11-02: 34 removed by the rules</title></rect>
+<circle cx="715.8" cy="201.5" r="4" fill="#cf222e"><title>2026-11-02: 2 notified</title></circle>
+<rect x="732.2" y="182.6" width="17.6" height="73.4" fill="#0969da"><title>2026-11-03: 85 sent to the LLM</title></rect>
+<rect x="732.2" y="50.4" width="17.6" height="132.2" fill="#afb8c1"><title>2026-11-03: 153 removed by the rules</title></rect>
+<circle cx="741.0" cy="43.4" r="4" fill="#cf222e"><title>2026-11-03: 2 notified</title></circle>
+<rect x="757.4" y="226.6" width="17.6" height="29.4" fill="#0969da"><title>2026-11-04: 34 sent to the LLM</title></rect>
+<rect x="757.4" y="155.8" width="17.6" height="70.8" fill="#afb8c1"><title>2026-11-04: 82 removed by the rules</title></rect>
+<text x="766.2" y="272" text-anchor="middle" fill="#57606a">04 Nov</text>
+<rect x="782.6" y="201.6" width="17.6" height="54.4" fill="#0969da"><title>2026-11-05: 63 sent to the LLM</title></rect>
+<rect x="782.6" y="146.3" width="17.6" height="55.3" fill="#afb8c1"><title>2026-11-05: 64 removed by the rules</title></rect>
+<circle cx="791.4" cy="139.3" r="4" fill="#cf222e"><title>2026-11-05: 4 notified</title></circle>
+<rect x="48" y="279" width="12" height="10" fill="#afb8c1"/>
+<text x="65" y="288" fill="#1f2328">removed by the rules</text>
+<rect x="218" y="279" width="12" height="10" fill="#0969da"/>
+<text x="235" y="288" fill="#1f2328">sent to the LLM</text>
+<circle cx="359" cy="284" r="4" fill="#cf222e"/>
+<text x="370" y="288" fill="#1f2328">at least one offer notified</text>
+</svg>

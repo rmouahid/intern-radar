@@ -42,6 +42,7 @@ from intern_radar.letters.writer import LetterWriter
 from intern_radar.metrics import PARIS
 from intern_radar.metrics import collect as collect_metrics
 from intern_radar.metrics import render_markdown as render_metrics
+from intern_radar.metrics import render_svg as render_metrics_chart
 from intern_radar.models import Company, Job
 from intern_radar.notifier import ConsoleNotifier, NotifyError, TelegramNotifier
 from intern_radar.pipeline import Pipeline, utcnow
@@ -68,6 +69,7 @@ CONFIG_DIR = typer.Option(Path("config"), "--config-dir", help="Configuration di
 DB_PATH = typer.Option(Path("data/intern-radar.db"), "--db", help="SQLite file.")
 BACKUP_DIR = typer.Option(Path("data/backups"), "--dest", help="Backups directory.")
 METRICS_OUT = typer.Option(None, "--out", help="Markdown file to write.")
+METRICS_CHART = typer.Option(None, "--chart", help="SVG bar chart to write.")
 DRY_RUN = typer.Option(False, "--dry-run", help="Print instead of notifying.")
 
 
@@ -357,12 +359,18 @@ def metrics(
     start: str | None = typer.Option(None, help="First day (default: 30 days ago)."),
     end: str | None = typer.Option(None, help="Last day (default: yesterday)."),
     out: Path | None = METRICS_OUT,
+    chart: Path | None = METRICS_CHART,
 ) -> None:
     """Operating metrics per day: postings, rules, LLM tokens, latency."""
     today = datetime.now(PARIS).date()
     last = date.fromisoformat(end) if end else today - timedelta(days=1)
     first = date.fromisoformat(start) if start else last - timedelta(days=29)
-    text = render_metrics(collect_metrics(str(db), first, last))
+    report = collect_metrics(str(db), first, last)
+    if chart is not None:
+        chart.parent.mkdir(parents=True, exist_ok=True)
+        chart.write_text(render_metrics_chart(report), encoding="utf-8")
+        typer.echo(f"Chart written: {chart}")
+    text = render_metrics(report)
     if out is None:
         typer.echo(text, nl=False)
         return
