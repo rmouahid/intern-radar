@@ -1,0 +1,16 @@
+.git
+.venv
+.llm-auth
+.env
+**/__pycache__
+.pytest_cache
+.ruff_cache
+data
+logs
+docs
+tests
+config/profile.yaml
+config/career.md
+config/career
+config/candidate.json*
+config/writing-guide.md

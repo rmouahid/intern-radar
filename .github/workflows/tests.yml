@@ -33,3 +33,19 @@ jobs:
 
       - name: Run tests
         run: poetry run pytest -q
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate the Compose file
+        run: docker compose config -q
+
+      - name: Build the image
+        run: docker build -t intern-radar .
+
+      - name: Smoke-test the image
+        run: >
+          docker run --rm intern-radar sh -c
+          "intern-radar --help > /dev/null && supercronic -test /app/deploy/crontab"

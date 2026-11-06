@@ -1,0 +1,35 @@
+# docker compose up -d   → scheduled runs + Telegram listener + web app.
+#
+# Before the first start: cp config/profile.example.yaml config/profile.yaml
+# and fill it in (docs/configuration.md). The LLM CLI reads its login from
+# ./.llm-auth, or an API key from LLM_API_KEY in .env (see README).
+x-app: &app
+  build: .
+  image: intern-radar
+  restart: unless-stopped
+  env_file:
+    - path: .env
+      required: false
+  environment:
+    ANTHROPIC_API_KEY: ${LLM_API_KEY:-}
+  volumes:
+    - ./config:/app/config
+    - ./data:/app/data
+    - ./logs:/app/logs
+    - ./.llm-auth:/root/.claude
+
+services:
+  scheduler:
+    <<: *app
+
+  listener:
+    <<: *app
+    command: ["intern-radar", "listen"]
+
+  web:
+    <<: *app
+    command: ["intern-radar", "dashboard", "--host", "0.0.0.0", "--port", "8787"]
+    # Private by default: bind to your Tailscale address instead of 127.0.0.1
+    # to reach it from your phone (DASHBOARD_BIND in .env).
+    ports:
+      - "${DASHBOARD_BIND:-127.0.0.1}:8787:8787"
