@@ -147,6 +147,7 @@ poetry run intern-radar run                  # collect, triage, notify
 poetry run intern-radar digest               # evening digest
 poetry run intern-radar list --min-score 6   # stored offers, best first
 poetry run intern-radar rescore              # recompute scores after a weights change
+poetry run intern-radar metrics --out docs/metrics.md   # operating metrics, last 30 days
 poetry run intern-radar applications         # tracked applications
 poetry run intern-radar letter <job_id>      # write (or re-send) one letter
 poetry run intern-radar listen               # wait for letter and 🔔 button taps
@@ -260,6 +261,7 @@ The full list is in [docs/pipeline.md §6](docs/pipeline.md#6-limits-and-known-g
 | [docs/pipeline.md](docs/pipeline.md) | stage-by-stage reference, failure modes, limits, LLM costs, operations |
 | [docs/configuration.md](docs/configuration.md) | every profile and company setting |
 | [docs/development.md](docs/development.md) | setup, conventions, testing, adding a source |
+| [docs/metrics.md](docs/metrics.md) | operating metrics from the production database (`intern-radar metrics`) |
 
 ## Author
 
