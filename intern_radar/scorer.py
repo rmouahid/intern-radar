@@ -101,6 +101,30 @@ Write visa_note and summary in French.
 Jobs:
 """
 
+# Variant compared with INSTRUCTIONS by `intern-radar eval`: ai_relevance gets
+# anchored levels instead of a bare 0-10 scale, the field that weighs most in
+# the final score.
+INSTRUCTIONS_V2 = INSTRUCTIONS.replace(
+    """- ai_relevance: 0-10, how close the role is to AI/ML engineering (LLMs, RAG,
+  agents, ML infrastructure, data) and to the candidate's skills.
+""",
+    """- ai_relevance: 0-10, how close the daily work is to AI/ML engineering and
+  to the candidate's skills, judged from the tasks described, not from the
+  team or company name:
+  0-2: no engineering (sales, finance, design, operations, hardware lab work);
+  3-4: software engineering with no ML (web, mobile, backend, QA, IT);
+  5-6: data or infrastructure work that serves ML (data engineering,
+  analytics, MLOps, platform) without building models;
+  7-8: building or evaluating ML systems (training, fine-tuning, evaluation,
+  recommendation, computer vision, NLP);
+  9-10: LLM applications, RAG, agents or retrieval, the candidate's core.
+""",
+)
+if INSTRUCTIONS_V2 == INSTRUCTIONS:  # the replaced text drifted from INSTRUCTIONS
+    raise RuntimeError("INSTRUCTIONS_V2 does not change ai_relevance")
+
+PROMPTS = {"v1": INSTRUCTIONS, "v2": INSTRUCTIONS_V2}
+
 
 class LLMError(Exception):
     """The LLM backend could not produce an answer."""
@@ -254,9 +278,10 @@ class Scorer:
         window_end: date,
         min_months: int,
         preferences: str = "",
+        instructions: str = INSTRUCTIONS,
     ) -> None:
         self._backend = backend
-        self._header = INSTRUCTIONS.format(
+        self._header = instructions.format(
             preferences=PREFERENCES.format(feedback=preferences.strip())
             if preferences.strip()
             else "",

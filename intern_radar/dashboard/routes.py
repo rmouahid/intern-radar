@@ -49,6 +49,7 @@ from intern_radar.dashboard.pages.applications import (
 from intern_radar.dashboard.pages.autofill import autofill_body
 from intern_radar.dashboard.pages.companies import companies_body, company_body
 from intern_radar.dashboard.pages.editing import letter_form, resume_form
+from intern_radar.dashboard.pages.evaluation import label_body, next_unlabelled
 from intern_radar.dashboard.pages.feedback import feedback_body
 from intern_radar.dashboard.pages.insights import insights_body
 from intern_radar.dashboard.pages.kit import kit_html, submission_body
@@ -64,6 +65,7 @@ from intern_radar.dashboard.render import stats_body
 from intern_radar.dashboard.runner import RunStatus
 from intern_radar.dashboard.worker import FAILED, KINDS, PENDING, RUNNING, Worker
 from intern_radar.editing import DocumentEditor, EditError
+from intern_radar.evaluation import load_offers, save_offers
 from intern_radar.form_answers import FormAnswerer, parse_fields
 from intern_radar.models import ScoredJob
 from intern_radar.scorer import LLMBackend
@@ -113,6 +115,7 @@ class Context:
     profile_backend: Callable[[], LLMBackend] | None = None
     form_backend: Callable[[Store], LLMBackend] | None = None
     companies: tuple[tuple[str, str, str], ...] = ()  # watched: name, tier, source
+    eval_path: Path | None = None  # offers to label (`intern-radar eval sample`)
 
     def editor(self, store: Store) -> DocumentEditor | None:
         """Edits need the contact block; CV edits also the candidate profile."""
@@ -1003,6 +1006,39 @@ def build_app(ctx: Context) -> App:
             return redirect("/stats?run=busy")
         return redirect(f"/stats?run={'started' if ctx.trigger() else 'error'}")
 
+    # "Je ne sais pas" leaves an offer unlabelled; it comes back after the others.
+    skipped: set[int] = set()
+
+    @app.route("GET", "/eval")
+    def eval_page(request: Request):
+        if ctx.eval_path is None or not ctx.eval_path.exists():
+            body = (
+                "<h1>Évaluation du tri</h1><section class='muted'>Aucun échantillon :"
+                " lance <code>intern-radar eval sample</code>.</section>"
+            )
+            return html_response(page("Évaluation", body, "more"))
+        offers = load_offers(ctx.eval_path)
+        index = next_unlabelled(offers, skipped)
+        if index is None and skipped:
+            skipped.clear()
+            index = next_unlabelled(offers, skipped)
+        return html_response(page("Évaluation", label_body(offers, index), "more"))
+
+    @app.route("POST", "/eval/<int:index>")
+    def eval_label(request: Request, index: int):
+        if ctx.eval_path is None or not ctx.eval_path.exists():
+            return not_found("Aucun échantillon.")
+        offers = load_offers(ctx.eval_path)
+        if index >= len(offers):
+            return not_found("Offre introuvable.")
+        choice = request.form.get("label", "")
+        if choice == "skip":
+            skipped.add(index)
+        elif choice in ("yes", "no"):
+            offers[index].label = choice == "yes"
+            save_offers(ctx.eval_path, offers)
+        return redirect("/eval")
+
     @app.route("GET", "/more")
     def more(request: Request):
         links = "".join(
@@ -1024,4 +1060,5 @@ MORE_LINKS: list[tuple[str, str, str]] = [
     ("/profile", "Profil", "candidate.json, career.md et régénération"),
     ("/searches", "Recherches", "Alertes Telegram sur des filtres enregistrés"),
     ("/feedback", "Mes avis", "Les offres notées 👍/👎, prises en compte au scoring"),
+    ("/eval", "Évaluation du tri", "Étiqueter l'échantillon de `intern-radar eval`"),
 ]
