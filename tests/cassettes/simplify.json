@@ -1,0 +1,708 @@
+{
+ "adapter": "simplify",
+ "company": {
+  "name": "Simplify",
+  "tier": "unlisted",
+  "source": "simplify",
+  "params": {
+   "min_interval_hours": 6
+  }
+ },
+ "setup": {
+  "lookup": {
+   "google": [
+    "Google",
+    "S"
+   ],
+   "deepmind": [
+    "Google",
+    "S"
+   ],
+   "google deepmind": [
+    "Google",
+    "S"
+   ],
+   "meta": [
+    "Meta",
+    "S"
+   ],
+   "facebook": [
+    "Meta",
+    "S"
+   ],
+   "apple": [
+    "Apple",
+    "S"
+   ],
+   "microsoft": [
+    "Microsoft",
+    "S"
+   ],
+   "amazon": [
+    "Amazon",
+    "S"
+   ],
+   "aws": [
+    "Amazon",
+    "S"
+   ],
+   "amazon web services": [
+    "Amazon",
+    "S"
+   ],
+   "nvidia": [
+    "NVIDIA",
+    "S"
+   ],
+   "openai": [
+    "OpenAI",
+    "S"
+   ],
+   "anthropic": [
+    "Anthropic",
+    "S"
+   ],
+   "mistral ai": [
+    "Mistral AI",
+    "A"
+   ],
+   "mistral": [
+    "Mistral AI",
+    "A"
+   ],
+   "cohere": [
+    "Cohere",
+    "A"
+   ],
+   "databricks": [
+    "Databricks",
+    "A"
+   ],
+   "scale ai": [
+    "Scale AI",
+    "A"
+   ],
+   "hugging face": [
+    "Hugging Face",
+    "A"
+   ],
+   "stripe": [
+    "Stripe",
+    "A"
+   ],
+   "palantir": [
+    "Palantir",
+    "A"
+   ],
+   "perplexity": [
+    "Perplexity",
+    "A"
+   ],
+   "xai": [
+    "xAI",
+    "A"
+   ],
+   "tesla": [
+    "Tesla",
+    "A"
+   ],
+   "bytedance": [
+    "ByteDance",
+    "A"
+   ],
+   "tiktok": [
+    "ByteDance",
+    "A"
+   ],
+   "ibm": [
+    "IBM",
+    "A"
+   ],
+   "salesforce": [
+    "Salesforce",
+    "A"
+   ],
+   "adobe": [
+    "Adobe",
+    "A"
+   ],
+   "intel": [
+    "Intel",
+    "A"
+   ],
+   "samsung": [
+    "Samsung",
+    "A"
+   ],
+   "together ai": [
+    "Together AI",
+    "A"
+   ],
+   "cursor": [
+    "Cursor",
+    "A"
+   ],
+   "anysphere": [
+    "Cursor",
+    "A"
+   ],
+   "harvey": [
+    "Harvey",
+    "A"
+   ],
+   "sierra": [
+    "Sierra",
+    "A"
+   ],
+   "glean": [
+    "Glean",
+    "A"
+   ],
+   "langchain": [
+    "LangChain",
+    "A"
+   ],
+   "cerebras": [
+    "Cerebras",
+    "A"
+   ],
+   "cerebras systems": [
+    "Cerebras",
+    "A"
+   ],
+   "coreweave": [
+    "CoreWeave",
+    "A"
+   ],
+   "weights & biases": [
+    "CoreWeave",
+    "A"
+   ],
+   "weights and biases": [
+    "CoreWeave",
+    "A"
+   ],
+   "isomorphic labs": [
+    "Isomorphic Labs",
+    "A"
+   ],
+   "character.ai": [
+    "Character.AI",
+    "A"
+   ],
+   "notion": [
+    "Notion",
+    "A"
+   ],
+   "netflix": [
+    "Netflix",
+    "A"
+   ],
+   "amd": [
+    "AMD",
+    "A"
+   ],
+   "advanced micro devices": [
+    "AMD",
+    "A"
+   ],
+   "arm": [
+    "Arm",
+    "A"
+   ],
+   "arm limited": [
+    "Arm",
+    "A"
+   ],
+   "arm holdings": [
+    "Arm",
+    "A"
+   ],
+   "jane street": [
+    "Jane Street",
+    "A"
+   ],
+   "citadel": [
+    "Citadel",
+    "A"
+   ],
+   "citadel securities": [
+    "Citadel",
+    "A"
+   ],
+   "two sigma": [
+    "Two Sigma",
+    "A"
+   ],
+   "goldman sachs": [
+    "Goldman Sachs",
+    "A"
+   ],
+   "jpmorgan chase": [
+    "JPMorgan Chase",
+    "A"
+   ],
+   "jp morgan": [
+    "JPMorgan Chase",
+    "A"
+   ],
+   "j.p. morgan": [
+    "JPMorgan Chase",
+    "A"
+   ],
+   "jpmorgan": [
+    "JPMorgan Chase",
+    "A"
+   ],
+   "point72": [
+    "Point72",
+    "A"
+   ],
+   "drw": [
+    "DRW",
+    "A"
+   ],
+   "imc trading": [
+    "IMC Trading",
+    "A"
+   ],
+   "xtx markets": [
+    "XTX Markets",
+    "A"
+   ],
+   "citi": [
+    "Citi",
+    "A"
+   ],
+   "blackrock": [
+    "BlackRock",
+    "A"
+   ],
+   "jump trading": [
+    "Jump Trading",
+    "A"
+   ],
+   "hudson river trading": [
+    "Hudson River Trading",
+    "A"
+   ],
+   "hrt": [
+    "Hudson River Trading",
+    "A"
+   ],
+   "optiver": [
+    "Optiver",
+    "A"
+   ],
+   "tower research capital": [
+    "Tower Research Capital",
+    "A"
+   ],
+   "tower research": [
+    "Tower Research Capital",
+    "A"
+   ],
+   "squarepoint capital": [
+    "Squarepoint Capital",
+    "A"
+   ],
+   "squarepoint": [
+    "Squarepoint Capital",
+    "A"
+   ],
+   "g-research": [
+    "G-Research",
+    "A"
+   ],
+   "g research": [
+    "G-Research",
+    "A"
+   ],
+   "sig": [
+    "SIG",
+    "A"
+   ],
+   "susquehanna": [
+    "SIG",
+    "A"
+   ],
+   "susquehanna international group": [
+    "SIG",
+    "A"
+   ],
+   "mckinsey": [
+    "McKinsey",
+    "A"
+   ],
+   "quantumblack": [
+    "McKinsey",
+    "A"
+   ],
+   "bcg": [
+    "BCG",
+    "A"
+   ],
+   "boston consulting group": [
+    "BCG",
+    "A"
+   ],
+   "bcg x": [
+    "BCG",
+    "A"
+   ],
+   "snowflake": [
+    "Snowflake",
+    "B"
+   ],
+   "datadog": [
+    "Datadog",
+    "B"
+   ],
+   "figma": [
+    "Figma",
+    "B"
+   ],
+   "cloudflare": [
+    "Cloudflare",
+    "B"
+   ],
+   "airbnb": [
+    "Airbnb",
+    "B"
+   ],
+   "pinterest": [
+    "Pinterest",
+    "B"
+   ],
+   "reddit": [
+    "Reddit",
+    "B"
+   ],
+   "waymo": [
+    "Waymo",
+    "B"
+   ],
+   "coinbase": [
+    "Coinbase",
+    "B"
+   ],
+   "robinhood": [
+    "Robinhood",
+    "B"
+   ],
+   "samsara": [
+    "Samsara",
+    "B"
+   ],
+   "spotify": [
+    "Spotify",
+    "B"
+   ],
+   "uber": [
+    "Uber",
+    "B"
+   ],
+   "qualcomm": [
+    "Qualcomm",
+    "B"
+   ],
+   "deepl": [
+    "DeepL",
+    "B"
+   ],
+   "elevenlabs": [
+    "ElevenLabs",
+    "B"
+   ],
+   "synthesia": [
+    "Synthesia",
+    "B"
+   ],
+   "wayve": [
+    "Wayve",
+    "B"
+   ],
+   "helsing": [
+    "Helsing",
+    "B"
+   ],
+   "multiverse computing": [
+    "Multiverse Computing",
+    "B"
+   ],
+   "canva": [
+    "Canva",
+    "B"
+   ],
+   "bosch": [
+    "Bosch",
+    "B"
+   ],
+   "mastercard": [
+    "Mastercard",
+    "B"
+   ],
+   "accenture": [
+    "Accenture",
+    "B"
+   ],
+   "airbus": [
+    "Airbus",
+    "B"
+   ],
+   "siemens": [
+    "Siemens",
+    "B"
+   ],
+   "grab": [
+    "Grab",
+    "B"
+   ],
+   "sea": [
+    "Sea",
+    "B"
+   ],
+   "shopee": [
+    "Sea",
+    "B"
+   ],
+   "garena": [
+    "Sea",
+    "B"
+   ],
+   "shopify": [
+    "Shopify",
+    "B"
+   ],
+   "runway": [
+    "Runway",
+    "B"
+   ],
+   "runwayml": [
+    "Runway",
+    "B"
+   ],
+   "poolside": [
+    "Poolside",
+    "B"
+   ],
+   "aleph alpha": [
+    "Aleph Alpha",
+    "B"
+   ],
+   "polyai": [
+    "PolyAI",
+    "B"
+   ],
+   "graphcore": [
+    "Graphcore",
+    "B"
+   ],
+   "anyscale": [
+    "Anyscale",
+    "B"
+   ],
+   "replit": [
+    "Replit",
+    "B"
+   ],
+   "faculty": [
+    "Faculty",
+    "B"
+   ],
+   "faculty ai": [
+    "Faculty",
+    "B"
+   ],
+   "tractable": [
+    "Tractable",
+    "B"
+   ],
+   "photoroom": [
+    "Photoroom",
+    "B"
+   ],
+   "pinecone": [
+    "Pinecone",
+    "B"
+   ],
+   "weaviate": [
+    "Weaviate",
+    "B"
+   ],
+   "zilliz": [
+    "Zilliz",
+    "B"
+   ],
+   "vercel": [
+    "Vercel",
+    "B"
+   ],
+   "monzo": [
+    "Monzo",
+    "B"
+   ],
+   "wise": [
+    "Wise",
+    "B"
+   ],
+   "adyen": [
+    "Adyen",
+    "B"
+   ],
+   "n26": [
+    "N26",
+    "B"
+   ],
+   "cleo": [
+    "Cleo",
+    "B"
+   ],
+   "cleo ai": [
+    "Cleo",
+    "B"
+   ],
+   "thales": [
+    "Thales",
+    "B"
+   ],
+   "qdrant": [
+    "Qdrant",
+    "B"
+   ],
+   "instadeep": [
+    "InstaDeep",
+    "B"
+   ],
+   "groq": [
+    "Groq",
+    "B"
+   ],
+   "black forest labs": [
+    "Black Forest Labs",
+    "B"
+   ],
+   "sakana ai": [
+    "Sakana AI",
+    "B"
+   ],
+   "klarna": [
+    "Klarna",
+    "B"
+   ],
+   "revolut": [
+    "Revolut",
+    "B"
+   ],
+   "booking.com": [
+    "Booking.com",
+    "B"
+   ],
+   "booking holdings": [
+    "Booking.com",
+    "B"
+   ],
+   "sap": [
+    "SAP",
+    "B"
+   ],
+   "sap se": [
+    "SAP",
+    "B"
+   ],
+   "asml": [
+    "ASML",
+    "B"
+   ]
+  },
+  "window": [
+   "2027-03-08",
+   "2027-08-31"
+  ]
+ },
+ "recorded_at": "2026-11-06T16:02:36+00:00",
+ "exchanges": [
+  {
+   "method": "GET",
+   "url": "https://raw.githubusercontent.com/SimplifyJobs/Summer2027-Internships/dev/.github/scripts/listings.json",
+   "body": "",
+   "status": 200,
+   "content_type": "text/plain; charset=utf-8",
+   "text": "[{\"source\": \"Simplify\", \"category\": \"AI/ML/Data\", \"company_name\": \"Susquehanna International Group (SIG)\", \"id\": \"101c0a59-cfc7-4ef9-bcf8-d70d2a67c4f7\", \"title\": \"Electricity + Natural Gas Analyst Intern\", \"active\": true, \"terms\": [\"Summer 2027\"], \"date_updated\": 1780612305, \"date_posted\": 1780610869, \"url\": \"https://careers-sig.icims.com/jobs/10945/job?mobile=true&needsRedirect=false\", \"locations\": [\"Ardmore, PA\"], \"company_url\": \"https://simplify.jobs/c/Susquehanna\", \"is_visible\": true, \"sponsorship\": \"Other\", \"degrees\": [\"Bachelor's\", \"Master's\"]}, {\"source\": \"Simplify\", \"category\": \"AI/ML/Data\", \"company_name\": \"Block\", \"id\": \"11aaf289-dda4-4297-8b78-8998a2d45e2f\", \"title\": \"Applied Research Intern Co-op\", \"active\": true, \"terms\": [\"Fall 2026\", \"Winter 2027\"], \"date_updated\": 1781044576, \"date_posted\": 1781043683, \"url\": \"http://block.xyz/careers/jobs/5108009008?gh_jid=5108009008\", \"locations\": [\"Toronto, ON, Canada\"], \"company_url\": \"https://simplify.jobs/c/Block\", \"is_visible\": true, \"sponsorship\": \"Other\", \"degrees\": [\"Master's\", \"PhD\"]}, {\"source\": \"Simplify\", \"category\": \"AI/ML/Data\", \"company_name\": \"Castleton Commodities International\", \"id\": \"ef340463-f818-4cd0-874c-2b1574493963\", \"title\": \"Data Science Machine Learning Intern\", \"active\": true, \"terms\": [\"Summer 2027\"], \"date_updated\": 1784685816, \"date_posted\": 1784592000, \"url\": \"https://osv-cci.wd1.myworkdayjobs.com/en-US/CCICareers/job/London-UK/Data-Science-Machine-Learning-Internship--Summer-2027-_R1345\", \"locations\": [\"London, UK\"], \"company_url\": \"https://simplify.jobs/c/Castleton-Commodities-International\", \"is_visible\": true, \"sponsorship\": \"Other\", \"degrees\": [\"Bachelor's\", \"Master's\", \"MBA\", \"PhD\"]}, {\"source\": \"Simplify\", \"category\": \"AI/ML/Data\", \"company_name\": \"G-Research\", \"id\": \"ff38f8af-bafd-4a27-b65d-e65d625efe50\", \"title\": \"Machine Learning Research Intern\", \"active\": true, \"terms\": [\"Summer 2027\"], \"date_updated\": 1784819047, \"date_posted\": 1784764800, \"url\": \"https://gresearch.wd103.myworkdayjobs.com/G-Research/job/London-UK/Machine-Learning-Research-Internship_R3682\", \"locations\": [\"London, UK\"], \"company_url\": \"https://simplify.jobs/c/G-Research\", \"is_visible\": true, \"sponsorship\": \"Other\", \"degrees\": [\"Bachelor's\", \"PhD\"]}, {\"source\": \"Simplify\", \"category\": \"AI/ML/Data\", \"company_name\": \"G-Research\", \"id\": \"4ca02159-a836-4a7c-86cf-014e77b15a7a\", \"title\": \"Natural Language Processing Intern\", \"active\": true, \"terms\": [\"Summer 2027\"], \"date_updated\": 1784819041, \"date_posted\": 1784764800, \"url\": \"https://gresearch.wd103.myworkdayjobs.com/G-Research/job/London-UK/Natural-Language-Processing-Internship_R3686\", \"locations\": [\"London, UK\"], \"company_url\": \"https://simplify.jobs/c/G-Research\", \"is_visible\": true, \"sponsorship\": \"Other\", \"degrees\": [\"Bachelor's\", \"PhD\"]}, {\"source\": \"Simplify\", \"category\": \"AI/ML/Data\", \"company_name\": \"G-Research\", \"id\": \"e0f7c410-495b-4e54-8274-9a6d2f191e10\", \"title\": \"Data Science Intern\", \"active\": true, \"terms\": [\"Summer 2027\"], \"date_updated\": 1784822996, \"date_posted\": 1784764800, \"url\": \"https://gresearch.wd103.myworkdayjobs.com/G-Research/job/London-UK/Data-Science-Internship_R3679\", \"locations\": [\"London, UK\"], \"company_url\": \"https://simplify.jobs/c/G-Research\", \"is_visible\": true, \"sponsorship\": \"Other\", \"degrees\": [\"Bachelor's\", \"Master's\", \"PhD\"]}, {\"source\": \"Simplify\", \"category\": \"AI/ML/Data\", \"company_name\": \"Two Sigma\", \"id\": \"6bb2553b-f9bc-4c0b-ae90-ae4d6dabeeee\", \"title\": \"AI Research Scientist Intern - 2027 Summer\", \"active\": true, \"terms\": [\"Summer 2027\"], \"date_updated\": 1785633960, \"date_posted\": 1785633715, \"url\": \"https://twosigma.avature.net/careers/JobDetail/14096\", \"locations\": [\"NYC\"], \"company_url\": \"https://simplify.jobs/c/0e04910d-c55c-49e9-b2c6-5f391cf32384\", \"is_visible\": true, \"sponsorship\": \"Other\", \"degrees\": [\"Bachelor's\", \"Master's\", \"PhD\"]}, {\"source\": \"Simplify\", \"category\": \"AI/ML/Data\", \"company_name\": \"TikTok\", \"id\": \"32e32073-854a-4b16-8adf-f981a6901e09\", \"title\": \"Machine Learning Engineer Intern - Recommendation\", \"active\": true, \"terms\": [\"Summer 2027\"], \"date_updated\": 1785739206, \"date_posted\": 1785737711, \"url\": \"https://lifeattiktok.com/search/7662653087863081221\", \"locations\": [\"San Jose, CA\"], \"company_url\": \"https://simplify.jobs/c/TikTok\", \"is_visible\": true, \"sponsorship\": \"Other\", \"degrees\": [\"Master's\"]}, {\"source\": \"Simplify\", \"category\": \"AI/ML/Data\", \"company_name\": \"Trane Technologies\", \"id\": \"e651c39f-47c7-45b4-849c-468bd4658f61\", \"title\": \"Retail Operations Analyst Intern\", \"active\": false, \"terms\": [\"Summer 2026\"], \"date_updated\": 1773267654, \"date_posted\": 1773267654, \"url\": \"https://careers.tranetechnologies.com/global/en/job/2601553\", \"locations\": [\"Winona, MN\"], \"company_url\": \"https://simplify.jobs/c/Trane-Technologies\", \"is_visible\": true, \"sponsorship\": \"Other\", \"degrees\": [\"Bachelor's\"]}, {\"source\": \"Simplify\", \"category\": \"AI/ML/Data\", \"company_name\": \"Pivotal Software\", \"id\": \"bce68664-0490-4d31-99f0-b858b1e2b2f9\", \"title\": \"Intern - Autonomy - Path Planning\", \"active\": false, \"terms\": [\"Summer 2026\"], \"date_updated\": 1773267684, \"date_posted\": 1773267684, \"url\": \"https://jobs.lever.co/pivotal/a1e35931-1634-4d5e-ba1a-4d80f7ae4b68/apply\", \"locations\": [\"Palo Alto, CA\"], \"company_url\": \"https://simplify.jobs/c/Pivotal-Software\", \"is_visible\": true, \"sponsorship\": \"Other\", \"degrees\": [\"Bachelor's\", \"Master's\", \"PhD\"]}, {\"source\": \"Simplify\", \"category\": \"AI/ML/Data\", \"company_name\": \"CareBridge\", \"id\": \"ac02723b-4c09-4f38-a2d8-814b059bc07f\", \"title\": \"Business Informatics Intern\", \"active\": false, \"terms\": [\"Summer 2026\"], \"date_updated\": 1773267742, \"date_posted\": 1773267742, \"url\": \"https://elevancehealth.wd1.myworkdayjobs.com/ANT/job/IN-INDIANAPOLIS-220-VIRGINIA-AVE/Business-Informatics-Intern---Summer-2026_JR185340\", \"locations\": [\"Indianapolis, IN\"], \"company_url\": \"https://simplify.jobs/c/CareBridge\", \"is_visible\": true, \"sponsorship\": \"Other\", \"degrees\": [\"Bachelor's\"]}, {\"source\": \"Simplify\", \"category\": \"Software\", \"company_name\": \"Savannah River National Laboratory\", \"id\": \"9e956dba-b0af-4a0e-bf50-76143601f8b1\", \"title\": \"EM University Programs Software Developer Undergraduate Intern\", \"active\": false, \"terms\": [\"Summer 2026\"], \"date_updated\": 1773267566, \"date_posted\": 1773267566, \"url\": \"https://ewvl.fa.us8.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/1994\", \"locations\": [\"North Augusta, SC\"], \"company_url\": \"https://simplify.jobs/c/Savannah-River-National-Laboratory\", \"is_visible\": true, \"sponsorship\": \"Other\", \"degrees\": [\"Bachelor's\"]}]"
+  }
+ ],
+ "expected": [
+  {
+   "id": "simplify:101c0a59-cfc7-4ef9-bcf8-d70d2a67c4f7",
+   "company": "SIG",
+   "title": "Electricity + Natural Gas Analyst Intern",
+   "location": "Ardmore, PA",
+   "url": "https://careers-sig.icims.com/jobs/10945/job?mobile=true&needsRedirect=false",
+   "posted_at": "2026-06-04",
+   "description_chars": 179
+  },
+  {
+   "id": "simplify:11aaf289-dda4-4297-8b78-8998a2d45e2f",
+   "company": "Block",
+   "title": "Applied Research Intern Co-op",
+   "location": "Toronto, ON, Canada",
+   "url": "http://block.xyz/careers/jobs/5108009008?gh_jid=5108009008",
+   "posted_at": "2026-06-09",
+   "description_chars": 191
+  },
+  {
+   "id": "simplify:ef340463-f818-4cd0-874c-2b1574493963",
+   "company": "Castleton Commodities International",
+   "title": "Data Science Machine Learning Intern",
+   "location": "London, UK",
+   "url": "https://osv-cci.wd1.myworkdayjobs.com/en-US/CCICareers/job/London-UK/Data-Science-Machine-Learning-Internship--Summer-2027-_R1345",
+   "posted_at": "2026-07-21",
+   "description_chars": 188
+  },
+  {
+   "id": "simplify:ff38f8af-bafd-4a27-b65d-e65d625efe50",
+   "company": "G-Research",
+   "title": "Machine Learning Research Intern",
+   "location": "London, UK",
+   "url": "https://gresearch.wd103.myworkdayjobs.com/G-Research/job/London-UK/Machine-Learning-Research-Internship_R3682",
+   "posted_at": "2026-07-23",
+   "description_chars": 173
+  },
+  {
+   "id": "simplify:4ca02159-a836-4a7c-86cf-014e77b15a7a",
+   "company": "G-Research",
+   "title": "Natural Language Processing Intern",
+   "location": "London, UK",
+   "url": "https://gresearch.wd103.myworkdayjobs.com/G-Research/job/London-UK/Natural-Language-Processing-Internship_R3686",
+   "posted_at": "2026-07-23",
+   "description_chars": 173
+  },
+  {
+   "id": "simplify:e0f7c410-495b-4e54-8274-9a6d2f191e10",
+   "company": "G-Research",
+   "title": "Data Science Intern",
+   "location": "London, UK",
+   "url": "https://gresearch.wd103.myworkdayjobs.com/G-Research/job/London-UK/Data-Science-Internship_R3679",
+   "posted_at": "2026-07-23",
+   "description_chars": 183
+  },
+  {
+   "id": "simplify:6bb2553b-f9bc-4c0b-ae90-ae4d6dabeeee",
+   "company": "Two Sigma",
+   "title": "AI Research Scientist Intern - 2027 Summer",
+   "location": "NYC",
+   "url": "https://twosigma.avature.net/careers/JobDetail/14096",
+   "posted_at": "2026-08-02",
+   "description_chars": 176
+  },
+  {
+   "id": "simplify:32e32073-854a-4b16-8adf-f981a6901e09",
+   "company": "ByteDance",
+   "title": "Machine Learning Engineer Intern - Recommendation",
+   "location": "San Jose, CA",
+   "url": "https://lifeattiktok.com/search/7662653087863081221",
+   "posted_at": "2026-08-03",
+   "description_chars": 168
+  }
+ ]
+}
