@@ -154,6 +154,24 @@ poetry run intern-radar listen               # wait for letter and 🔔 button t
 
 ## Deployment
 
+### Docker
+
+```bash
+cp config/profile.example.yaml config/profile.yaml   # then fill it in
+docker compose up -d
+```
+
+One image, three services: `scheduler` (runs every 2 hours from 08:00 to
+22:00, digest at 21:00, backup at 03:30, Europe/Paris, through
+[supercronic](https://github.com/aptible/supercronic) and
+`deploy/crontab`), `listener` (Telegram button taps) and `web` (the web
+app, on `127.0.0.1:8787` unless `DASHBOARD_BIND` is set to your Tailscale
+address in `.env`). `config/`, `data/` and `logs/` are mounted from the
+host. The LLM CLI reads its login from `./.llm-auth`, or an API key from
+`LLM_API_KEY` in `.env`.
+
+### systemd
+
 ```bash
 ln -sf "$PWD"/deploy/intern-radar-*.service "$PWD"/deploy/intern-radar-*.timer /etc/systemd/system/
 cp deploy/logrotate.conf /etc/logrotate.d/intern-radar

@@ -1,0 +1,5 @@
+# Same schedule as the systemd timers, Europe/Paris time (TZ of the image).
+# Runs every 2 hours from 08:00 to 22:00, digest at 21:00, backup at 03:30.
+0 8-22/2 * * * intern-radar run
+0 21 * * * intern-radar digest
+30 3 * * * intern-radar backup

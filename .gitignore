@@ -16,3 +16,7 @@ config/writing-guide.md
 # Runtime data
 data/
 logs/
+
+# Docker
+.env
+.llm-auth/
