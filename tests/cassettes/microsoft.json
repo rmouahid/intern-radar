@@ -1,0 +1,778 @@
+{
+ "adapter": "microsoft",
+ "company": {
+  "name": "Microsoft",
+  "tier": "S",
+  "source": "microsoft",
+  "params": {}
+ },
+ "setup": {},
+ "recorded_at": "2026-11-06T16:05:10+00:00",
+ "exchanges": [
+  {
+   "method": "GET",
+   "url": "https://apply.careers.microsoft.com/api/pcsx/search?domain=microsoft.com&query=intern&start=0",
+   "body": "",
+   "status": 429,
+   "content_type": "text/html; charset=utf-8",
+   "text": "Please try again later"
+  },
+  {
+   "method": "GET",
+   "url": "https://apply.careers.microsoft.com/api/pcsx/search?domain=microsoft.com&query=intern&start=0",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json",
+   "text": "{\"status\": 200, \"error\": {\"message\": \"\", \"body\": \"\"}, \"data\": {\"positions\": [{\"id\": 1970393556922930, \"displayJobId\": \"200042199\", \"name\": \"Software Engineer: Security & Identity Intern Opportunities for University Students, Redmond\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1793895965, \"solrScore\": null, \"stars\": 0, \"department\": \"Software Engineering\", \"creationTs\": 1782938412, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200042199\", \"positionUrl\": \"/careers/job/1970393556922930\"}, {\"id\": 1970393557027326, \"displayJobId\": \"200060937\", \"name\": \"Research Intern - Audio and Acoustics\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1791478721, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1791477344, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200060937\", \"positionUrl\": \"/careers/job/1970393557027326\"}, {\"id\": 1970393557027378, \"displayJobId\": \"200060957\", \"name\": \"Research Intern - Brain-Computer Interfaces\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1791482125, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1791480692, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200060957\", \"positionUrl\": \"/careers/job/1970393557027378\"}, {\"id\": 1970393557037649, \"displayJobId\": \"200061176\", \"name\": \"Research Intern - Document Intelligence and Content Understanding\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1791568140, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1791564768, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200061176\", \"positionUrl\": \"/careers/job/1970393557037649\"}, {\"id\": 1970393557049981, \"displayJobId\": \"200064359\", \"name\": \"Research Intern - Machine Learning and Optimization - Redmond\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1793201011, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1793199961, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200064359\", \"positionUrl\": \"/careers/job/1970393557049981\"}, {\"id\": 1970393557050039, \"displayJobId\": \"200064379\", \"name\": \"Research Intern - MSR Systems Research Group - Redmond\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1793208480, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1793207167, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200064379\", \"positionUrl\": \"/careers/job/1970393557050039\"}, {\"id\": 1970393557052982, \"displayJobId\": \"200065169\", \"name\": \"Research Intern - Foundational Models & Agent\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1793646990, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1793645922, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200065169\", \"positionUrl\": \"/careers/job/1970393557052982\"}, {\"id\": 1970393556978904, \"displayJobId\": \"200050324\", \"name\": \"Research Intern\", \"locations\": [\"Singapore, Singapore, Singapore\"], \"standardizedLocations\": [\"SG\"], \"postedTs\": 1788278400, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1787309308, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200050324\", \"positionUrl\": \"/careers/job/1970393556978904\"}, {\"id\": 1970393556982268, \"displayJobId\": \"200052124\", \"name\": \"Research Intern\", \"locations\": [\"Hong Kong SAR, Hong Kong Island, Hong Kong\"], \"standardizedLocations\": [\"Hong Kong Island,HK\"], \"postedTs\": 1788278400, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1787809256, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200052124\", \"positionUrl\": \"/careers/job/1970393556982268\"}, {\"id\": 1970393557043712, \"displayJobId\": \"200062653\", \"name\": \"Business Program Manager, Global Intern Experience & Innovation\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1793632544, \"solrScore\": null, \"stars\": 0, \"department\": \"Business Program Management\", \"creationTs\": 1792438361, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200062653\", \"positionUrl\": \"/careers/job/1970393557043712\"}], \"filterDef\": {\"facets\": {\"locations\": [[\"Remote\", 999999], [\"Redmond, WA, United States\", 860], [\"United States\", 300], [\"Mountain View, CA, United States\", 271], [\"Bengaluru, KA, India\", 118], [\"Atlanta, GA, United States\", 107], [\"New York, NY, United States\", 105], [\"Hyderabad, TS, India\", 98], [\"Tokyo, Japan\", 93], [\"Austin, TX, United States\", 82], [\"Reston, VA, United States\", 74]]}, \"smartFilters\": [{\"type\": \"multi_select\", \"filterName\": \"work_site\", \"title\": \"Work site\", \"options\": [{\"label\": \"3 DAYS / WEEK IN-OFFICE\", \"value\": \"3 days / week in-office\"}, {\"label\": \"0 DAYS / WEEK IN-OFFICE – REMOTE\", \"value\": \"0 days / week in-office – remote\"}, {\"label\": \"FULLY ON-SITE\", \"value\": \"fully on-site\"}, {\"label\": \"4 DAYS / WEEK IN-OFFICE\", \"value\": \"4 days / week in-office\"}, {\"label\": \"2 DAYS / WEEK IN-OFFICE\", \"value\": \"2 days / week in-office\"}, {\"label\": \"1 DAY / WEEK IN-OFFICE\", \"value\": \"1 day / week in-office\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"seniority\", \"title\": \"Experience level\", \"options\": [{\"label\": \"SENIOR\", \"value\": \"Senior\"}, {\"label\": \"MID-LEVEL\", \"value\": \"Mid-Level\"}, {\"label\": \"MANAGER\", \"value\": \"Manager\"}, {\"label\": \"DIRECTOR\", \"value\": \"Director\"}, {\"label\": \"ENTRY\", \"value\": \"Entry\"}, {\"label\": \"INTERN\", \"value\": \"Intern\"}, {\"label\": \"VICE PRESIDENT\", \"value\": \"Vice President\"}, {\"label\": \"CXO\", \"value\": \"CXO\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"profession\", \"title\": \"Profession\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"software engineering\"}, {\"label\": \"SALES\", \"value\": \"sales\"}, {\"label\": \"DATA CENTER\", \"value\": \"data center\"}, {\"label\": \"CUSTOMER SUCCESS\", \"value\": \"customer success\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"career_discipline\", \"title\": \"Discipline\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"Software Engineering\"}, {\"label\": \"CLOUD SOLUTION ARCHITECTURE\", \"value\": \"Cloud Solution Architecture\"}, {\"label\": \"PRODUCT MANAGEMENT\", \"value\": \"Product Management\"}, {\"label\": \"TECHNICAL PROGRAM MANAGEMENT\", \"value\": \"Technical Program Management\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}], \"allFilters\": [{\"type\": \"multi_select\", \"filterName\": \"roletype\", \"title\": \"Role type\", \"options\": [{\"label\": \"INDIVIDUAL CONTRIBUTOR\", \"value\": \"individual contributor\"}, {\"label\": \"PEOPLE MANAGER\", \"value\": \"people manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"employment_type\", \"title\": \"Employment type\", \"options\": [{\"label\": \"FULL-TIME\", \"value\": \"full-time\"}, {\"label\": \"INTERNSHIP\", \"value\": \"internship\"}, {\"label\": \"PART-TIME\", \"value\": \"part-time\"}, {\"label\": \"POST DOC RESEARCH\", \"value\": \"post doc research\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select_suggest\", \"filterName\": \"skills\", \"title\": \"Skills\", \"options\": [{\"label\": \"PROBLEM SOLVING\", \"value\": \"Problem Solving\"}, {\"label\": \"DECISION MAKING\", \"value\": \"Decision Making\"}, {\"label\": \"CONFLICT RESOLUTION\", \"value\": \"Conflict Resolution\"}, {\"label\": \"NEGOTIATION\", \"value\": \"Negotiation\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"hiring_title\", \"title\": \"Job title\", \"options\": [{\"label\": \"SENIOR SOFTWARE ENGINEER\", \"value\": \"senior software engineer\"}, {\"label\": \"PRINCIPAL SOFTWARE ENGINEER\", \"value\": \"principal software engineer\"}, {\"label\": \"DATA CENTER TECHNICIAN\", \"value\": \"data center technician\"}, {\"label\": \"PRINCIPAL PRODUCT MANAGER\", \"value\": \"principal product manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}]}, \"count\": 98, \"sortBy\": \"relevance\", \"appliedFilters\": {}, \"debug\": {}, \"savedSearchMetadata\": {\"savedSearchParamsHash\": null, \"isSavedSearchActive\": false}, \"resultsMetaData\": {\"usedFuzzSearch\": false}}, \"metadata\": null}"
+  },
+  {
+   "method": "GET",
+   "url": "https://apply.careers.microsoft.com/api/pcsx/search?domain=microsoft.com&query=intern&start=10",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json",
+   "text": "{\"status\": 200, \"error\": {\"message\": \"\", \"body\": \"\"}, \"data\": {\"positions\": [{\"id\": 1970393556951950, \"displayJobId\": \"200046156\", \"name\": \"Software Engineer: Intern Opportunities for University Students - CoreAI - Redmond, WA\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1793639359, \"solrScore\": null, \"stars\": 0, \"department\": \"Software Engineering\", \"creationTs\": 1785361055, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200046156\", \"positionUrl\": \"/careers/job/1970393556951950\"}, {\"id\": 1970393556998387, \"displayJobId\": \"200055643\", \"name\": \"Cloud Solution Architecture Intern\", \"locations\": [\"Belgium, Brussels Region, Brussels\"], \"standardizedLocations\": [\"Brussels, Brussels, BE\"], \"postedTs\": 1789396779, \"solrScore\": null, \"stars\": 0, \"department\": \"Cloud Solution Architecture\", \"creationTs\": 1789391947, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200055643\", \"positionUrl\": \"/careers/job/1970393556998387\"}, {\"id\": 1970393556983226, \"displayJobId\": \"200052636\", \"name\": \"Product Management Intern - CTJ - TS\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1789152002, \"solrScore\": null, \"stars\": 0, \"department\": \"Product Management\", \"creationTs\": 1787943399, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200052636\", \"positionUrl\": \"/careers/job/1970393556983226\"}, {\"id\": 1970393556998780, \"displayJobId\": \"200055835\", \"name\": \"Account Executive Intern\", \"locations\": [\"Belgium, Brussels Region, Brussels\"], \"standardizedLocations\": [\"Brussels, Brussels, BE\"], \"postedTs\": 1789465462, \"solrScore\": null, \"stars\": 0, \"department\": \"Account Management\", \"creationTs\": 1789459889, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200055835\", \"positionUrl\": \"/careers/job/1970393556998780\"}, {\"id\": 1970393557053016, \"displayJobId\": \"200065196\", \"name\": \"Research Intern - Speech Processing\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1793650428, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1793649382, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200065196\", \"positionUrl\": \"/careers/job/1970393557053016\"}, {\"id\": 1970393556992502, \"displayJobId\": \"200054934\", \"name\": \"Product Design INTERN\", \"locations\": [\"India, Multiple Locations, Multiple Locations\"], \"standardizedLocations\": [\"IN\"], \"postedTs\": 1789031303, \"solrScore\": null, \"stars\": 0, \"department\": \"Product Design\", \"creationTs\": 1789030240, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200054934\", \"positionUrl\": \"/careers/job/1970393556992502\"}, {\"id\": 1970393557027387, \"displayJobId\": \"200060962\", \"name\": \"Researcher Intern, CoreAI\", \"locations\": [\"United States, Washington, Redmond\", \"United States, California, Mountain View\"], \"standardizedLocations\": [\"Redmond, WA, US\", \"Mountain View, CA, US\"], \"postedTs\": 1793647663, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1791481663, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200060962\", \"positionUrl\": \"/careers/job/1970393557027387\"}, {\"id\": 1970393557039243, \"displayJobId\": \"200061531\", \"name\": \"Research Intern - Agentic Graph Learning\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1791842452, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1791840705, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200061531\", \"positionUrl\": \"/careers/job/1970393557039243\"}, {\"id\": 1970393557041012, \"displayJobId\": \"200061978\", \"name\": \"Research Intern - Interactive Multimodal Futures Group (Situated, Social & Ubiquitous Computing)\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1792012331, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1792010596, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200061978\", \"positionUrl\": \"/careers/job/1970393557041012\"}, {\"id\": 1970393557040080, \"displayJobId\": \"200061632\", \"name\": \"Applied Sciences INTERN\", \"locations\": [\"Israel, Tel Aviv, Herzliya\"], \"standardizedLocations\": [\"Herzliya, Tel Aviv District, IL\"], \"postedTs\": 1791887820, \"solrScore\": null, \"stars\": 0, \"department\": \"Applied Sciences\", \"creationTs\": 1791886552, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200061632\", \"positionUrl\": \"/careers/job/1970393557040080\"}], \"filterDef\": {\"facets\": {\"locations\": [[\"Remote\", 999999], [\"Redmond, WA, United States\", 860], [\"United States\", 300], [\"Mountain View, CA, United States\", 271], [\"Bengaluru, KA, India\", 118], [\"Atlanta, GA, United States\", 107], [\"New York, NY, United States\", 105], [\"Hyderabad, TS, India\", 98], [\"Tokyo, Japan\", 93], [\"Austin, TX, United States\", 82], [\"Reston, VA, United States\", 74]]}, \"smartFilters\": [{\"type\": \"multi_select\", \"filterName\": \"work_site\", \"title\": \"Work site\", \"options\": [{\"label\": \"3 DAYS / WEEK IN-OFFICE\", \"value\": \"3 days / week in-office\"}, {\"label\": \"0 DAYS / WEEK IN-OFFICE – REMOTE\", \"value\": \"0 days / week in-office – remote\"}, {\"label\": \"FULLY ON-SITE\", \"value\": \"fully on-site\"}, {\"label\": \"4 DAYS / WEEK IN-OFFICE\", \"value\": \"4 days / week in-office\"}, {\"label\": \"2 DAYS / WEEK IN-OFFICE\", \"value\": \"2 days / week in-office\"}, {\"label\": \"1 DAY / WEEK IN-OFFICE\", \"value\": \"1 day / week in-office\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"seniority\", \"title\": \"Experience level\", \"options\": [{\"label\": \"SENIOR\", \"value\": \"Senior\"}, {\"label\": \"MID-LEVEL\", \"value\": \"Mid-Level\"}, {\"label\": \"MANAGER\", \"value\": \"Manager\"}, {\"label\": \"DIRECTOR\", \"value\": \"Director\"}, {\"label\": \"ENTRY\", \"value\": \"Entry\"}, {\"label\": \"INTERN\", \"value\": \"Intern\"}, {\"label\": \"VICE PRESIDENT\", \"value\": \"Vice President\"}, {\"label\": \"CXO\", \"value\": \"CXO\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"profession\", \"title\": \"Profession\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"software engineering\"}, {\"label\": \"SALES\", \"value\": \"sales\"}, {\"label\": \"DATA CENTER\", \"value\": \"data center\"}, {\"label\": \"CUSTOMER SUCCESS\", \"value\": \"customer success\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"career_discipline\", \"title\": \"Discipline\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"Software Engineering\"}, {\"label\": \"CLOUD SOLUTION ARCHITECTURE\", \"value\": \"Cloud Solution Architecture\"}, {\"label\": \"PRODUCT MANAGEMENT\", \"value\": \"Product Management\"}, {\"label\": \"TECHNICAL PROGRAM MANAGEMENT\", \"value\": \"Technical Program Management\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}], \"allFilters\": [{\"type\": \"multi_select\", \"filterName\": \"roletype\", \"title\": \"Role type\", \"options\": [{\"label\": \"INDIVIDUAL CONTRIBUTOR\", \"value\": \"individual contributor\"}, {\"label\": \"PEOPLE MANAGER\", \"value\": \"people manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"employment_type\", \"title\": \"Employment type\", \"options\": [{\"label\": \"FULL-TIME\", \"value\": \"full-time\"}, {\"label\": \"INTERNSHIP\", \"value\": \"internship\"}, {\"label\": \"PART-TIME\", \"value\": \"part-time\"}, {\"label\": \"POST DOC RESEARCH\", \"value\": \"post doc research\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select_suggest\", \"filterName\": \"skills\", \"title\": \"Skills\", \"options\": [{\"label\": \"PROBLEM SOLVING\", \"value\": \"Problem Solving\"}, {\"label\": \"DECISION MAKING\", \"value\": \"Decision Making\"}, {\"label\": \"CONFLICT RESOLUTION\", \"value\": \"Conflict Resolution\"}, {\"label\": \"NEGOTIATION\", \"value\": \"Negotiation\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"hiring_title\", \"title\": \"Job title\", \"options\": [{\"label\": \"SENIOR SOFTWARE ENGINEER\", \"value\": \"senior software engineer\"}, {\"label\": \"PRINCIPAL SOFTWARE ENGINEER\", \"value\": \"principal software engineer\"}, {\"label\": \"DATA CENTER TECHNICIAN\", \"value\": \"data center technician\"}, {\"label\": \"PRINCIPAL PRODUCT MANAGER\", \"value\": \"principal product manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}]}, \"count\": 98, \"sortBy\": \"relevance\", \"appliedFilters\": {}, \"debug\": {}, \"savedSearchMetadata\": {\"savedSearchParamsHash\": null, \"isSavedSearchActive\": false}, \"resultsMetaData\": {\"usedFuzzSearch\": false}}, \"metadata\": null}"
+  },
+  {
+   "method": "GET",
+   "url": "https://apply.careers.microsoft.com/api/pcsx/search?domain=microsoft.com&query=intern&start=20",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json",
+   "text": "{\"status\": 200, \"error\": {\"message\": \"\", \"body\": \"\"}, \"data\": {\"positions\": [{\"id\": 1970393557008574, \"displayJobId\": \"200058258\", \"name\": \"Research Intern - Data Systems\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1790376651, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1790355328, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200058258\", \"positionUrl\": \"/careers/job/1970393557008574\"}, {\"id\": 1970393557021663, \"displayJobId\": \"200059127\", \"name\": \"Research Intern - Quantum Algorithms\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1790803995, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1790797569, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200059127\", \"positionUrl\": \"/careers/job/1970393557021663\"}, {\"id\": 1970393557008286, \"displayJobId\": \"200058181\", \"name\": \"Business Operations & Management / Assistant Coordinator Intern\", \"locations\": [\"Belgium, Brussels Region, Brussels\"], \"standardizedLocations\": [\"Brussels, Brussels, BE\"], \"postedTs\": 1790681303, \"solrScore\": null, \"stars\": 0, \"department\": \"Government Affairs\", \"creationTs\": 1790322626, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200058181\", \"positionUrl\": \"/careers/job/1970393557008286\"}, {\"id\": 1970393557051409, \"displayJobId\": \"200064977\", \"name\": \"Research Intern - Office of Applied Research\", \"locations\": [\"United States, Washington, Redmond\", \"United States, New York, New York\"], \"standardizedLocations\": [\"Redmond, WA, US\", \"New York, NY, US\"], \"postedTs\": 1793396404, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1793394780, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200064977\", \"positionUrl\": \"/careers/job/1970393557051409\"}, {\"id\": 1970393556983238, \"displayJobId\": \"200052637\", \"name\": \"Technical Program Management Intern - CTJ - TS\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1789152090, \"solrScore\": null, \"stars\": 0, \"department\": \"Technical Program Management\", \"creationTs\": 1787943715, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200052637\", \"positionUrl\": \"/careers/job/1970393556983238\"}, {\"id\": 1970393556988203, \"displayJobId\": \"200053656\", \"name\": \"Security Assurance Intern - CTJ - TS\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1789152122, \"solrScore\": null, \"stars\": 0, \"department\": \"Security Assurance\", \"creationTs\": 1788470353, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200053656\", \"positionUrl\": \"/careers/job/1970393556988203\"}, {\"id\": 1970393557040927, \"displayJobId\": \"200061939\", \"name\": \"Stagiaire en recherche - apprentissage automatique; Research Intern - Machine Learning\", \"locations\": [\"Canada, Québec, Montreal\"], \"standardizedLocations\": [\"Montreal, QC, CA\"], \"postedTs\": 1792002123, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1791998176, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200061939\", \"positionUrl\": \"/careers/job/1970393557040927\"}, {\"id\": 1970393556998388, \"displayJobId\": \"200055641\", \"name\": \"Customer Success Account Management Intern\", \"locations\": [\"Belgium, Brussels Region, Brussels\"], \"standardizedLocations\": [\"Brussels, Brussels, BE\"], \"postedTs\": 1789554059, \"solrScore\": null, \"stars\": 0, \"department\": \"Customer Success Account Mgmt\", \"creationTs\": 1789391494, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200055641\", \"positionUrl\": \"/careers/job/1970393556998388\"}, {\"id\": 1970393557041731, \"displayJobId\": \"200062277\", \"name\": \"Research Intern - Efficient AI Software Systems\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1792108023, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1792106948, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200062277\", \"positionUrl\": \"/careers/job/1970393557041731\"}, {\"id\": 1970393556972877, \"displayJobId\": \"200049843\", \"name\": \"Research Sciences INTERN\", \"locations\": [\"Japan, Tokyo-to, Tokyo\"], \"standardizedLocations\": [\"Tokyo, Tokyo, JP\"], \"postedTs\": 1787238000, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1787131444, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200049843\", \"positionUrl\": \"/careers/job/1970393556972877\"}], \"filterDef\": {\"facets\": {\"locations\": [[\"Remote\", 999999], [\"Redmond, WA, United States\", 860], [\"United States\", 300], [\"Mountain View, CA, United States\", 271], [\"Bengaluru, KA, India\", 118], [\"Atlanta, GA, United States\", 107], [\"New York, NY, United States\", 105], [\"Hyderabad, TS, India\", 98], [\"Tokyo, Japan\", 93], [\"Austin, TX, United States\", 82], [\"Reston, VA, United States\", 74]]}, \"smartFilters\": [{\"type\": \"multi_select\", \"filterName\": \"work_site\", \"title\": \"Work site\", \"options\": [{\"label\": \"3 DAYS / WEEK IN-OFFICE\", \"value\": \"3 days / week in-office\"}, {\"label\": \"0 DAYS / WEEK IN-OFFICE – REMOTE\", \"value\": \"0 days / week in-office – remote\"}, {\"label\": \"FULLY ON-SITE\", \"value\": \"fully on-site\"}, {\"label\": \"4 DAYS / WEEK IN-OFFICE\", \"value\": \"4 days / week in-office\"}, {\"label\": \"2 DAYS / WEEK IN-OFFICE\", \"value\": \"2 days / week in-office\"}, {\"label\": \"1 DAY / WEEK IN-OFFICE\", \"value\": \"1 day / week in-office\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"seniority\", \"title\": \"Experience level\", \"options\": [{\"label\": \"SENIOR\", \"value\": \"Senior\"}, {\"label\": \"MID-LEVEL\", \"value\": \"Mid-Level\"}, {\"label\": \"MANAGER\", \"value\": \"Manager\"}, {\"label\": \"DIRECTOR\", \"value\": \"Director\"}, {\"label\": \"ENTRY\", \"value\": \"Entry\"}, {\"label\": \"INTERN\", \"value\": \"Intern\"}, {\"label\": \"VICE PRESIDENT\", \"value\": \"Vice President\"}, {\"label\": \"CXO\", \"value\": \"CXO\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"profession\", \"title\": \"Profession\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"software engineering\"}, {\"label\": \"SALES\", \"value\": \"sales\"}, {\"label\": \"DATA CENTER\", \"value\": \"data center\"}, {\"label\": \"CUSTOMER SUCCESS\", \"value\": \"customer success\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"career_discipline\", \"title\": \"Discipline\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"Software Engineering\"}, {\"label\": \"CLOUD SOLUTION ARCHITECTURE\", \"value\": \"Cloud Solution Architecture\"}, {\"label\": \"PRODUCT MANAGEMENT\", \"value\": \"Product Management\"}, {\"label\": \"TECHNICAL PROGRAM MANAGEMENT\", \"value\": \"Technical Program Management\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}], \"allFilters\": [{\"type\": \"multi_select\", \"filterName\": \"roletype\", \"title\": \"Role type\", \"options\": [{\"label\": \"INDIVIDUAL CONTRIBUTOR\", \"value\": \"individual contributor\"}, {\"label\": \"PEOPLE MANAGER\", \"value\": \"people manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"employment_type\", \"title\": \"Employment type\", \"options\": [{\"label\": \"FULL-TIME\", \"value\": \"full-time\"}, {\"label\": \"INTERNSHIP\", \"value\": \"internship\"}, {\"label\": \"PART-TIME\", \"value\": \"part-time\"}, {\"label\": \"POST DOC RESEARCH\", \"value\": \"post doc research\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select_suggest\", \"filterName\": \"skills\", \"title\": \"Skills\", \"options\": [{\"label\": \"PROBLEM SOLVING\", \"value\": \"Problem Solving\"}, {\"label\": \"DECISION MAKING\", \"value\": \"Decision Making\"}, {\"label\": \"CONFLICT RESOLUTION\", \"value\": \"Conflict Resolution\"}, {\"label\": \"NEGOTIATION\", \"value\": \"Negotiation\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"hiring_title\", \"title\": \"Job title\", \"options\": [{\"label\": \"SENIOR SOFTWARE ENGINEER\", \"value\": \"senior software engineer\"}, {\"label\": \"PRINCIPAL SOFTWARE ENGINEER\", \"value\": \"principal software engineer\"}, {\"label\": \"DATA CENTER TECHNICIAN\", \"value\": \"data center technician\"}, {\"label\": \"PRINCIPAL PRODUCT MANAGER\", \"value\": \"principal product manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}]}, \"count\": 98, \"sortBy\": \"relevance\", \"appliedFilters\": {}, \"debug\": {}, \"savedSearchMetadata\": {\"savedSearchParamsHash\": null, \"isSavedSearchActive\": false}, \"resultsMetaData\": {\"usedFuzzSearch\": false}}, \"metadata\": null}"
+  },
+  {
+   "method": "GET",
+   "url": "https://apply.careers.microsoft.com/api/pcsx/search?domain=microsoft.com&query=intern&start=30",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json",
+   "text": "{\"status\": 200, \"error\": {\"message\": \"\", \"body\": \"\"}, \"data\": {\"positions\": [{\"id\": 1970393557021518, \"displayJobId\": \"200059074\", \"name\": \"Stagiaire en opérations critiques Centre de données / Critical Environment Ops INTERN Data Center\", \"locations\": [\"Canada, Québec, Quebec City\"], \"standardizedLocations\": [\"Québec City, QC, CA\"], \"postedTs\": 1793652818, \"solrScore\": null, \"stars\": 0, \"department\": \"Critical Environment Ops\", \"creationTs\": 1790782319, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200059074\", \"positionUrl\": \"/careers/job/1970393557021518\"}, {\"id\": 1970393557021552, \"displayJobId\": \"200059096\", \"name\": \"Stagiaire - Technicien de Centre de Données (TI) / Datacenter Technician - Intern (IT)\", \"locations\": [\"Canada, Québec, Quebec City\"], \"standardizedLocations\": [\"Québec City, QC, CA\"], \"postedTs\": 1793652958, \"solrScore\": null, \"stars\": 0, \"department\": \"Data Center Technicians\", \"creationTs\": 1790789488, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200059096\", \"positionUrl\": \"/careers/job/1970393557021552\"}, {\"id\": 1970393557053024, \"displayJobId\": \"200065202\", \"name\": \"Research Intern - Coding Agents & Post-Training Optimization\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1793653203, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1793650950, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200065202\", \"positionUrl\": \"/careers/job/1970393557053024\"}, {\"id\": 1970393557040333, \"displayJobId\": \"200061710\", \"name\": \"Research Intern - Machine Learning for Biology and Healthcare\", \"locations\": [\"United States, Massachusetts, Cambridge\"], \"standardizedLocations\": [\"Cambridge, MA, US\"], \"postedTs\": 1791917916, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1791915925, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200061710\", \"positionUrl\": \"/careers/job/1970393557040333\"}, {\"id\": 1970393556978896, \"displayJobId\": \"200050323\", \"name\": \"Product Management INTERN\", \"locations\": [\"India, Multiple Locations, Multiple Locations\"], \"standardizedLocations\": [\"IN\"], \"postedTs\": 1787651792, \"solrScore\": null, \"stars\": 0, \"department\": \"Product Management\", \"creationTs\": 1787306634, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200050323\", \"positionUrl\": \"/careers/job/1970393556978896\"}, {\"id\": 1970393556999316, \"displayJobId\": \"200055967\", \"name\": \"Software Engineering INTERN\", \"locations\": [\"Mexico, Multiple Locations, Multiple Locations\"], \"standardizedLocations\": [\"MX\"], \"postedTs\": 1789585396, \"solrScore\": null, \"stars\": 0, \"department\": \"Software Engineering\", \"creationTs\": 1789508488, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200055967\", \"positionUrl\": \"/careers/job/1970393556999316\"}, {\"id\": 1970393557054069, \"displayJobId\": \"200065702\", \"name\": \"Research Intern - Research in Software Engineering, ML Systems, Agents\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1793838059, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1793836564, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200065702\", \"positionUrl\": \"/careers/job/1970393557054069\"}, {\"id\": 1970393557043740, \"displayJobId\": \"200062674\", \"name\": \"Research Intern - Algorithms Group: Generative Modeling\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1792446696, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1792444978, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200062674\", \"positionUrl\": \"/careers/job/1970393557043740\"}, {\"id\": 1970393556641091, \"displayJobId\": \"200015233\", \"name\": \"Research Sciences INTERN\", \"locations\": [\"India, Multiple Locations, Multiple Locations\"], \"standardizedLocations\": [\"IN\"], \"postedTs\": 1772192320, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1765367213, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200015233\", \"positionUrl\": \"/careers/job/1970393556641091\"}, {\"id\": 1970393557043468, \"displayJobId\": \"200062589\", \"name\": \"Research Intern: Audio and Speech Processing\", \"locations\": [\"Germany, Bavaria, Munich\"], \"standardizedLocations\": [\"Munich, BY, DE\"], \"postedTs\": 1792504516, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1792416641, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200062589\", \"positionUrl\": \"/careers/job/1970393557043468\"}], \"filterDef\": {\"facets\": {\"locations\": [[\"Remote\", 999999], [\"Redmond, WA, United States\", 860], [\"United States\", 300], [\"Mountain View, CA, United States\", 271], [\"Bengaluru, KA, India\", 118], [\"Atlanta, GA, United States\", 107], [\"New York, NY, United States\", 105], [\"Hyderabad, TS, India\", 98], [\"Tokyo, Japan\", 93], [\"Austin, TX, United States\", 82], [\"Reston, VA, United States\", 74]]}, \"smartFilters\": [{\"type\": \"multi_select\", \"filterName\": \"work_site\", \"title\": \"Work site\", \"options\": [{\"label\": \"3 DAYS / WEEK IN-OFFICE\", \"value\": \"3 days / week in-office\"}, {\"label\": \"0 DAYS / WEEK IN-OFFICE – REMOTE\", \"value\": \"0 days / week in-office – remote\"}, {\"label\": \"FULLY ON-SITE\", \"value\": \"fully on-site\"}, {\"label\": \"4 DAYS / WEEK IN-OFFICE\", \"value\": \"4 days / week in-office\"}, {\"label\": \"2 DAYS / WEEK IN-OFFICE\", \"value\": \"2 days / week in-office\"}, {\"label\": \"1 DAY / WEEK IN-OFFICE\", \"value\": \"1 day / week in-office\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"seniority\", \"title\": \"Experience level\", \"options\": [{\"label\": \"SENIOR\", \"value\": \"Senior\"}, {\"label\": \"MID-LEVEL\", \"value\": \"Mid-Level\"}, {\"label\": \"MANAGER\", \"value\": \"Manager\"}, {\"label\": \"DIRECTOR\", \"value\": \"Director\"}, {\"label\": \"ENTRY\", \"value\": \"Entry\"}, {\"label\": \"INTERN\", \"value\": \"Intern\"}, {\"label\": \"VICE PRESIDENT\", \"value\": \"Vice President\"}, {\"label\": \"CXO\", \"value\": \"CXO\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"profession\", \"title\": \"Profession\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"software engineering\"}, {\"label\": \"SALES\", \"value\": \"sales\"}, {\"label\": \"DATA CENTER\", \"value\": \"data center\"}, {\"label\": \"CUSTOMER SUCCESS\", \"value\": \"customer success\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"career_discipline\", \"title\": \"Discipline\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"Software Engineering\"}, {\"label\": \"CLOUD SOLUTION ARCHITECTURE\", \"value\": \"Cloud Solution Architecture\"}, {\"label\": \"PRODUCT MANAGEMENT\", \"value\": \"Product Management\"}, {\"label\": \"TECHNICAL PROGRAM MANAGEMENT\", \"value\": \"Technical Program Management\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}], \"allFilters\": [{\"type\": \"multi_select\", \"filterName\": \"roletype\", \"title\": \"Role type\", \"options\": [{\"label\": \"INDIVIDUAL CONTRIBUTOR\", \"value\": \"individual contributor\"}, {\"label\": \"PEOPLE MANAGER\", \"value\": \"people manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"employment_type\", \"title\": \"Employment type\", \"options\": [{\"label\": \"FULL-TIME\", \"value\": \"full-time\"}, {\"label\": \"INTERNSHIP\", \"value\": \"internship\"}, {\"label\": \"PART-TIME\", \"value\": \"part-time\"}, {\"label\": \"POST DOC RESEARCH\", \"value\": \"post doc research\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select_suggest\", \"filterName\": \"skills\", \"title\": \"Skills\", \"options\": [{\"label\": \"PROBLEM SOLVING\", \"value\": \"Problem Solving\"}, {\"label\": \"DECISION MAKING\", \"value\": \"Decision Making\"}, {\"label\": \"CONFLICT RESOLUTION\", \"value\": \"Conflict Resolution\"}, {\"label\": \"NEGOTIATION\", \"value\": \"Negotiation\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"hiring_title\", \"title\": \"Job title\", \"options\": [{\"label\": \"SENIOR SOFTWARE ENGINEER\", \"value\": \"senior software engineer\"}, {\"label\": \"PRINCIPAL SOFTWARE ENGINEER\", \"value\": \"principal software engineer\"}, {\"label\": \"DATA CENTER TECHNICIAN\", \"value\": \"data center technician\"}, {\"label\": \"PRINCIPAL PRODUCT MANAGER\", \"value\": \"principal product manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}]}, \"count\": 98, \"sortBy\": \"relevance\", \"appliedFilters\": {}, \"debug\": {}, \"savedSearchMetadata\": {\"savedSearchParamsHash\": null, \"isSavedSearchActive\": false}, \"resultsMetaData\": {\"usedFuzzSearch\": false}}, \"metadata\": null}"
+  },
+  {
+   "method": "GET",
+   "url": "https://apply.careers.microsoft.com/api/pcsx/search?domain=microsoft.com&query=intern&start=40",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json",
+   "text": "{\"status\": 200, \"error\": {\"message\": \"\", \"body\": \"\"}, \"data\": {\"positions\": [{\"id\": 1970393557040344, \"displayJobId\": \"200061716\", \"name\": \"Research Intern - Agentic Data Memory\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1792172988, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1791916975, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200061716\", \"positionUrl\": \"/careers/job/1970393557040344\"}, {\"id\": 1970393557042145, \"displayJobId\": \"200062418\", \"name\": \"Research Intern - Machine Learning at MSR NYC\", \"locations\": [\"United States, New York, New York\", \"United States, Massachusetts, Cambridge\"], \"standardizedLocations\": [\"New York, NY, US\", \"Cambridge, MA, US\"], \"postedTs\": 1792172135, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1792169989, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200062418\", \"positionUrl\": \"/careers/job/1970393557042145\"}, {\"id\": 1970393557042156, \"displayJobId\": \"200062421\", \"name\": \"Research Intern - MSR AI Interaction and Learning\", \"locations\": [\"United States, Washington, Redmond\", \"United States, New York, New York\"], \"standardizedLocations\": [\"Redmond, WA, US\", \"New York, NY, US\"], \"postedTs\": 1792172059, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1792170549, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200062421\", \"positionUrl\": \"/careers/job/1970393557042156\"}, {\"id\": 1970393557040502, \"displayJobId\": \"200061780\", \"name\": \"Research Intern - Machine Learning and Statistics\", \"locations\": [\"United States, Massachusetts, Cambridge\", \"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Cambridge, MA, US\", \"Redmond, WA, US\"], \"postedTs\": 1791935104, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1791933540, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200061780\", \"positionUrl\": \"/careers/job/1970393557040502\"}, {\"id\": 1970393556983221, \"displayJobId\": \"200052631\", \"name\": \"Software Engineering Intern - CTJ - TS\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1789151907, \"solrScore\": null, \"stars\": 0, \"department\": \"Software Engineering\", \"creationTs\": 1787942549, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200052631\", \"positionUrl\": \"/careers/job/1970393556983221\"}, {\"id\": 1970393556983223, \"displayJobId\": \"200052634\", \"name\": \"Software Engineering Intern - CTJ - TS\", \"locations\": [\"United States, Virginia, Reston\"], \"standardizedLocations\": [\"Reston, VA, US\"], \"postedTs\": 1789151972, \"solrScore\": null, \"stars\": 0, \"department\": \"Software Engineering\", \"creationTs\": 1787943004, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200052634\", \"positionUrl\": \"/careers/job/1970393556983223\"}, {\"id\": 1970393557043468, \"displayJobId\": \"200062589\", \"name\": \"Research Intern: Audio and Speech Processing\", \"locations\": [\"Germany, Bavaria, Munich\"], \"standardizedLocations\": [\"Munich, BY, DE\"], \"postedTs\": 1792504516, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1792416641, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200062589\", \"positionUrl\": \"/careers/job/1970393557043468\"}, {\"id\": 1970393557042485, \"displayJobId\": \"200062523\", \"name\": \"Data Science INTERN\", \"locations\": [\"Israel, Tel Aviv, Herzliya\"], \"standardizedLocations\": [\"Herzliya, Tel Aviv District, IL\"], \"postedTs\": 1792308515, \"solrScore\": null, \"stars\": 0, \"department\": \"Data Science\", \"creationTs\": 1792243745, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200062523\", \"positionUrl\": \"/careers/job/1970393557042485\"}, {\"id\": 1970393556978909, \"displayJobId\": \"200050325\", \"name\": \"Research Intern\", \"locations\": [\"China, Beijing, Beijing\", \"China, Shanghai, Shanghai\"], \"standardizedLocations\": [\"Beijing, Beijing, CN\", \"Shanghai, Shanghai, CN\"], \"postedTs\": 1793970919, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1787309714, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200050325\", \"positionUrl\": \"/careers/job/1970393556978909\"}, {\"id\": 1970393557043754, \"displayJobId\": \"200062675\", \"name\": \"Research Intern - Extended Perception Interaction Cognition (EPIC)\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1792446614, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1792445448, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200062675\", \"positionUrl\": \"/careers/job/1970393557043754\"}], \"filterDef\": {\"facets\": {\"locations\": [[\"Remote\", 999999], [\"Redmond, WA, United States\", 860], [\"United States\", 300], [\"Mountain View, CA, United States\", 271], [\"Bengaluru, KA, India\", 118], [\"Atlanta, GA, United States\", 107], [\"New York, NY, United States\", 105], [\"Hyderabad, TS, India\", 98], [\"Tokyo, Japan\", 93], [\"Austin, TX, United States\", 82], [\"Reston, VA, United States\", 74]]}, \"smartFilters\": [{\"type\": \"multi_select\", \"filterName\": \"work_site\", \"title\": \"Work site\", \"options\": [{\"label\": \"3 DAYS / WEEK IN-OFFICE\", \"value\": \"3 days / week in-office\"}, {\"label\": \"0 DAYS / WEEK IN-OFFICE – REMOTE\", \"value\": \"0 days / week in-office – remote\"}, {\"label\": \"FULLY ON-SITE\", \"value\": \"fully on-site\"}, {\"label\": \"4 DAYS / WEEK IN-OFFICE\", \"value\": \"4 days / week in-office\"}, {\"label\": \"2 DAYS / WEEK IN-OFFICE\", \"value\": \"2 days / week in-office\"}, {\"label\": \"1 DAY / WEEK IN-OFFICE\", \"value\": \"1 day / week in-office\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"seniority\", \"title\": \"Experience level\", \"options\": [{\"label\": \"SENIOR\", \"value\": \"Senior\"}, {\"label\": \"MID-LEVEL\", \"value\": \"Mid-Level\"}, {\"label\": \"MANAGER\", \"value\": \"Manager\"}, {\"label\": \"DIRECTOR\", \"value\": \"Director\"}, {\"label\": \"ENTRY\", \"value\": \"Entry\"}, {\"label\": \"INTERN\", \"value\": \"Intern\"}, {\"label\": \"VICE PRESIDENT\", \"value\": \"Vice President\"}, {\"label\": \"CXO\", \"value\": \"CXO\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"profession\", \"title\": \"Profession\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"software engineering\"}, {\"label\": \"SALES\", \"value\": \"sales\"}, {\"label\": \"DATA CENTER\", \"value\": \"data center\"}, {\"label\": \"CUSTOMER SUCCESS\", \"value\": \"customer success\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"career_discipline\", \"title\": \"Discipline\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"Software Engineering\"}, {\"label\": \"CLOUD SOLUTION ARCHITECTURE\", \"value\": \"Cloud Solution Architecture\"}, {\"label\": \"PRODUCT MANAGEMENT\", \"value\": \"Product Management\"}, {\"label\": \"TECHNICAL PROGRAM MANAGEMENT\", \"value\": \"Technical Program Management\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}], \"allFilters\": [{\"type\": \"multi_select\", \"filterName\": \"roletype\", \"title\": \"Role type\", \"options\": [{\"label\": \"INDIVIDUAL CONTRIBUTOR\", \"value\": \"individual contributor\"}, {\"label\": \"PEOPLE MANAGER\", \"value\": \"people manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"employment_type\", \"title\": \"Employment type\", \"options\": [{\"label\": \"FULL-TIME\", \"value\": \"full-time\"}, {\"label\": \"INTERNSHIP\", \"value\": \"internship\"}, {\"label\": \"PART-TIME\", \"value\": \"part-time\"}, {\"label\": \"POST DOC RESEARCH\", \"value\": \"post doc research\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select_suggest\", \"filterName\": \"skills\", \"title\": \"Skills\", \"options\": [{\"label\": \"PROBLEM SOLVING\", \"value\": \"Problem Solving\"}, {\"label\": \"DECISION MAKING\", \"value\": \"Decision Making\"}, {\"label\": \"CONFLICT RESOLUTION\", \"value\": \"Conflict Resolution\"}, {\"label\": \"NEGOTIATION\", \"value\": \"Negotiation\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"hiring_title\", \"title\": \"Job title\", \"options\": [{\"label\": \"SENIOR SOFTWARE ENGINEER\", \"value\": \"senior software engineer\"}, {\"label\": \"PRINCIPAL SOFTWARE ENGINEER\", \"value\": \"principal software engineer\"}, {\"label\": \"DATA CENTER TECHNICIAN\", \"value\": \"data center technician\"}, {\"label\": \"PRINCIPAL PRODUCT MANAGER\", \"value\": \"principal product manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}]}, \"count\": 98, \"sortBy\": \"relevance\", \"appliedFilters\": {}, \"debug\": {}, \"savedSearchMetadata\": {\"savedSearchParamsHash\": null, \"isSavedSearchActive\": false}, \"resultsMetaData\": {\"usedFuzzSearch\": false}}, \"metadata\": null}"
+  },
+  {
+   "method": "GET",
+   "url": "https://apply.careers.microsoft.com/api/pcsx/search?domain=microsoft.com&query=intern&start=50",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json",
+   "text": "{\"status\": 200, \"error\": {\"message\": \"\", \"body\": \"\"}, \"data\": {\"positions\": [{\"id\": 1970393557043465, \"displayJobId\": \"200062587\", \"name\": \"Applied Sciences INTERN\", \"locations\": [\"Israel, Tel Aviv, Tel Aviv\"], \"standardizedLocations\": [\"Tel Aviv-Yafo, Tel Aviv District, IL\"], \"postedTs\": 1792564180, \"solrScore\": null, \"stars\": 0, \"department\": \"Applied Sciences\", \"creationTs\": 1792416164, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200062587\", \"positionUrl\": \"/careers/job/1970393557043465\"}, {\"id\": 1970393557043380, \"displayJobId\": \"200062560\", \"name\": \"Security Research INTERN\", \"locations\": [\"India, Multiple Locations, Multiple Locations\"], \"standardizedLocations\": [\"IN\"], \"postedTs\": 1792748465, \"solrScore\": null, \"stars\": 0, \"department\": \"Security Research\", \"creationTs\": 1792409079, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200062560\", \"positionUrl\": \"/careers/job/1970393557043380\"}, {\"id\": 1970393556641091, \"displayJobId\": \"200015233\", \"name\": \"Research Sciences INTERN\", \"locations\": [\"India, Multiple Locations, Multiple Locations\"], \"standardizedLocations\": [\"IN\"], \"postedTs\": 1772192320, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1765367213, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200015233\", \"positionUrl\": \"/careers/job/1970393556641091\"}, {\"id\": 1970393557044765, \"displayJobId\": \"200063141\", \"name\": \"Software Engineer: Security & Identity Intern Opportunities for University Students, Cambridge\", \"locations\": [\"United States, Massachusetts, Cambridge\"], \"standardizedLocations\": [\"Cambridge, MA, US\"], \"postedTs\": 1792622205, \"solrScore\": null, \"stars\": 0, \"department\": \"Software Engineering\", \"creationTs\": 1792619693, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200063141\", \"positionUrl\": \"/careers/job/1970393557044765\"}, {\"id\": 1970393557022480, \"displayJobId\": \"200059346\", \"name\": \"Research Intern - Security Research Group, Microsoft Research Redmond\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1790888114, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1790879333, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200059346\", \"positionUrl\": \"/careers/job/1970393557022480\"}, {\"id\": 1970393557045445, \"displayJobId\": \"200063363\", \"name\": \"Research Intern - Gray Systems Lab (GSL)\", \"locations\": [\"United States, Washington, Redmond\", \"United States, California, Mountain View\"], \"standardizedLocations\": [\"Redmond, WA, US\", \"Mountain View, CA, US\"], \"postedTs\": 1792701517, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1792700108, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200063363\", \"positionUrl\": \"/careers/job/1970393557045445\"}, {\"id\": 1970393557045963, \"displayJobId\": \"200063562\", \"name\": \"Research Intern - Algorithms Group: Theory\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1792778757, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1792776132, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200063562\", \"positionUrl\": \"/careers/job/1970393557045963\"}, {\"id\": 1970393557042487, \"displayJobId\": \"200062524\", \"name\": \"Applied Science PhD Internship\", \"locations\": [\"United Kingdom, Berkshire, Reading\"], \"standardizedLocations\": [\"Reading, England, GB\"], \"postedTs\": 1793786009, \"solrScore\": null, \"stars\": 0, \"department\": \"Applied Sciences\", \"creationTs\": 1792244033, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200062524\", \"positionUrl\": \"/careers/job/1970393557042487\"}, {\"id\": 1970393557050154, \"displayJobId\": \"200064449\", \"name\": \"Applied Science: PhD Internship Opportunities, Turing\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1793279341, \"solrScore\": null, \"stars\": 0, \"department\": \"Applied Sciences\", \"creationTs\": 1793220391, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200064449\", \"positionUrl\": \"/careers/job/1970393557050154\"}, {\"id\": 1970393556925823, \"displayJobId\": \"200042630\", \"name\": \"Explore Program Engineering Internship Opportunities: First-Year Students, Redmond\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1793591051, \"solrScore\": null, \"stars\": 0, \"department\": \"Software Development\", \"creationTs\": 1783361498, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200042630\", \"positionUrl\": \"/careers/job/1970393556925823\"}], \"filterDef\": {\"facets\": {\"locations\": [[\"Remote\", 999999], [\"Redmond, WA, United States\", 860], [\"United States\", 300], [\"Mountain View, CA, United States\", 271], [\"Bengaluru, KA, India\", 118], [\"Atlanta, GA, United States\", 107], [\"New York, NY, United States\", 105], [\"Hyderabad, TS, India\", 98], [\"Tokyo, Japan\", 93], [\"Austin, TX, United States\", 82], [\"Reston, VA, United States\", 74]]}, \"smartFilters\": [{\"type\": \"multi_select\", \"filterName\": \"work_site\", \"title\": \"Work site\", \"options\": [{\"label\": \"3 DAYS / WEEK IN-OFFICE\", \"value\": \"3 days / week in-office\"}, {\"label\": \"0 DAYS / WEEK IN-OFFICE – REMOTE\", \"value\": \"0 days / week in-office – remote\"}, {\"label\": \"FULLY ON-SITE\", \"value\": \"fully on-site\"}, {\"label\": \"4 DAYS / WEEK IN-OFFICE\", \"value\": \"4 days / week in-office\"}, {\"label\": \"2 DAYS / WEEK IN-OFFICE\", \"value\": \"2 days / week in-office\"}, {\"label\": \"1 DAY / WEEK IN-OFFICE\", \"value\": \"1 day / week in-office\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"seniority\", \"title\": \"Experience level\", \"options\": [{\"label\": \"SENIOR\", \"value\": \"Senior\"}, {\"label\": \"MID-LEVEL\", \"value\": \"Mid-Level\"}, {\"label\": \"MANAGER\", \"value\": \"Manager\"}, {\"label\": \"DIRECTOR\", \"value\": \"Director\"}, {\"label\": \"ENTRY\", \"value\": \"Entry\"}, {\"label\": \"INTERN\", \"value\": \"Intern\"}, {\"label\": \"VICE PRESIDENT\", \"value\": \"Vice President\"}, {\"label\": \"CXO\", \"value\": \"CXO\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"profession\", \"title\": \"Profession\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"software engineering\"}, {\"label\": \"SALES\", \"value\": \"sales\"}, {\"label\": \"DATA CENTER\", \"value\": \"data center\"}, {\"label\": \"CUSTOMER SUCCESS\", \"value\": \"customer success\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"career_discipline\", \"title\": \"Discipline\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"Software Engineering\"}, {\"label\": \"CLOUD SOLUTION ARCHITECTURE\", \"value\": \"Cloud Solution Architecture\"}, {\"label\": \"PRODUCT MANAGEMENT\", \"value\": \"Product Management\"}, {\"label\": \"TECHNICAL PROGRAM MANAGEMENT\", \"value\": \"Technical Program Management\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}], \"allFilters\": [{\"type\": \"multi_select\", \"filterName\": \"roletype\", \"title\": \"Role type\", \"options\": [{\"label\": \"INDIVIDUAL CONTRIBUTOR\", \"value\": \"individual contributor\"}, {\"label\": \"PEOPLE MANAGER\", \"value\": \"people manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"employment_type\", \"title\": \"Employment type\", \"options\": [{\"label\": \"FULL-TIME\", \"value\": \"full-time\"}, {\"label\": \"INTERNSHIP\", \"value\": \"internship\"}, {\"label\": \"PART-TIME\", \"value\": \"part-time\"}, {\"label\": \"POST DOC RESEARCH\", \"value\": \"post doc research\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select_suggest\", \"filterName\": \"skills\", \"title\": \"Skills\", \"options\": [{\"label\": \"PROBLEM SOLVING\", \"value\": \"Problem Solving\"}, {\"label\": \"DECISION MAKING\", \"value\": \"Decision Making\"}, {\"label\": \"CONFLICT RESOLUTION\", \"value\": \"Conflict Resolution\"}, {\"label\": \"NEGOTIATION\", \"value\": \"Negotiation\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"hiring_title\", \"title\": \"Job title\", \"options\": [{\"label\": \"SENIOR SOFTWARE ENGINEER\", \"value\": \"senior software engineer\"}, {\"label\": \"PRINCIPAL SOFTWARE ENGINEER\", \"value\": \"principal software engineer\"}, {\"label\": \"DATA CENTER TECHNICIAN\", \"value\": \"data center technician\"}, {\"label\": \"PRINCIPAL PRODUCT MANAGER\", \"value\": \"principal product manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}]}, \"count\": 98, \"sortBy\": \"relevance\", \"appliedFilters\": {}, \"debug\": {}, \"savedSearchMetadata\": {\"savedSearchParamsHash\": null, \"isSavedSearchActive\": false}, \"resultsMetaData\": {\"usedFuzzSearch\": false}}, \"metadata\": null}"
+  },
+  {
+   "method": "GET",
+   "url": "https://apply.careers.microsoft.com/api/pcsx/search?domain=microsoft.com&query=intern&start=60",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json",
+   "text": "{\"status\": 200, \"error\": {\"message\": \"\", \"body\": \"\"}, \"data\": {\"positions\": [{\"id\": 1970393556982928, \"displayJobId\": \"200052449\", \"name\": \"Data Science: PhD Internship Opportunities - Redmond\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1793818734, \"solrScore\": null, \"stars\": 0, \"department\": \"Data Science\", \"creationTs\": 1787916811, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200052449\", \"positionUrl\": \"/careers/job/1970393556982928\"}, {\"id\": 1970393556942315, \"displayJobId\": \"200044946\", \"name\": \"Account Tech Strategist - Erada Internship\", \"locations\": [\"Qatar, Ad Dawḩah, Doha\"], \"standardizedLocations\": [\"Doha, Doha Municipality, QA\"], \"postedTs\": 1791805821, \"solrScore\": null, \"stars\": 0, \"department\": \"Account Technology\", \"creationTs\": 1784723111, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200044946\", \"positionUrl\": \"/careers/job/1970393556942315\"}, {\"id\": 1970393557050150, \"displayJobId\": \"200064446\", \"name\": \"Applied Scientist: Internship Opportunities, Turing\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1793279443, \"solrScore\": null, \"stars\": 0, \"department\": \"Applied Sciences\", \"creationTs\": 1793220350, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200064446\", \"positionUrl\": \"/careers/job/1970393557050150\"}, {\"id\": 1970393557044764, \"displayJobId\": \"200063140\", \"name\": \"Software Engineer: Internship Opportunities\", \"locations\": [\"United States, California, Aliso Viejo\"], \"standardizedLocations\": [\"Aliso Viejo, CA, US\"], \"postedTs\": 1793640795, \"solrScore\": null, \"stars\": 0, \"department\": \"Software Engineering\", \"creationTs\": 1792619110, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200063140\", \"positionUrl\": \"/careers/job/1970393557044764\"}, {\"id\": 1970393556944035, \"displayJobId\": \"200045365\", \"name\": \"Account Executive - Tomoh Apprenticeship\", \"locations\": [\"United Arab Emirates, Dubai, Dubai\"], \"standardizedLocations\": [\"Dubai, Dubai, AE\"], \"postedTs\": 1791355391, \"solrScore\": null, \"stars\": 0, \"department\": \"Account Management\", \"creationTs\": 1784899403, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200045365\", \"positionUrl\": \"/careers/job/1970393556944035\"}, {\"id\": 1970393557021004, \"displayJobId\": \"200059051\", \"name\": \"Solution Area Specialists: Student Worker Opportunities\", \"locations\": [\"Switzerland, Zürich, Zürich\"], \"standardizedLocations\": [\"Zürich, ZH, CH\"], \"postedTs\": 1791555345, \"solrScore\": null, \"stars\": 0, \"department\": \"Solution Area Specialists\", \"creationTs\": 1790765593, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200059051\", \"positionUrl\": \"/careers/job/1970393557021004\"}, {\"id\": 1970393556942219, \"displayJobId\": \"200044913\", \"name\": \"Solution Engineer - Erada Internship\", \"locations\": [\"Qatar, Ad Dawḩah, Doha\"], \"standardizedLocations\": [\"Doha, Doha Municipality, QA\"], \"postedTs\": 1791805742, \"solrScore\": null, \"stars\": 0, \"department\": \"Solution Engineering\", \"creationTs\": 1784709333, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200044913\", \"positionUrl\": \"/careers/job/1970393556942219\"}, {\"id\": 1970393556942310, \"displayJobId\": \"200044944\", \"name\": \"Cloud Solution Architect - Erada Internship\", \"locations\": [\"Qatar, Ad Dawḩah, Doha\"], \"standardizedLocations\": [\"Doha, Doha Municipality, QA\"], \"postedTs\": 1791805781, \"solrScore\": null, \"stars\": 0, \"department\": \"Cloud Solution Architecture\", \"creationTs\": 1784722330, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200044944\", \"positionUrl\": \"/careers/job/1970393556942310\"}, {\"id\": 1970393556943941, \"displayJobId\": \"200045318\", \"name\": \"Account Executive - Erada Internship\", \"locations\": [\"Qatar, Ad Dawḩah, Doha\"], \"standardizedLocations\": [\"Doha, Doha Municipality, QA\"], \"postedTs\": 1791805907, \"solrScore\": null, \"stars\": 0, \"department\": \"Account Management\", \"creationTs\": 1784883616, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200045318\", \"positionUrl\": \"/careers/job/1970393556943941\"}, {\"id\": 1970393556944057, \"displayJobId\": \"200045373\", \"name\": \"Solution Engineer - Tomoh Apprenticeship\", \"locations\": [\"United Arab Emirates, Dubai, Dubai\"], \"standardizedLocations\": [\"Dubai, Dubai, AE\"], \"postedTs\": 1791962085, \"solrScore\": null, \"stars\": 0, \"department\": \"Solution Engineering\", \"creationTs\": 1784901355, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200045373\", \"positionUrl\": \"/careers/job/1970393556944057\"}], \"filterDef\": {\"facets\": {\"locations\": [[\"Remote\", 999999], [\"Redmond, WA, United States\", 860], [\"United States\", 300], [\"Mountain View, CA, United States\", 271], [\"Bengaluru, KA, India\", 118], [\"Atlanta, GA, United States\", 107], [\"New York, NY, United States\", 105], [\"Hyderabad, TS, India\", 98], [\"Tokyo, Japan\", 93], [\"Austin, TX, United States\", 82], [\"Reston, VA, United States\", 74]]}, \"smartFilters\": [{\"type\": \"multi_select\", \"filterName\": \"work_site\", \"title\": \"Work site\", \"options\": [{\"label\": \"3 DAYS / WEEK IN-OFFICE\", \"value\": \"3 days / week in-office\"}, {\"label\": \"0 DAYS / WEEK IN-OFFICE – REMOTE\", \"value\": \"0 days / week in-office – remote\"}, {\"label\": \"FULLY ON-SITE\", \"value\": \"fully on-site\"}, {\"label\": \"4 DAYS / WEEK IN-OFFICE\", \"value\": \"4 days / week in-office\"}, {\"label\": \"2 DAYS / WEEK IN-OFFICE\", \"value\": \"2 days / week in-office\"}, {\"label\": \"1 DAY / WEEK IN-OFFICE\", \"value\": \"1 day / week in-office\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"seniority\", \"title\": \"Experience level\", \"options\": [{\"label\": \"SENIOR\", \"value\": \"Senior\"}, {\"label\": \"MID-LEVEL\", \"value\": \"Mid-Level\"}, {\"label\": \"MANAGER\", \"value\": \"Manager\"}, {\"label\": \"DIRECTOR\", \"value\": \"Director\"}, {\"label\": \"ENTRY\", \"value\": \"Entry\"}, {\"label\": \"INTERN\", \"value\": \"Intern\"}, {\"label\": \"VICE PRESIDENT\", \"value\": \"Vice President\"}, {\"label\": \"CXO\", \"value\": \"CXO\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"profession\", \"title\": \"Profession\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"software engineering\"}, {\"label\": \"SALES\", \"value\": \"sales\"}, {\"label\": \"DATA CENTER\", \"value\": \"data center\"}, {\"label\": \"CUSTOMER SUCCESS\", \"value\": \"customer success\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"career_discipline\", \"title\": \"Discipline\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"Software Engineering\"}, {\"label\": \"CLOUD SOLUTION ARCHITECTURE\", \"value\": \"Cloud Solution Architecture\"}, {\"label\": \"PRODUCT MANAGEMENT\", \"value\": \"Product Management\"}, {\"label\": \"TECHNICAL PROGRAM MANAGEMENT\", \"value\": \"Technical Program Management\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}], \"allFilters\": [{\"type\": \"multi_select\", \"filterName\": \"roletype\", \"title\": \"Role type\", \"options\": [{\"label\": \"INDIVIDUAL CONTRIBUTOR\", \"value\": \"individual contributor\"}, {\"label\": \"PEOPLE MANAGER\", \"value\": \"people manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"employment_type\", \"title\": \"Employment type\", \"options\": [{\"label\": \"FULL-TIME\", \"value\": \"full-time\"}, {\"label\": \"INTERNSHIP\", \"value\": \"internship\"}, {\"label\": \"PART-TIME\", \"value\": \"part-time\"}, {\"label\": \"POST DOC RESEARCH\", \"value\": \"post doc research\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select_suggest\", \"filterName\": \"skills\", \"title\": \"Skills\", \"options\": [{\"label\": \"PROBLEM SOLVING\", \"value\": \"Problem Solving\"}, {\"label\": \"DECISION MAKING\", \"value\": \"Decision Making\"}, {\"label\": \"CONFLICT RESOLUTION\", \"value\": \"Conflict Resolution\"}, {\"label\": \"NEGOTIATION\", \"value\": \"Negotiation\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"hiring_title\", \"title\": \"Job title\", \"options\": [{\"label\": \"SENIOR SOFTWARE ENGINEER\", \"value\": \"senior software engineer\"}, {\"label\": \"PRINCIPAL SOFTWARE ENGINEER\", \"value\": \"principal software engineer\"}, {\"label\": \"DATA CENTER TECHNICIAN\", \"value\": \"data center technician\"}, {\"label\": \"PRINCIPAL PRODUCT MANAGER\", \"value\": \"principal product manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}]}, \"count\": 98, \"sortBy\": \"relevance\", \"appliedFilters\": {}, \"debug\": {}, \"savedSearchMetadata\": {\"savedSearchParamsHash\": null, \"isSavedSearchActive\": false}, \"resultsMetaData\": {\"usedFuzzSearch\": false}}, \"metadata\": null}"
+  },
+  {
+   "method": "GET",
+   "url": "https://apply.careers.microsoft.com/api/pcsx/search?domain=microsoft.com&query=intern&start=70",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json",
+   "text": "{\"status\": 200, \"error\": {\"message\": \"\", \"body\": \"\"}, \"data\": {\"positions\": [{\"id\": 1970393557037859, \"displayJobId\": \"200061280\", \"name\": \"Software Engineer, Teamwork Experiences Internship Opportunities\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1793732873, \"solrScore\": null, \"stars\": 0, \"department\": \"Software Engineering\", \"creationTs\": 1791583272, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200061280\", \"positionUrl\": \"/careers/job/1970393557037859\"}, {\"id\": 1970393557054332, \"displayJobId\": \"200065846\", \"name\": \"Government Affairs Internship Opportunities\", \"locations\": [\"Egypt, Cairo, Cairo\"], \"standardizedLocations\": [\"Cairo, Cairo Governorate, EG\"], \"postedTs\": 1793963013, \"solrScore\": null, \"stars\": 0, \"department\": \"Government Affairs\", \"creationTs\": 1793883416, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200065846\", \"positionUrl\": \"/careers/job/1970393557054332\"}, {\"id\": 1970393556983239, \"displayJobId\": \"200052642\", \"name\": \"Technical Solutions: Internship Opportunities\", \"locations\": [\"Brazil, São Paulo, São Paulo\"], \"standardizedLocations\": [\"São Paulo, SP, BR\"], \"postedTs\": 1789566811, \"solrScore\": null, \"stars\": 0, \"department\": \"Solution Area Specialists\", \"creationTs\": 1787944269, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200052642\", \"positionUrl\": \"/careers/job/1970393556983239\"}, {\"id\": 1970393556972272, \"displayJobId\": \"200049562\", \"name\": \"Business Program Mgr - BBBEE Internship (PwD Opportunities)\", \"locations\": [\"South Africa, Gauteng, Johannesburg\"], \"standardizedLocations\": [\"Johannesburg, GP, ZA\"], \"postedTs\": 1792400789, \"solrScore\": null, \"stars\": 0, \"department\": \"Business Program Management\", \"creationTs\": 1787039731, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200049562\", \"positionUrl\": \"/careers/job/1970393556972272\"}, {\"id\": 1970393557040991, \"displayJobId\": \"200061967\", \"name\": \"Data Science - Forward Deployed Engineer: PhD Internship Opportunities\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1792479600, \"solrScore\": null, \"stars\": 0, \"department\": \"Data Science\", \"creationTs\": 1792008381, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200061967\", \"positionUrl\": \"/careers/job/1970393557040991\"}, {\"id\": 1970393556914938, \"displayJobId\": \"200041582\", \"name\": \"Critical Environment Operations\", \"locations\": [\"Mexico, Querétaro, Querétaro City\"], \"standardizedLocations\": [\"Santiago de Querétaro, Qro., MX\"], \"postedTs\": 1791398883, \"solrScore\": null, \"stars\": 0, \"department\": \"Critical Environment Ops\", \"creationTs\": 1782425963, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200041582\", \"positionUrl\": \"/careers/job/1970393556914938\"}, {\"id\": 1970393556944032, \"displayJobId\": \"200045362\", \"name\": \"Business Management - Tomoh Apprenticeship\", \"locations\": [\"United Arab Emirates, Dubai, Dubai\"], \"standardizedLocations\": [\"Dubai, Dubai, AE\"], \"postedTs\": 1791355474, \"solrScore\": null, \"stars\": 0, \"department\": \"Business Management\", \"creationTs\": 1784899012, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200045362\", \"positionUrl\": \"/careers/job/1970393556944032\"}, {\"id\": 1970393556944052, \"displayJobId\": \"200045369\", \"name\": \"Customer Success Acct Manager - Tomoh Apprenticeship\", \"locations\": [\"United Arab Emirates, Dubai, Dubai\"], \"standardizedLocations\": [\"Dubai, Dubai, AE\"], \"postedTs\": 1791355323, \"solrScore\": null, \"stars\": 0, \"department\": \"Customer Success Account Mgmt\", \"creationTs\": 1784900235, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200045369\", \"positionUrl\": \"/careers/job/1970393556944052\"}, {\"id\": 1970393556944328, \"displayJobId\": \"200045376\", \"name\": \"Cloud Solution Architect - Tomoh Apprenticeship\", \"locations\": [\"United Arab Emirates, Dubai, Dubai\"], \"standardizedLocations\": [\"Dubai, Dubai, AE\"], \"postedTs\": 1791355243, \"solrScore\": null, \"stars\": 0, \"department\": \"Cloud Solution Architecture\", \"creationTs\": 1784902332, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200045376\", \"positionUrl\": \"/careers/job/1970393556944328\"}, {\"id\": 1970393556999153, \"displayJobId\": \"200055886\", \"name\": \"Software Engineer II- CTJ- POLY\", \"locations\": [\"United States, Virginia, Reston\", \"United States, Washington, Redmond\", \"United States, Maryland, Annapolis Junction\"], \"standardizedLocations\": [\"Reston, VA, US\", \"Redmond, WA, US\", \"MD,US\"], \"postedTs\": 1792774821, \"solrScore\": null, \"stars\": 0, \"department\": \"Software Engineering\", \"creationTs\": 1789488619, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200055886\", \"positionUrl\": \"/careers/job/1970393556999153\"}], \"filterDef\": {\"facets\": {\"locations\": [[\"Remote\", 999999], [\"Redmond, WA, United States\", 860], [\"United States\", 300], [\"Mountain View, CA, United States\", 271], [\"Bengaluru, KA, India\", 118], [\"Atlanta, GA, United States\", 107], [\"New York, NY, United States\", 105], [\"Hyderabad, TS, India\", 98], [\"Tokyo, Japan\", 93], [\"Austin, TX, United States\", 82], [\"Reston, VA, United States\", 74]]}, \"smartFilters\": [{\"type\": \"multi_select\", \"filterName\": \"work_site\", \"title\": \"Work site\", \"options\": [{\"label\": \"3 DAYS / WEEK IN-OFFICE\", \"value\": \"3 days / week in-office\"}, {\"label\": \"0 DAYS / WEEK IN-OFFICE – REMOTE\", \"value\": \"0 days / week in-office – remote\"}, {\"label\": \"FULLY ON-SITE\", \"value\": \"fully on-site\"}, {\"label\": \"4 DAYS / WEEK IN-OFFICE\", \"value\": \"4 days / week in-office\"}, {\"label\": \"2 DAYS / WEEK IN-OFFICE\", \"value\": \"2 days / week in-office\"}, {\"label\": \"1 DAY / WEEK IN-OFFICE\", \"value\": \"1 day / week in-office\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"seniority\", \"title\": \"Experience level\", \"options\": [{\"label\": \"SENIOR\", \"value\": \"Senior\"}, {\"label\": \"MID-LEVEL\", \"value\": \"Mid-Level\"}, {\"label\": \"MANAGER\", \"value\": \"Manager\"}, {\"label\": \"DIRECTOR\", \"value\": \"Director\"}, {\"label\": \"ENTRY\", \"value\": \"Entry\"}, {\"label\": \"INTERN\", \"value\": \"Intern\"}, {\"label\": \"VICE PRESIDENT\", \"value\": \"Vice President\"}, {\"label\": \"CXO\", \"value\": \"CXO\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"profession\", \"title\": \"Profession\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"software engineering\"}, {\"label\": \"SALES\", \"value\": \"sales\"}, {\"label\": \"DATA CENTER\", \"value\": \"data center\"}, {\"label\": \"CUSTOMER SUCCESS\", \"value\": \"customer success\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"career_discipline\", \"title\": \"Discipline\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"Software Engineering\"}, {\"label\": \"CLOUD SOLUTION ARCHITECTURE\", \"value\": \"Cloud Solution Architecture\"}, {\"label\": \"PRODUCT MANAGEMENT\", \"value\": \"Product Management\"}, {\"label\": \"TECHNICAL PROGRAM MANAGEMENT\", \"value\": \"Technical Program Management\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}], \"allFilters\": [{\"type\": \"multi_select\", \"filterName\": \"roletype\", \"title\": \"Role type\", \"options\": [{\"label\": \"INDIVIDUAL CONTRIBUTOR\", \"value\": \"individual contributor\"}, {\"label\": \"PEOPLE MANAGER\", \"value\": \"people manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"employment_type\", \"title\": \"Employment type\", \"options\": [{\"label\": \"FULL-TIME\", \"value\": \"full-time\"}, {\"label\": \"INTERNSHIP\", \"value\": \"internship\"}, {\"label\": \"PART-TIME\", \"value\": \"part-time\"}, {\"label\": \"POST DOC RESEARCH\", \"value\": \"post doc research\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select_suggest\", \"filterName\": \"skills\", \"title\": \"Skills\", \"options\": [{\"label\": \"PROBLEM SOLVING\", \"value\": \"Problem Solving\"}, {\"label\": \"DECISION MAKING\", \"value\": \"Decision Making\"}, {\"label\": \"CONFLICT RESOLUTION\", \"value\": \"Conflict Resolution\"}, {\"label\": \"NEGOTIATION\", \"value\": \"Negotiation\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"hiring_title\", \"title\": \"Job title\", \"options\": [{\"label\": \"SENIOR SOFTWARE ENGINEER\", \"value\": \"senior software engineer\"}, {\"label\": \"PRINCIPAL SOFTWARE ENGINEER\", \"value\": \"principal software engineer\"}, {\"label\": \"DATA CENTER TECHNICIAN\", \"value\": \"data center technician\"}, {\"label\": \"PRINCIPAL PRODUCT MANAGER\", \"value\": \"principal product manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}]}, \"count\": 98, \"sortBy\": \"relevance\", \"appliedFilters\": {}, \"debug\": {}, \"savedSearchMetadata\": {\"savedSearchParamsHash\": null, \"isSavedSearchActive\": false}, \"resultsMetaData\": {\"usedFuzzSearch\": false}}, \"metadata\": null}"
+  },
+  {
+   "method": "GET",
+   "url": "https://apply.careers.microsoft.com/api/pcsx/search?domain=microsoft.com&query=intern&start=80",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json",
+   "text": "{\"status\": 200, \"error\": {\"message\": \"\", \"body\": \"\"}, \"data\": {\"positions\": [{\"id\": 1970393557002282, \"displayJobId\": \"200056942\", \"name\": \"Customer Success Account Management\", \"locations\": [\"Romania, Bucharest, Bucharest\"], \"standardizedLocations\": [\"Bucharest, Bucharest, RO\"], \"postedTs\": 1790772384, \"solrScore\": null, \"stars\": 0, \"department\": \"Customer Success Account Mgmt\", \"creationTs\": 1789743539, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200056942\", \"positionUrl\": \"/careers/job/1970393557002282\"}, {\"id\": 1970393556943955, \"displayJobId\": \"200045321\", \"name\": \"Sales Excellence Mgr - Tomoh Apprenticeship\", \"locations\": [\"United Arab Emirates, Dubai, Dubai\"], \"standardizedLocations\": [\"Dubai, Dubai, AE\"], \"postedTs\": 1791355560, \"solrScore\": null, \"stars\": 0, \"department\": \"Sales Excellence\", \"creationTs\": 1784888010, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200045321\", \"positionUrl\": \"/careers/job/1970393556943955\"}, {\"id\": 1970393556999317, \"displayJobId\": \"200055968\", \"name\": \"Vaga de Estágio Afirmativa PCD em Arquitetura de Solução em Nuvem (Cloud Solution Architect)\", \"locations\": [\"Brazil, São Paulo, São Paulo\"], \"standardizedLocations\": [\"São Paulo, SP, BR\"], \"postedTs\": 1789566547, \"solrScore\": null, \"stars\": 0, \"department\": \"Cloud Solution Architecture\", \"creationTs\": 1789508770, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200055968\", \"positionUrl\": \"/careers/job/1970393556999317\"}, {\"id\": 1970393557040277, \"displayJobId\": \"200061682\", \"name\": \"People Operations Services Lead - Offboarding EMEA\", \"locations\": [\"Czech Republic, Prague, Prague\"], \"standardizedLocations\": [\"Prague, Prague, CZ\"], \"postedTs\": 1793712700, \"solrScore\": null, \"stars\": 0, \"department\": \"HR Shared Services Support\", \"creationTs\": 1791908717, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200061682\", \"positionUrl\": \"/careers/job/1970393557040277\"}, {\"id\": 1970393557020995, \"displayJobId\": \"200059047\", \"name\": \"Customer Success Account Management: Student Worker Opportunities\", \"locations\": [\"Switzerland, Zürich, Zürich\"], \"standardizedLocations\": [\"Zürich, ZH, CH\"], \"postedTs\": 1791555902, \"solrScore\": null, \"stars\": 0, \"department\": \"Customer Success Account Mgmt\", \"creationTs\": 1790765137, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200059047\", \"positionUrl\": \"/careers/job/1970393557020995\"}, {\"id\": 1970393556944234, \"displayJobId\": \"200045375\", \"name\": \"Specialist - Tomoh Apprenticeship\", \"locations\": [\"United Arab Emirates, Dubai, Dubai\"], \"standardizedLocations\": [\"Dubai, Dubai, AE\"], \"postedTs\": 1791962283, \"solrScore\": null, \"stars\": 0, \"department\": \"Solution Area Specialists\", \"creationTs\": 1784901844, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200045375\", \"positionUrl\": \"/careers/job/1970393556944234\"}, {\"id\": 1970393556945079, \"displayJobId\": \"200045506\", \"name\": \"Account Technology - Tomoh Apprenticeship\", \"locations\": [\"United Arab Emirates, Dubai, Dubai\"], \"standardizedLocations\": [\"Dubai, Dubai, AE\"], \"postedTs\": 1791962221, \"solrScore\": null, \"stars\": 0, \"department\": \"Account Technology\", \"creationTs\": 1785138508, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200045506\", \"positionUrl\": \"/careers/job/1970393556945079\"}, {\"id\": 1970393556982851, \"displayJobId\": \"200052426\", \"name\": \"Ptnr Sol Sales Mgr - Tomoh Apprenticeship\", \"locations\": [\"United Arab Emirates, Dubai, Dubai\"], \"standardizedLocations\": [\"Dubai, Dubai, AE\"], \"postedTs\": 1792141487, \"solrScore\": null, \"stars\": 0, \"department\": \"Partner Solution Sales\", \"creationTs\": 1787903262, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200052426\", \"positionUrl\": \"/careers/job/1970393556982851\"}, {\"id\": 1970393557008498, \"displayJobId\": \"200058220\", \"name\": \"Part time Logistics Technician\", \"locations\": [\"United Kingdom, Berkshire, Slough\"], \"standardizedLocations\": [\"Slough, England, GB\"], \"postedTs\": 1790696423, \"solrScore\": null, \"stars\": 0, \"department\": \"Logistics Technician\", \"creationTs\": 1790348436, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200058220\", \"positionUrl\": \"/careers/job/1970393557008498\"}, {\"id\": 1970393556972332, \"displayJobId\": \"200049580\", \"name\": \"Post Doc Researcher\", \"locations\": [\"India, Karnataka, Bangalore\"], \"standardizedLocations\": [\"Bengaluru, KA, IN\"], \"postedTs\": 1787218362, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1787054241, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200049580\", \"positionUrl\": \"/careers/job/1970393556972332\"}], \"filterDef\": {\"facets\": {\"locations\": [[\"Remote\", 999999], [\"Redmond, WA, United States\", 860], [\"United States\", 300], [\"Mountain View, CA, United States\", 271], [\"Bengaluru, KA, India\", 118], [\"Atlanta, GA, United States\", 107], [\"New York, NY, United States\", 105], [\"Hyderabad, TS, India\", 98], [\"Tokyo, Japan\", 93], [\"Austin, TX, United States\", 82], [\"Reston, VA, United States\", 74]]}, \"smartFilters\": [{\"type\": \"multi_select\", \"filterName\": \"work_site\", \"title\": \"Work site\", \"options\": [{\"label\": \"3 DAYS / WEEK IN-OFFICE\", \"value\": \"3 days / week in-office\"}, {\"label\": \"0 DAYS / WEEK IN-OFFICE – REMOTE\", \"value\": \"0 days / week in-office – remote\"}, {\"label\": \"FULLY ON-SITE\", \"value\": \"fully on-site\"}, {\"label\": \"4 DAYS / WEEK IN-OFFICE\", \"value\": \"4 days / week in-office\"}, {\"label\": \"2 DAYS / WEEK IN-OFFICE\", \"value\": \"2 days / week in-office\"}, {\"label\": \"1 DAY / WEEK IN-OFFICE\", \"value\": \"1 day / week in-office\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"seniority\", \"title\": \"Experience level\", \"options\": [{\"label\": \"SENIOR\", \"value\": \"Senior\"}, {\"label\": \"MID-LEVEL\", \"value\": \"Mid-Level\"}, {\"label\": \"MANAGER\", \"value\": \"Manager\"}, {\"label\": \"DIRECTOR\", \"value\": \"Director\"}, {\"label\": \"ENTRY\", \"value\": \"Entry\"}, {\"label\": \"INTERN\", \"value\": \"Intern\"}, {\"label\": \"VICE PRESIDENT\", \"value\": \"Vice President\"}, {\"label\": \"CXO\", \"value\": \"CXO\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"profession\", \"title\": \"Profession\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"software engineering\"}, {\"label\": \"SALES\", \"value\": \"sales\"}, {\"label\": \"DATA CENTER\", \"value\": \"data center\"}, {\"label\": \"CUSTOMER SUCCESS\", \"value\": \"customer success\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"career_discipline\", \"title\": \"Discipline\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"Software Engineering\"}, {\"label\": \"CLOUD SOLUTION ARCHITECTURE\", \"value\": \"Cloud Solution Architecture\"}, {\"label\": \"PRODUCT MANAGEMENT\", \"value\": \"Product Management\"}, {\"label\": \"TECHNICAL PROGRAM MANAGEMENT\", \"value\": \"Technical Program Management\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}], \"allFilters\": [{\"type\": \"multi_select\", \"filterName\": \"roletype\", \"title\": \"Role type\", \"options\": [{\"label\": \"INDIVIDUAL CONTRIBUTOR\", \"value\": \"individual contributor\"}, {\"label\": \"PEOPLE MANAGER\", \"value\": \"people manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"employment_type\", \"title\": \"Employment type\", \"options\": [{\"label\": \"FULL-TIME\", \"value\": \"full-time\"}, {\"label\": \"INTERNSHIP\", \"value\": \"internship\"}, {\"label\": \"PART-TIME\", \"value\": \"part-time\"}, {\"label\": \"POST DOC RESEARCH\", \"value\": \"post doc research\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select_suggest\", \"filterName\": \"skills\", \"title\": \"Skills\", \"options\": [{\"label\": \"PROBLEM SOLVING\", \"value\": \"Problem Solving\"}, {\"label\": \"DECISION MAKING\", \"value\": \"Decision Making\"}, {\"label\": \"CONFLICT RESOLUTION\", \"value\": \"Conflict Resolution\"}, {\"label\": \"NEGOTIATION\", \"value\": \"Negotiation\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"hiring_title\", \"title\": \"Job title\", \"options\": [{\"label\": \"SENIOR SOFTWARE ENGINEER\", \"value\": \"senior software engineer\"}, {\"label\": \"PRINCIPAL SOFTWARE ENGINEER\", \"value\": \"principal software engineer\"}, {\"label\": \"DATA CENTER TECHNICIAN\", \"value\": \"data center technician\"}, {\"label\": \"PRINCIPAL PRODUCT MANAGER\", \"value\": \"principal product manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}]}, \"count\": 98, \"sortBy\": \"relevance\", \"appliedFilters\": {}, \"debug\": {}, \"savedSearchMetadata\": {\"savedSearchParamsHash\": null, \"isSavedSearchActive\": false}, \"resultsMetaData\": {\"usedFuzzSearch\": false}}, \"metadata\": null}"
+  },
+  {
+   "method": "GET",
+   "url": "https://apply.careers.microsoft.com/api/pcsx/search?domain=microsoft.com&query=intern&start=90",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json",
+   "text": "{\"status\": 200, \"error\": {\"message\": \"\", \"body\": \"\"}, \"data\": {\"positions\": [{\"id\": 1970393556943370, \"displayJobId\": \"200045092\", \"name\": \"Customer Success Acct Manager - Erada Internship\", \"locations\": [\"Qatar, Ad Dawḩah, Doha\"], \"standardizedLocations\": [\"Doha, Doha Municipality, QA\"], \"postedTs\": 1791805864, \"solrScore\": null, \"stars\": 0, \"department\": \"Customer Success Account Mgmt\", \"creationTs\": 1784795693, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200045092\", \"positionUrl\": \"/careers/job/1970393556943370\"}, {\"id\": 1970393556982857, \"displayJobId\": \"200052427\", \"name\": \"National Tech Officer - Tomoh Apprenticeship\", \"locations\": [\"United Arab Emirates, Dubai, Dubai\"], \"standardizedLocations\": [\"Dubai, Dubai, AE\"], \"postedTs\": 1792567339, \"solrScore\": null, \"stars\": 0, \"department\": \"National Technology\", \"creationTs\": 1787905779, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200052427\", \"positionUrl\": \"/careers/job/1970393556982857\"}, {\"id\": 1970393557050083, \"displayJobId\": \"200064403\", \"name\": \"Microsoft Research Cambridge Internship Program - Machine Intelligence\", \"locations\": [\"United Kingdom, Cambridgeshire, Cambridge\"], \"standardizedLocations\": [\"Cambridge, England, GB\"], \"postedTs\": 1793268457, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1793214042, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200064403\", \"positionUrl\": \"/careers/job/1970393557050083\"}, {\"id\": 1970393557050102, \"displayJobId\": \"200064410\", \"name\": \"Cambridge Internship Program Azure Research, Security and Privacy\", \"locations\": [\"United Kingdom, Cambridgeshire, Cambridge\"], \"standardizedLocations\": [\"Cambridge, England, GB\"], \"postedTs\": 1793351346, \"solrScore\": null, \"stars\": 0, \"department\": \"Research Sciences\", \"creationTs\": 1793214339, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200064410\", \"positionUrl\": \"/careers/job/1970393557050102\"}, {\"id\": 1970393557021085, \"displayJobId\": \"200059059\", \"name\": \"Executive Business Administrator\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1790867962, \"solrScore\": null, \"stars\": 0, \"department\": \"Business Support\", \"creationTs\": 1790774040, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200059059\", \"positionUrl\": \"/careers/job/1970393557021085\"}, {\"id\": 1970393557021092, \"displayJobId\": \"200059065\", \"name\": \"Executive Business Admin\", \"locations\": [\"United States, Washington, Redmond\"], \"standardizedLocations\": [\"Redmond, WA, US\"], \"postedTs\": 1790867927, \"solrScore\": null, \"stars\": 0, \"department\": \"Business Support\", \"creationTs\": 1790777797, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200059065\", \"positionUrl\": \"/careers/job/1970393557021092\"}, {\"id\": 1970393556989641, \"displayJobId\": \"200053929\", \"name\": \"Internal Audit Manager\", \"locations\": [\"United States, Washington, Redmond\", \"United States, Georgia, Atlanta\"], \"standardizedLocations\": [\"Redmond, WA, US\", \"Atlanta, GA, US\"], \"postedTs\": 1790342839, \"solrScore\": null, \"stars\": 0, \"department\": \"Internal Audit\", \"creationTs\": 1788556696, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200053929\", \"positionUrl\": \"/careers/job/1970393556989641\"}, {\"id\": 1970393556984937, \"displayJobId\": \"200053190\", \"name\": \"Head of Internal Audit, MIPSL and Audit Program Management\", \"locations\": [\"Ireland, Multiple Locations, Multiple Locations\", \"Ireland, Dublin, Dublin\"], \"standardizedLocations\": [\"Ireland, Multiple Locations, Multiple Locations\", \"Dublin, D, IE\"], \"postedTs\": 1790607965, \"solrScore\": null, \"stars\": 0, \"department\": \"Internal Audit\", \"creationTs\": 1788302904, \"isHot\": 0, \"workLocationOption\": \"onsite\", \"locationFlexibility\": null, \"atsJobId\": \"200053190\", \"positionUrl\": \"/careers/job/1970393556984937\"}], \"filterDef\": {\"facets\": {\"locations\": [[\"Remote\", 999999], [\"Redmond, WA, United States\", 860], [\"United States\", 300], [\"Mountain View, CA, United States\", 271], [\"Bengaluru, KA, India\", 118], [\"Atlanta, GA, United States\", 107], [\"New York, NY, United States\", 105], [\"Hyderabad, TS, India\", 98], [\"Tokyo, Japan\", 93], [\"Austin, TX, United States\", 82], [\"Reston, VA, United States\", 74]]}, \"smartFilters\": [{\"type\": \"multi_select\", \"filterName\": \"work_site\", \"title\": \"Work site\", \"options\": [{\"label\": \"3 DAYS / WEEK IN-OFFICE\", \"value\": \"3 days / week in-office\"}, {\"label\": \"0 DAYS / WEEK IN-OFFICE – REMOTE\", \"value\": \"0 days / week in-office – remote\"}, {\"label\": \"FULLY ON-SITE\", \"value\": \"fully on-site\"}, {\"label\": \"4 DAYS / WEEK IN-OFFICE\", \"value\": \"4 days / week in-office\"}, {\"label\": \"2 DAYS / WEEK IN-OFFICE\", \"value\": \"2 days / week in-office\"}, {\"label\": \"1 DAY / WEEK IN-OFFICE\", \"value\": \"1 day / week in-office\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"seniority\", \"title\": \"Experience level\", \"options\": [{\"label\": \"SENIOR\", \"value\": \"Senior\"}, {\"label\": \"MID-LEVEL\", \"value\": \"Mid-Level\"}, {\"label\": \"MANAGER\", \"value\": \"Manager\"}, {\"label\": \"DIRECTOR\", \"value\": \"Director\"}, {\"label\": \"ENTRY\", \"value\": \"Entry\"}, {\"label\": \"INTERN\", \"value\": \"Intern\"}, {\"label\": \"VICE PRESIDENT\", \"value\": \"Vice President\"}, {\"label\": \"CXO\", \"value\": \"CXO\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"profession\", \"title\": \"Profession\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"software engineering\"}, {\"label\": \"SALES\", \"value\": \"sales\"}, {\"label\": \"DATA CENTER\", \"value\": \"data center\"}, {\"label\": \"CUSTOMER SUCCESS\", \"value\": \"customer success\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"career_discipline\", \"title\": \"Discipline\", \"options\": [{\"label\": \"SOFTWARE ENGINEERING\", \"value\": \"Software Engineering\"}, {\"label\": \"CLOUD SOLUTION ARCHITECTURE\", \"value\": \"Cloud Solution Architecture\"}, {\"label\": \"PRODUCT MANAGEMENT\", \"value\": \"Product Management\"}, {\"label\": \"TECHNICAL PROGRAM MANAGEMENT\", \"value\": \"Technical Program Management\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}], \"allFilters\": [{\"type\": \"multi_select\", \"filterName\": \"roletype\", \"title\": \"Role type\", \"options\": [{\"label\": \"INDIVIDUAL CONTRIBUTOR\", \"value\": \"individual contributor\"}, {\"label\": \"PEOPLE MANAGER\", \"value\": \"people manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"employment_type\", \"title\": \"Employment type\", \"options\": [{\"label\": \"FULL-TIME\", \"value\": \"full-time\"}, {\"label\": \"INTERNSHIP\", \"value\": \"internship\"}, {\"label\": \"PART-TIME\", \"value\": \"part-time\"}, {\"label\": \"POST DOC RESEARCH\", \"value\": \"post doc research\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select_suggest\", \"filterName\": \"skills\", \"title\": \"Skills\", \"options\": [{\"label\": \"PROBLEM SOLVING\", \"value\": \"Problem Solving\"}, {\"label\": \"DECISION MAKING\", \"value\": \"Decision Making\"}, {\"label\": \"CONFLICT RESOLUTION\", \"value\": \"Conflict Resolution\"}, {\"label\": \"NEGOTIATION\", \"value\": \"Negotiation\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}, {\"type\": \"multi_select\", \"filterName\": \"hiring_title\", \"title\": \"Job title\", \"options\": [{\"label\": \"SENIOR SOFTWARE ENGINEER\", \"value\": \"senior software engineer\"}, {\"label\": \"PRINCIPAL SOFTWARE ENGINEER\", \"value\": \"principal software engineer\"}, {\"label\": \"DATA CENTER TECHNICIAN\", \"value\": \"data center technician\"}, {\"label\": \"PRINCIPAL PRODUCT MANAGER\", \"value\": \"principal product manager\"}], \"tooltip\": null, \"extraData\": {}, \"displayCount\": 50, \"translateOptions\": true, \"allowFreeText\": false}]}, \"count\": 98, \"sortBy\": \"relevance\", \"appliedFilters\": {}, \"debug\": {}, \"savedSearchMetadata\": {\"savedSearchParamsHash\": null, \"isSavedSearchActive\": false}, \"resultsMetaData\": {\"usedFuzzSearch\": false}}, \"metadata\": null}"
+  }
+ ],
+ "expected": [
+  {
+   "id": "microsoft:1970393556922930",
+   "company": "Microsoft",
+   "title": "Software Engineer: Security & Identity Intern Opportunities for University Students, Redmond",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556922930",
+   "posted_at": "2026-11-05",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557027326",
+   "company": "Microsoft",
+   "title": "Research Intern - Audio and Acoustics",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557027326",
+   "posted_at": "2026-10-08",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557027378",
+   "company": "Microsoft",
+   "title": "Research Intern - Brain-Computer Interfaces",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557027378",
+   "posted_at": "2026-10-08",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557037649",
+   "company": "Microsoft",
+   "title": "Research Intern - Document Intelligence and Content Understanding",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557037649",
+   "posted_at": "2026-10-09",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557049981",
+   "company": "Microsoft",
+   "title": "Research Intern - Machine Learning and Optimization - Redmond",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557049981",
+   "posted_at": "2026-10-28",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557050039",
+   "company": "Microsoft",
+   "title": "Research Intern - MSR Systems Research Group - Redmond",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557050039",
+   "posted_at": "2026-10-28",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557052982",
+   "company": "Microsoft",
+   "title": "Research Intern - Foundational Models & Agent",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557052982",
+   "posted_at": "2026-11-02",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556978904",
+   "company": "Microsoft",
+   "title": "Research Intern",
+   "location": "Singapore, Singapore, Singapore",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556978904",
+   "posted_at": "2026-09-01",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556982268",
+   "company": "Microsoft",
+   "title": "Research Intern",
+   "location": "Hong Kong SAR, Hong Kong Island, Hong Kong",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556982268",
+   "posted_at": "2026-09-01",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557043712",
+   "company": "Microsoft",
+   "title": "Business Program Manager, Global Intern Experience & Innovation",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557043712",
+   "posted_at": "2026-11-02",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556951950",
+   "company": "Microsoft",
+   "title": "Software Engineer: Intern Opportunities for University Students - CoreAI - Redmond, WA",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556951950",
+   "posted_at": "2026-11-02",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556998387",
+   "company": "Microsoft",
+   "title": "Cloud Solution Architecture Intern",
+   "location": "Belgium, Brussels Region, Brussels",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556998387",
+   "posted_at": "2026-09-14",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556983226",
+   "company": "Microsoft",
+   "title": "Product Management Intern - CTJ - TS",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556983226",
+   "posted_at": "2026-09-11",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556998780",
+   "company": "Microsoft",
+   "title": "Account Executive Intern",
+   "location": "Belgium, Brussels Region, Brussels",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556998780",
+   "posted_at": "2026-09-15",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557053016",
+   "company": "Microsoft",
+   "title": "Research Intern - Speech Processing",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557053016",
+   "posted_at": "2026-11-02",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556992502",
+   "company": "Microsoft",
+   "title": "Product Design INTERN",
+   "location": "India, Multiple Locations, Multiple Locations",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556992502",
+   "posted_at": "2026-09-10",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557027387",
+   "company": "Microsoft",
+   "title": "Researcher Intern, CoreAI",
+   "location": "United States, Washington, Redmond; United States, California, Mountain View",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557027387",
+   "posted_at": "2026-11-02",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557039243",
+   "company": "Microsoft",
+   "title": "Research Intern - Agentic Graph Learning",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557039243",
+   "posted_at": "2026-10-12",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557041012",
+   "company": "Microsoft",
+   "title": "Research Intern - Interactive Multimodal Futures Group (Situated, Social & Ubiquitous Computing)",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557041012",
+   "posted_at": "2026-10-14",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557040080",
+   "company": "Microsoft",
+   "title": "Applied Sciences INTERN",
+   "location": "Israel, Tel Aviv, Herzliya",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557040080",
+   "posted_at": "2026-10-13",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557008574",
+   "company": "Microsoft",
+   "title": "Research Intern - Data Systems",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557008574",
+   "posted_at": "2026-09-25",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557021663",
+   "company": "Microsoft",
+   "title": "Research Intern - Quantum Algorithms",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557021663",
+   "posted_at": "2026-09-30",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557008286",
+   "company": "Microsoft",
+   "title": "Business Operations & Management / Assistant Coordinator Intern",
+   "location": "Belgium, Brussels Region, Brussels",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557008286",
+   "posted_at": "2026-09-29",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557051409",
+   "company": "Microsoft",
+   "title": "Research Intern - Office of Applied Research",
+   "location": "United States, Washington, Redmond; United States, New York, New York",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557051409",
+   "posted_at": "2026-10-30",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556983238",
+   "company": "Microsoft",
+   "title": "Technical Program Management Intern - CTJ - TS",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556983238",
+   "posted_at": "2026-09-11",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556988203",
+   "company": "Microsoft",
+   "title": "Security Assurance Intern - CTJ - TS",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556988203",
+   "posted_at": "2026-09-11",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557040927",
+   "company": "Microsoft",
+   "title": "Stagiaire en recherche - apprentissage automatique; Research Intern - Machine Learning",
+   "location": "Canada, Québec, Montreal",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557040927",
+   "posted_at": "2026-10-14",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556998388",
+   "company": "Microsoft",
+   "title": "Customer Success Account Management Intern",
+   "location": "Belgium, Brussels Region, Brussels",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556998388",
+   "posted_at": "2026-09-16",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557041731",
+   "company": "Microsoft",
+   "title": "Research Intern - Efficient AI Software Systems",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557041731",
+   "posted_at": "2026-10-15",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556972877",
+   "company": "Microsoft",
+   "title": "Research Sciences INTERN",
+   "location": "Japan, Tokyo-to, Tokyo",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556972877",
+   "posted_at": "2026-08-20",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557021518",
+   "company": "Microsoft",
+   "title": "Stagiaire en opérations critiques Centre de données / Critical Environment Ops INTERN Data Center",
+   "location": "Canada, Québec, Quebec City",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557021518",
+   "posted_at": "2026-11-02",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557021552",
+   "company": "Microsoft",
+   "title": "Stagiaire - Technicien de Centre de Données (TI) / Datacenter Technician - Intern (IT)",
+   "location": "Canada, Québec, Quebec City",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557021552",
+   "posted_at": "2026-11-02",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557053024",
+   "company": "Microsoft",
+   "title": "Research Intern - Coding Agents & Post-Training Optimization",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557053024",
+   "posted_at": "2026-11-02",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557040333",
+   "company": "Microsoft",
+   "title": "Research Intern - Machine Learning for Biology and Healthcare",
+   "location": "United States, Massachusetts, Cambridge",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557040333",
+   "posted_at": "2026-10-13",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556978896",
+   "company": "Microsoft",
+   "title": "Product Management INTERN",
+   "location": "India, Multiple Locations, Multiple Locations",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556978896",
+   "posted_at": "2026-08-25",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556999316",
+   "company": "Microsoft",
+   "title": "Software Engineering INTERN",
+   "location": "Mexico, Multiple Locations, Multiple Locations",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556999316",
+   "posted_at": "2026-09-16",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557054069",
+   "company": "Microsoft",
+   "title": "Research Intern - Research in Software Engineering, ML Systems, Agents",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557054069",
+   "posted_at": "2026-11-05",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557043740",
+   "company": "Microsoft",
+   "title": "Research Intern - Algorithms Group: Generative Modeling",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557043740",
+   "posted_at": "2026-10-19",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556641091",
+   "company": "Microsoft",
+   "title": "Research Sciences INTERN",
+   "location": "India, Multiple Locations, Multiple Locations",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556641091",
+   "posted_at": "2026-02-27",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557043468",
+   "company": "Microsoft",
+   "title": "Research Intern: Audio and Speech Processing",
+   "location": "Germany, Bavaria, Munich",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557043468",
+   "posted_at": "2026-10-20",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557040344",
+   "company": "Microsoft",
+   "title": "Research Intern - Agentic Data Memory",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557040344",
+   "posted_at": "2026-10-16",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557042145",
+   "company": "Microsoft",
+   "title": "Research Intern - Machine Learning at MSR NYC",
+   "location": "United States, New York, New York; United States, Massachusetts, Cambridge",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557042145",
+   "posted_at": "2026-10-16",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557042156",
+   "company": "Microsoft",
+   "title": "Research Intern - MSR AI Interaction and Learning",
+   "location": "United States, Washington, Redmond; United States, New York, New York",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557042156",
+   "posted_at": "2026-10-16",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557040502",
+   "company": "Microsoft",
+   "title": "Research Intern - Machine Learning and Statistics",
+   "location": "United States, Massachusetts, Cambridge; United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557040502",
+   "posted_at": "2026-10-13",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556983221",
+   "company": "Microsoft",
+   "title": "Software Engineering Intern - CTJ - TS",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556983221",
+   "posted_at": "2026-09-11",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556983223",
+   "company": "Microsoft",
+   "title": "Software Engineering Intern - CTJ - TS",
+   "location": "United States, Virginia, Reston",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556983223",
+   "posted_at": "2026-09-11",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557043468",
+   "company": "Microsoft",
+   "title": "Research Intern: Audio and Speech Processing",
+   "location": "Germany, Bavaria, Munich",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557043468",
+   "posted_at": "2026-10-20",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557042485",
+   "company": "Microsoft",
+   "title": "Data Science INTERN",
+   "location": "Israel, Tel Aviv, Herzliya",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557042485",
+   "posted_at": "2026-10-18",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556978909",
+   "company": "Microsoft",
+   "title": "Research Intern",
+   "location": "China, Beijing, Beijing; China, Shanghai, Shanghai",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556978909",
+   "posted_at": "2026-11-06",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557043754",
+   "company": "Microsoft",
+   "title": "Research Intern - Extended Perception Interaction Cognition (EPIC)",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557043754",
+   "posted_at": "2026-10-19",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557043465",
+   "company": "Microsoft",
+   "title": "Applied Sciences INTERN",
+   "location": "Israel, Tel Aviv, Tel Aviv",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557043465",
+   "posted_at": "2026-10-21",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557043380",
+   "company": "Microsoft",
+   "title": "Security Research INTERN",
+   "location": "India, Multiple Locations, Multiple Locations",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557043380",
+   "posted_at": "2026-10-23",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556641091",
+   "company": "Microsoft",
+   "title": "Research Sciences INTERN",
+   "location": "India, Multiple Locations, Multiple Locations",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556641091",
+   "posted_at": "2026-02-27",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557044765",
+   "company": "Microsoft",
+   "title": "Software Engineer: Security & Identity Intern Opportunities for University Students, Cambridge",
+   "location": "United States, Massachusetts, Cambridge",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557044765",
+   "posted_at": "2026-10-21",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557022480",
+   "company": "Microsoft",
+   "title": "Research Intern - Security Research Group, Microsoft Research Redmond",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557022480",
+   "posted_at": "2026-10-01",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557045445",
+   "company": "Microsoft",
+   "title": "Research Intern - Gray Systems Lab (GSL)",
+   "location": "United States, Washington, Redmond; United States, California, Mountain View",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557045445",
+   "posted_at": "2026-10-22",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557045963",
+   "company": "Microsoft",
+   "title": "Research Intern - Algorithms Group: Theory",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557045963",
+   "posted_at": "2026-10-23",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557042487",
+   "company": "Microsoft",
+   "title": "Applied Science PhD Internship",
+   "location": "United Kingdom, Berkshire, Reading",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557042487",
+   "posted_at": "2026-11-04",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557050154",
+   "company": "Microsoft",
+   "title": "Applied Science: PhD Internship Opportunities, Turing",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557050154",
+   "posted_at": "2026-10-29",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556925823",
+   "company": "Microsoft",
+   "title": "Explore Program Engineering Internship Opportunities: First-Year Students, Redmond",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556925823",
+   "posted_at": "2026-11-02",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556982928",
+   "company": "Microsoft",
+   "title": "Data Science: PhD Internship Opportunities - Redmond",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556982928",
+   "posted_at": "2026-11-04",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556942315",
+   "company": "Microsoft",
+   "title": "Account Tech Strategist - Erada Internship",
+   "location": "Qatar, Ad Dawḩah, Doha",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556942315",
+   "posted_at": "2026-10-12",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557050150",
+   "company": "Microsoft",
+   "title": "Applied Scientist: Internship Opportunities, Turing",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557050150",
+   "posted_at": "2026-10-29",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557044764",
+   "company": "Microsoft",
+   "title": "Software Engineer: Internship Opportunities",
+   "location": "United States, California, Aliso Viejo",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557044764",
+   "posted_at": "2026-11-02",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556942219",
+   "company": "Microsoft",
+   "title": "Solution Engineer - Erada Internship",
+   "location": "Qatar, Ad Dawḩah, Doha",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556942219",
+   "posted_at": "2026-10-12",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556942310",
+   "company": "Microsoft",
+   "title": "Cloud Solution Architect - Erada Internship",
+   "location": "Qatar, Ad Dawḩah, Doha",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556942310",
+   "posted_at": "2026-10-12",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556943941",
+   "company": "Microsoft",
+   "title": "Account Executive - Erada Internship",
+   "location": "Qatar, Ad Dawḩah, Doha",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556943941",
+   "posted_at": "2026-10-12",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557037859",
+   "company": "Microsoft",
+   "title": "Software Engineer, Teamwork Experiences Internship Opportunities",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557037859",
+   "posted_at": "2026-11-03",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557054332",
+   "company": "Microsoft",
+   "title": "Government Affairs Internship Opportunities",
+   "location": "Egypt, Cairo, Cairo",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557054332",
+   "posted_at": "2026-11-06",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556983239",
+   "company": "Microsoft",
+   "title": "Technical Solutions: Internship Opportunities",
+   "location": "Brazil, São Paulo, São Paulo",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556983239",
+   "posted_at": "2026-09-16",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556972272",
+   "company": "Microsoft",
+   "title": "Business Program Mgr - BBBEE Internship (PwD Opportunities)",
+   "location": "South Africa, Gauteng, Johannesburg",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556972272",
+   "posted_at": "2026-10-19",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557040991",
+   "company": "Microsoft",
+   "title": "Data Science - Forward Deployed Engineer: PhD Internship Opportunities",
+   "location": "United States, Washington, Redmond",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557040991",
+   "posted_at": "2026-10-20",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393556943370",
+   "company": "Microsoft",
+   "title": "Customer Success Acct Manager - Erada Internship",
+   "location": "Qatar, Ad Dawḩah, Doha",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393556943370",
+   "posted_at": "2026-10-12",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557050083",
+   "company": "Microsoft",
+   "title": "Microsoft Research Cambridge Internship Program - Machine Intelligence",
+   "location": "United Kingdom, Cambridgeshire, Cambridge",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557050083",
+   "posted_at": "2026-10-29",
+   "description_chars": 0
+  },
+  {
+   "id": "microsoft:1970393557050102",
+   "company": "Microsoft",
+   "title": "Cambridge Internship Program Azure Research, Security and Privacy",
+   "location": "United Kingdom, Cambridgeshire, Cambridge",
+   "url": "https://apply.careers.microsoft.com/careers/job/1970393557050102",
+   "posted_at": "2026-10-30",
+   "description_chars": 0
+  }
+ ]
+}

@@ -43,7 +43,7 @@ No network, LLM, Telegram or SMTP access is needed to run the tests.
 | Layer | Approach |
 |---|---|
 | Pure logic (`prefilter`, `ranking`, `letters/checks`, formatters) | direct unit tests, including edge cases (multi-location, HTML escaping, caption limits) |
-| Source adapters | `mock_client(routes)` answers with payloads that mirror the real API responses (captured from the live APIs); pagination and per-posting failures covered |
+| Source adapters | `mock_client(routes)` answers with minimal payloads for each behaviour (pagination, per-posting failures, known ids); in addition, `tests/test_cassettes.py` replays one real answer per adapter (see below) |
 | LLM | `ScriptedBackend` / `FakeBackend` return prepared JSON; tests assert prompts, schemas and the handling of invalid or partial answers |
 | Telegram, SMTP | fake clients recording calls; the Telegram client itself is tested against a mocked transport, including token redaction |
 | Store | in-memory SQLite |
@@ -55,6 +55,26 @@ expected reason, implement the minimum, run the whole suite, commit.
 Behaviour that depends on live services (a new board id, a prompt change)
 is additionally checked by hand: `check-sources`, `run --dry-run`, or a real
 `letter <job_id>` read back with `pypdf`.
+
+### Recorded answers (cassettes)
+
+`tests/cassettes/<adapter>.json` holds one real exchange per adapter,
+recorded from the live job boards:
+
+```bash
+poetry run python scripts/record_cassettes.py              # every adapter
+poetry run python scripts/record_cassettes.py workday --company workday="NVIDIA"
+```
+
+The script picks the first company of each adapter that currently has an
+internship, keeps the listing items of up to 8 of its real jobs plus a few
+others for the filters to reject, cuts long texts, and replaces secrets
+(Adzuna's `app_id` / `app_key`, also inside the answers) with `REDACTED`.
+The jobs stored as `expected` are computed by replaying the cut cassette,
+so the test checks exactly what the adapter makes of a real payload. No
+network call happens in CI: a request missing from the cassette fails the
+test. Re-record when a board changes its API on purpose, then review the
+diff of `expected`.
 
 ## Adding a source
 
@@ -96,6 +116,8 @@ is additionally checked by hand: `check-sources`, `run --dry-run`, or a real
    checks both stay in sync.
 5. **Configure** companies in `companies.yaml` and run
    `poetry run intern-radar check-sources`.
+6. **Record** its cassette: `poetry run python scripts/record_cassettes.py <name>`;
+   `test_every_adapter_has_a_cassette` fails until it exists.
 
 ## Changing prompts
 

@@ -1,0 +1,881 @@
+{
+ "adapter": "adzuna",
+ "company": {
+  "name": "Adzuna",
+  "tier": "unlisted",
+  "source": "adzuna",
+  "params": {
+   "min_interval_hours": 6
+  }
+ },
+ "setup": {
+  "terms": "google deepmind meta facebook apple mistral tesla bytedance tiktok ibm netflix amd arm citadel sigma goldman sachs jpmorgan morgan j.p. g-research sig susquehanna mckinsey quantumblack bcg boston uber qualcomm siemens grab sea shopee garena shopify qdrant instadeep groq sakana klarna revolut booking.com booking sap asml",
+  "lookup": {
+   "google": [
+    "Google",
+    "S"
+   ],
+   "deepmind": [
+    "Google",
+    "S"
+   ],
+   "google deepmind": [
+    "Google",
+    "S"
+   ],
+   "meta": [
+    "Meta",
+    "S"
+   ],
+   "facebook": [
+    "Meta",
+    "S"
+   ],
+   "apple": [
+    "Apple",
+    "S"
+   ],
+   "microsoft": [
+    "Microsoft",
+    "S"
+   ],
+   "amazon": [
+    "Amazon",
+    "S"
+   ],
+   "aws": [
+    "Amazon",
+    "S"
+   ],
+   "amazon web services": [
+    "Amazon",
+    "S"
+   ],
+   "nvidia": [
+    "NVIDIA",
+    "S"
+   ],
+   "openai": [
+    "OpenAI",
+    "S"
+   ],
+   "anthropic": [
+    "Anthropic",
+    "S"
+   ],
+   "mistral ai": [
+    "Mistral AI",
+    "A"
+   ],
+   "mistral": [
+    "Mistral AI",
+    "A"
+   ],
+   "cohere": [
+    "Cohere",
+    "A"
+   ],
+   "databricks": [
+    "Databricks",
+    "A"
+   ],
+   "scale ai": [
+    "Scale AI",
+    "A"
+   ],
+   "hugging face": [
+    "Hugging Face",
+    "A"
+   ],
+   "stripe": [
+    "Stripe",
+    "A"
+   ],
+   "palantir": [
+    "Palantir",
+    "A"
+   ],
+   "perplexity": [
+    "Perplexity",
+    "A"
+   ],
+   "xai": [
+    "xAI",
+    "A"
+   ],
+   "tesla": [
+    "Tesla",
+    "A"
+   ],
+   "bytedance": [
+    "ByteDance",
+    "A"
+   ],
+   "tiktok": [
+    "ByteDance",
+    "A"
+   ],
+   "ibm": [
+    "IBM",
+    "A"
+   ],
+   "salesforce": [
+    "Salesforce",
+    "A"
+   ],
+   "adobe": [
+    "Adobe",
+    "A"
+   ],
+   "intel": [
+    "Intel",
+    "A"
+   ],
+   "samsung": [
+    "Samsung",
+    "A"
+   ],
+   "together ai": [
+    "Together AI",
+    "A"
+   ],
+   "cursor": [
+    "Cursor",
+    "A"
+   ],
+   "anysphere": [
+    "Cursor",
+    "A"
+   ],
+   "harvey": [
+    "Harvey",
+    "A"
+   ],
+   "sierra": [
+    "Sierra",
+    "A"
+   ],
+   "glean": [
+    "Glean",
+    "A"
+   ],
+   "langchain": [
+    "LangChain",
+    "A"
+   ],
+   "cerebras": [
+    "Cerebras",
+    "A"
+   ],
+   "cerebras systems": [
+    "Cerebras",
+    "A"
+   ],
+   "coreweave": [
+    "CoreWeave",
+    "A"
+   ],
+   "weights & biases": [
+    "CoreWeave",
+    "A"
+   ],
+   "weights and biases": [
+    "CoreWeave",
+    "A"
+   ],
+   "isomorphic labs": [
+    "Isomorphic Labs",
+    "A"
+   ],
+   "character.ai": [
+    "Character.AI",
+    "A"
+   ],
+   "notion": [
+    "Notion",
+    "A"
+   ],
+   "netflix": [
+    "Netflix",
+    "A"
+   ],
+   "amd": [
+    "AMD",
+    "A"
+   ],
+   "advanced micro devices": [
+    "AMD",
+    "A"
+   ],
+   "arm": [
+    "Arm",
+    "A"
+   ],
+   "arm limited": [
+    "Arm",
+    "A"
+   ],
+   "arm holdings": [
+    "Arm",
+    "A"
+   ],
+   "jane street": [
+    "Jane Street",
+    "A"
+   ],
+   "citadel": [
+    "Citadel",
+    "A"
+   ],
+   "citadel securities": [
+    "Citadel",
+    "A"
+   ],
+   "two sigma": [
+    "Two Sigma",
+    "A"
+   ],
+   "goldman sachs": [
+    "Goldman Sachs",
+    "A"
+   ],
+   "jpmorgan chase": [
+    "JPMorgan Chase",
+    "A"
+   ],
+   "jp morgan": [
+    "JPMorgan Chase",
+    "A"
+   ],
+   "j.p. morgan": [
+    "JPMorgan Chase",
+    "A"
+   ],
+   "jpmorgan": [
+    "JPMorgan Chase",
+    "A"
+   ],
+   "point72": [
+    "Point72",
+    "A"
+   ],
+   "drw": [
+    "DRW",
+    "A"
+   ],
+   "imc trading": [
+    "IMC Trading",
+    "A"
+   ],
+   "xtx markets": [
+    "XTX Markets",
+    "A"
+   ],
+   "citi": [
+    "Citi",
+    "A"
+   ],
+   "blackrock": [
+    "BlackRock",
+    "A"
+   ],
+   "jump trading": [
+    "Jump Trading",
+    "A"
+   ],
+   "hudson river trading": [
+    "Hudson River Trading",
+    "A"
+   ],
+   "hrt": [
+    "Hudson River Trading",
+    "A"
+   ],
+   "optiver": [
+    "Optiver",
+    "A"
+   ],
+   "tower research capital": [
+    "Tower Research Capital",
+    "A"
+   ],
+   "tower research": [
+    "Tower Research Capital",
+    "A"
+   ],
+   "squarepoint capital": [
+    "Squarepoint Capital",
+    "A"
+   ],
+   "squarepoint": [
+    "Squarepoint Capital",
+    "A"
+   ],
+   "g-research": [
+    "G-Research",
+    "A"
+   ],
+   "g research": [
+    "G-Research",
+    "A"
+   ],
+   "sig": [
+    "SIG",
+    "A"
+   ],
+   "susquehanna": [
+    "SIG",
+    "A"
+   ],
+   "susquehanna international group": [
+    "SIG",
+    "A"
+   ],
+   "mckinsey": [
+    "McKinsey",
+    "A"
+   ],
+   "quantumblack": [
+    "McKinsey",
+    "A"
+   ],
+   "bcg": [
+    "BCG",
+    "A"
+   ],
+   "boston consulting group": [
+    "BCG",
+    "A"
+   ],
+   "bcg x": [
+    "BCG",
+    "A"
+   ],
+   "snowflake": [
+    "Snowflake",
+    "B"
+   ],
+   "datadog": [
+    "Datadog",
+    "B"
+   ],
+   "figma": [
+    "Figma",
+    "B"
+   ],
+   "cloudflare": [
+    "Cloudflare",
+    "B"
+   ],
+   "airbnb": [
+    "Airbnb",
+    "B"
+   ],
+   "pinterest": [
+    "Pinterest",
+    "B"
+   ],
+   "reddit": [
+    "Reddit",
+    "B"
+   ],
+   "waymo": [
+    "Waymo",
+    "B"
+   ],
+   "coinbase": [
+    "Coinbase",
+    "B"
+   ],
+   "robinhood": [
+    "Robinhood",
+    "B"
+   ],
+   "samsara": [
+    "Samsara",
+    "B"
+   ],
+   "spotify": [
+    "Spotify",
+    "B"
+   ],
+   "uber": [
+    "Uber",
+    "B"
+   ],
+   "qualcomm": [
+    "Qualcomm",
+    "B"
+   ],
+   "deepl": [
+    "DeepL",
+    "B"
+   ],
+   "elevenlabs": [
+    "ElevenLabs",
+    "B"
+   ],
+   "synthesia": [
+    "Synthesia",
+    "B"
+   ],
+   "wayve": [
+    "Wayve",
+    "B"
+   ],
+   "helsing": [
+    "Helsing",
+    "B"
+   ],
+   "multiverse computing": [
+    "Multiverse Computing",
+    "B"
+   ],
+   "canva": [
+    "Canva",
+    "B"
+   ],
+   "bosch": [
+    "Bosch",
+    "B"
+   ],
+   "mastercard": [
+    "Mastercard",
+    "B"
+   ],
+   "accenture": [
+    "Accenture",
+    "B"
+   ],
+   "airbus": [
+    "Airbus",
+    "B"
+   ],
+   "siemens": [
+    "Siemens",
+    "B"
+   ],
+   "grab": [
+    "Grab",
+    "B"
+   ],
+   "sea": [
+    "Sea",
+    "B"
+   ],
+   "shopee": [
+    "Sea",
+    "B"
+   ],
+   "garena": [
+    "Sea",
+    "B"
+   ],
+   "shopify": [
+    "Shopify",
+    "B"
+   ],
+   "runway": [
+    "Runway",
+    "B"
+   ],
+   "runwayml": [
+    "Runway",
+    "B"
+   ],
+   "poolside": [
+    "Poolside",
+    "B"
+   ],
+   "aleph alpha": [
+    "Aleph Alpha",
+    "B"
+   ],
+   "polyai": [
+    "PolyAI",
+    "B"
+   ],
+   "graphcore": [
+    "Graphcore",
+    "B"
+   ],
+   "anyscale": [
+    "Anyscale",
+    "B"
+   ],
+   "replit": [
+    "Replit",
+    "B"
+   ],
+   "faculty": [
+    "Faculty",
+    "B"
+   ],
+   "faculty ai": [
+    "Faculty",
+    "B"
+   ],
+   "tractable": [
+    "Tractable",
+    "B"
+   ],
+   "photoroom": [
+    "Photoroom",
+    "B"
+   ],
+   "pinecone": [
+    "Pinecone",
+    "B"
+   ],
+   "weaviate": [
+    "Weaviate",
+    "B"
+   ],
+   "zilliz": [
+    "Zilliz",
+    "B"
+   ],
+   "vercel": [
+    "Vercel",
+    "B"
+   ],
+   "monzo": [
+    "Monzo",
+    "B"
+   ],
+   "wise": [
+    "Wise",
+    "B"
+   ],
+   "adyen": [
+    "Adyen",
+    "B"
+   ],
+   "n26": [
+    "N26",
+    "B"
+   ],
+   "cleo": [
+    "Cleo",
+    "B"
+   ],
+   "cleo ai": [
+    "Cleo",
+    "B"
+   ],
+   "thales": [
+    "Thales",
+    "B"
+   ],
+   "qdrant": [
+    "Qdrant",
+    "B"
+   ],
+   "instadeep": [
+    "InstaDeep",
+    "B"
+   ],
+   "groq": [
+    "Groq",
+    "B"
+   ],
+   "black forest labs": [
+    "Black Forest Labs",
+    "B"
+   ],
+   "sakana ai": [
+    "Sakana AI",
+    "B"
+   ],
+   "klarna": [
+    "Klarna",
+    "B"
+   ],
+   "revolut": [
+    "Revolut",
+    "B"
+   ],
+   "booking.com": [
+    "Booking.com",
+    "B"
+   ],
+   "booking holdings": [
+    "Booking.com",
+    "B"
+   ],
+   "sap": [
+    "SAP",
+    "B"
+   ],
+   "sap se": [
+    "SAP",
+    "B"
+   ],
+   "asml": [
+    "ASML",
+    "B"
+   ]
+  }
+ },
+ "recorded_at": "2026-11-06T16:06:17+00:00",
+ "exchanges": [
+  {
+   "method": "GET",
+   "url": "https://api.adzuna.com/v1/api/jobs/gb/search/1?app_id=REDACTED&app_key=REDACTED&content-type=application%2Fjson&max_days_old=14&results_per_page=50&what=intern&what_or=google+deepmind+meta+facebook+apple+mistral+tesla+bytedance+tiktok+ibm+netflix+amd+arm+citadel+sigma+goldman+sachs+jpmorgan+morgan+j.p.+g-research+sig+susquehanna+mckinsey+quantumblack+bcg+boston+uber+qualcomm+siemens+grab+sea+shopee+garena+shopify+qdrant+instadeep+groq+sakana+klarna+revolut+booking.com+booking+sap+asml",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json; charset=utf8",
+   "text": "{\"count\": 3572, \"results\": [{\"id\": \"5945046814\", \"salary_is_predicted\": \"1\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"created\": \"2026-10-29T02:01:25Z\", \"salary_max\": 46003.38, \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Meta\"}, \"description\": \"Summary: Meta AI is currently seeking Research Scientist interns. Our team creates spoken language technology to make it faster and easier for people to build community and connect with others around the world. We conduct product-motivated research in ML/AI and design, develop and deploy state-of-the-art algorithms to the rest of Meta. We work in all aspects of AI for speech and audio processing, with a primary focus on speech with large language models (LLM) to power various speech-LLM-based p…\", \"category\": {\"label\": \"IT Jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"it-jobs\"}, \"redirect_url\": \"https://www.adzuna.co.uk/jobs/details/5945046814?utm_medium=api&utm_source=REDACTED\", \"salary_min\": 46003.38, \"latitude\": 51.503378, \"longitude\": -0.139134, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiNHN5bzlfdlo4UkdIalBONUZFT3JHQSIsImkiOiI1OTQ1MDQ2ODE0In0.HnMLQIAr5TAzzwlqZOZkgUsaHi3PAj7bT3tIykcTN2o\", \"title\": \"Research Scientist Intern, AI Research - Speech & Audio (PhD)\", \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"UK\", \"London\"], \"display_name\": \"London, UK\"}, \"contract_type\": \"contract\"}, {\"salary_min\": 44926.96, \"latitude\": 51.503378, \"longitude\": -0.139134, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTkzODU0NTY3NCIsInMiOiI0c3lvOV92WjhSR0hqUE41RkVPckdBIn0.tev6N5V-yB6ex7gxtR9AvMWywFqEmsSGGyR7Q1uRCt4\", \"location\": {\"area\": [\"UK\", \"London\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"London, UK\"}, \"title\": \"Research Intern - Self-Improving Agentic Systems and AI Research Agents\", \"contract_type\": \"contract\", \"id\": \"5938545674\", \"salary_is_predicted\": \"1\", \"created\": \"2026-10-23T02:35:09Z\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_max\": 44926.96, \"company\": {\"display_name\": \"Meta\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"description\": \"Summary: We are seeking a highly motivated intern (Contract Worker) to join our research team working on self-improving agentic systems - a cutting-edge area at the intersection of reinforcement learning, LLM post-training, and autonomous AI research agents. We develop agentic systems that improve their own performance over time, combining reinforcement learning and LLM post-training with agents capable of writing, evaluating, and optimizing code. A central goal is building AI research agents t…\", \"category\": {\"tag\": \"it-jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"IT Jobs\"}, \"redirect_url\": \"https://www.adzuna.co.uk/jobs/details/5938545674?utm_medium=api&utm_source=REDACTED\"}, {\"salary_is_predicted\": \"1\", \"id\": \"5955034224\", \"category\": {\"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"IT Jobs\", \"tag\": \"it-jobs\"}, \"redirect_url\": \"https://www.adzuna.co.uk/jobs/details/5955034224?utm_medium=api&utm_source=REDACTED\", \"company\": {\"display_name\": \"Meta\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"description\": \"Summary: The Reality AI Research team explores, develops, and ships novel and cutting-edge technologies for 3D/4D scene reconstruction, understanding and generation, serving as the foundation for future wearables and AI products. Our team is tackling a variety of technical challenges across the entire tech stack, including but not limited to model architecture development, data curation, and large-scale model training. We're looking for candidates who share a passion for exploring and solving c…\", \"created\": \"2026-11-06T03:19:01Z\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_max\": 46875.43, \"latitude\": 51.503378, \"salary_min\": 46875.43, \"contract_type\": \"contract\", \"location\": {\"display_name\": \"London, UK\", \"area\": [\"UK\", \"London\"], \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"title\": \"Research Scientist Intern, Generative AI (PhD) (multiple locations)\", \"longitude\": -0.139134, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk1NTAzNDIyNCIsInMiOiI0c3lvOV92WjhSR0hqUE41RkVPckdBIn0.wEylfdjSJNfyOXh9fCOpZsFnIO6nPs6Xyhx3-iix6zw\"}, {\"title\": \"Research Scientist Intern, Audio, Machine Learning and Computer Vision (PhD)\", \"location\": {\"area\": [\"UK\", \"Eastern England\", \"Cambridgeshire\", \"Cambridge\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Cambridge, Cambridgeshire\"}, \"contract_type\": \"contract\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiNHN5bzlfdlo4UkdIalBONUZFT3JHQSIsImkiOiI1OTM4NTQ1NjY3In0.OKPW3MuDQVeknWwCMaqWwGP39NCH8fV9NDLVR3Mkwkg\", \"longitude\": 0.131237, \"latitude\": 52.202499, \"salary_min\": 34145.4, \"redirect_url\": \"https://www.adzuna.co.uk/jobs/details/5938545667?utm_medium=api&utm_source=REDACTED\", \"category\": {\"tag\": \"it-jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"IT Jobs\"}, \"description\": \"Summary: The Meta Reality Labs Research Team brings together a world-class team of researchers, developers, and engineers to create the future of virtual and augmented reality, which together will become as universal and essential as smartphones and personal computers are today. And just as personal computers have done over the past 45 years, AR, VR and MR will ultimately change everything about how we work, play, and connect. We are developing all the technologies needed to enable breakthrough…\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Meta\"}, \"salary_max\": 34145.4, \"created\": \"2026-10-23T02:35:09Z\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_is_predicted\": \"1\", \"id\": \"5938545667\"}, {\"longitude\": -0.139134, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0MzkwMzI1NiIsInMiOiI0c3lvOV92WjhSR0hqUE41RkVPckdBIn0.5NUNV-HdpyLbbkNMg8EOqrGMxKe_vUSBfRWXuwk3UTc\", \"location\": {\"display_name\": \"London, UK\", \"area\": [\"UK\", \"London\"], \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"title\": \"Research Scientist Intern, AI Core Machine Learning (PhD)\", \"contract_type\": \"contract\", \"salary_min\": 37674.95, \"latitude\": 51.503378, \"created\": \"2026-10-28T01:44:23Z\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_max\": 37674.95, \"company\": {\"display_name\": \"Meta\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"description\": \"Summary: Meta was built to help people connect and share, and over the last decade, our tools have played a critical part in changing how people around the world communicate with one another. With over a billion people using the service and more than fifty offices around the globe, a career at Meta offers countless ways to make an impact in a fast growing organization.Meta is seeking Research Interns to join Monetization Ranking & AI Foundations where we strive to serve the best personalized ad…\", \"redirect_url\": \"https://www.adzuna.co.uk/jobs/details/5943903256?utm_medium=api&utm_source=REDACTED\", \"category\": {\"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"Scientific & QA Jobs\", \"tag\": \"scientific-qa-jobs\"}, \"id\": \"5943903256\", \"salary_is_predicted\": \"1\"}, {\"location\": {\"display_name\": \"London, UK\", \"area\": [\"UK\", \"London\"], \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"title\": \"Research Scientist Intern, AI Core Machine Learning (PhD)\", \"contract_type\": \"contract\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0ODQxMjgzMyIsInMiOiI0c3lvOV92WjhSR0hqUE41RkVPckdBIn0.vpxQHzndzeLuxyqhdwFfL9nD4fVq6_IhNaV2Htuy8tg\", \"longitude\": -0.139134, \"latitude\": 51.503378, \"salary_min\": 35516.06, \"redirect_url\": \"https://www.adzuna.co.uk/jobs/details/5948412833?utm_medium=api&utm_source=REDACTED\", \"category\": {\"tag\": \"scientific-qa-jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"Scientific & QA Jobs\"}, \"description\": \"Summary: Meta was built to help people connect and share, and over the last decade, our tools have played a critical part in changing how people around the world communicate with one another. With over a billion people using the service and more than fifty offices around the globe, a career at Meta offers countless ways to make an impact in a fast growing organization.Meta is seeking Research Interns to join Monetization Ranking & AI Foundations where we strive to serve the best personalized ad…\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Meta\"}, \"salary_max\": 35516.06, \"__CLASS__\": \"Adzuna::API::Response::Job\", \"created\": \"2026-11-01T02:14:04Z\", \"salary_is_predicted\": \"1\", \"id\": \"5948412833\"}, {\"latitude\": 51.503378, \"salary_min\": 42710.7, \"contract_type\": \"contract\", \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"UK\", \"London\"], \"display_name\": \"London, UK\"}, \"title\": \"Research Scientist Intern - Robotics, World Models & Embodied AI (PhD)\", \"longitude\": -0.139134, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTkzODU0NTY2NCIsInMiOiI0c3lvOV92WjhSR0hqUE41RkVPckdBIn0.ezIGMla0dQo-tdJu4Ib7e2i5o5ruiTlkj5ekAis1qFs\", \"salary_is_predicted\": \"1\", \"id\": \"5938545664\", \"category\": {\"label\": \"Scientific & QA Jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"scientific-qa-jobs\"}, \"redirect_url\": \"https://www.adzuna.co.uk/jobs/details/5938545664?utm_medium=api&utm_source=REDACTED\", \"company\": {\"display_name\": \"Meta\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"description\": \"Summary: Meta Reality Labs Research (RL Research) brings together a world-class R&D team of researchers and engineers with the shared goal of developing AI, Robotics, and AR/VR technology across the spectrum. The Surreal Spatial AI group is seeking Research Scientist Interns to help build the machine perception, 3D generative systems, and control technology that allow robotic agents and AI systems to perceive, understand, reason about, and interact with the world around them.Our research puts m…\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"created\": \"2026-10-23T02:35:09Z\", \"salary_max\": 42710.7}, {\"category\": {\"tag\": \"scientific-qa-jobs\", \"label\": \"Scientific & QA Jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}, \"redirect_url\": \"https://www.adzuna.co.uk/jobs/details/5948412836?utm_medium=api&utm_source=REDACTED\", \"salary_max\": 46274.43, \"__CLASS__\": \"Adzuna::API::Response::Job\", \"created\": \"2026-11-01T02:14:04Z\", \"description\": \"Summary: Meta was built to help people connect and share, and over the last decade our tools have played a critical part in changing how people around the world communicate with one another. With over a billion people using the service and more than fifty offices around the globe, a career at Meta offers countless ways to make an impact in a fast growing organization.Meta is seeking Research Interns to join our Meta Superintelligence Lab in one of the post-training modeling teams, with a focus …\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Meta\"}, \"salary_is_predicted\": \"1\", \"id\": \"5948412836\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0ODQxMjgzNiIsInMiOiI0c3lvOV92WjhSR0hqUE41RkVPckdBIn0.WQOvm6SbmW5yCIimprcU0Bj_dAP15WXJCMmmFokBjYA\", \"longitude\": -0.139134, \"title\": \"Research Scientist Intern, Muse RL and Agents Team (PhD)\", \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"UK\", \"London\"], \"display_name\": \"London, UK\"}, \"contract_type\": \"contract\", \"latitude\": 51.503378, \"salary_min\": 46274.43}, {\"salary_is_predicted\": \"0\", \"id\": \"5953355221\", \"category\": {\"label\": \"Admin Jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"admin-jobs\"}, \"redirect_url\": \"https://www.adzuna.co.uk/jobs/land/ad/5953355221?se=4syo9_vZ8RGHjPN5FEOrGA&utm_medium=api&utm_source=REDACTED&v=3624E6E2017658A856B0267F5A710C8B2DC829D5\", \"description\": \"One of the UK's largest Property Management companies, Residential Management Group (RMG) has an exciting opportunity for Property Management Apprentices to join our team and begin a rewarding career within the residential property management sector. This 18-month apprenticeship programme is designed to provide hands-on experience across a range of business areas while you work towards a Level 3 Housing and Property Management qualification. Throughout the programme, you'll rotate through key d…\", \"company\": {\"display_name\": \"Places for People\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"salary_max\": 26318, \"__CLASS__\": \"Adzuna::API::Response::Job\", \"created\": \"2026-11-04T18:34:23Z\", \"latitude\": 51.761981, \"salary_min\": 26318, \"location\": {\"display_name\": \"Hoddesdon, Hertfordshire\", \"area\": [\"UK\", \"Eastern England\", \"Hertfordshire\", \"Hoddesdon\"], \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"title\": \"Property Management Apprentice\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk1MzM1NTIyMSIsInMiOiI0c3lvOV92WjhSR0hqUE41RkVPckdBIn0.QfrESQxDLu4TCpcgyE3LC3gpx5BYOsLbZXUd6wA-4ek\", \"longitude\": -0.000527, \"contract_time\": \"full_time\"}, {\"latitude\": 51.503378, \"salary_min\": 147000, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTkzOTAxNzcwOSIsInMiOiI0c3lvOV92WjhSR0hqUE41RkVPckdBIn0.2JNZtp3T67Z3TOQnoZ48Op5n57VRX08Xo-3LFT9eiU4\", \"longitude\": -0.139134, \"title\": \"Research Engineer, Gemini Large Scale Pretraining, DeepMind\", \"location\": {\"area\": [\"UK\", \"London\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"London, UK\"}, \"contract_type\": \"contract\", \"contract_time\": \"full_time\", \"salary_is_predicted\": \"0\", \"id\": \"5939017709\", \"redirect_url\": \"https://www.adzuna.co.uk/jobs/land/ad/5939017709?se=4syo9_vZ8RGHjPN5FEOrGA&utm_medium=api&utm_source=REDACTED&v=EA2E3F0BAA58818FA87E960A1EAA468D81722E87\", \"category\": {\"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"Engineering Jobs\", \"tag\": \"engineering-jobs\"}, \"salary_max\": 210000, \"__CLASS__\": \"Adzuna::API::Response::Job\", \"created\": \"2026-10-23T09:44:43Z\", \"description\": \"info_outline X Note: By applying to this position you will have an opportunity to share your preferred working location from the following: London, UK; Mountain View, CA, USA . Minimum qualifications: Bachelor's degree in Computer Science, or a related technical field, or equivalent practical experience. 2 years of experience with software engineering involving Python-based ML/scientific libraries such as JAX or internship experience in these areas or Open Source Software (OSS) contributions. 1…\", \"company\": {\"display_name\": \"Google\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}}, {\"contract_type\": \"contract\", \"location\": {\"display_name\": \"London, UK\", \"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"UK\", \"London\"]}, \"title\": \"Research Engineer, Gemini Large Scale Pretraining, DeepMind\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTkzODU0NTgxOCIsInMiOiI0c3lvOV92WjhSR0hqUE41RkVPckdBIn0.CQ1iXCXO-YiHU7AW5DobY-Ur0oaPhyY4GRNek6TJTwg\", \"longitude\": -0.139134, \"salary_min\": 39035.71, \"latitude\": 51.503378, \"description\": \"Research Engineer, Gemini Large Scale Pretraining, DeepMind Share Research Engineer, Gemini Large Scale Pretraining, DeepMind _corporate_fare_ DeepMind _place_ London, UK; Mountain View, CA, USA Share Research Engineer, Gemini Large Scale Pretraining, DeepMind _info_outline_ XNote: By applying to this position you will have an opportunity to share your preferred working location from the following: London, UK; Mountain View, CA, USA . Minimum qualifications:  Bachelor's degree in Computer Scien…\", \"company\": {\"display_name\": \"Google\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"salary_max\": 39035.71, \"created\": \"2026-10-23T02:35:13Z\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"redirect_url\": \"https://www.adzuna.co.uk/jobs/details/5938545818?utm_medium=api&utm_source=REDACTED\", \"category\": {\"tag\": \"it-jobs\", \"label\": \"IT Jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}, \"id\": \"5938545818\", \"salary_is_predicted\": \"1\"}, {\"title\": \"Chef de Partie - Milford on Sea\", \"location\": {\"display_name\": \"Godalming, Surrey\", \"area\": [\"UK\", \"South East England\", \"Surrey\", \"Godalming\"], \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"contract_type\": \"permanent\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk1MTg0ODQ3MCIsInMiOiI0c3lvOV92WjhSR0hqUE41RkVPckdBIn0.dwh_2VoWBODNvoQlzCBD64cpWAWyupBmwgHI0MauMC4\", \"longitude\": -0.617529, \"latitude\": 51.184399, \"salary_min\": 29120, \"redirect_url\": \"https://www.adzuna.co.uk/jobs/land/ad/5951848470?se=4syo9_vZ8RGHjPN5FEOrGA&utm_medium=api&utm_source=REDACTED&v=69445E78925DAF8C6EB0FDD6A09686A4975E51C3\", \"category\": {\"tag\": \"hospitality-catering-jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"Hospitality & Catering Jobs\"}, \"description\": \"Chef de Partie - Milford on Sea Chef, Premium Pub - 14.00 per hour  Tips  60% off meals Beautiful Beach House - On the Seafront Part of the Hall & Woodhouse family of destination pubs and inns, the Grade II listed Beach House near Lymington was built in 1897 for Alexander Siemens (who created the world's first public electricity supply at Godalming) as a summer house for his family. Formerly known as Westover Hall, Hall & Woodhouse renamed it 'The Beach House' in 2012. Built in the Arts and Cra…\", \"company\": {\"display_name\": \"Hall & Woodhouse Ltd\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"salary_max\": 29120, \"created\": \"2026-11-03T15:24:44Z\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_is_predicted\": \"0\", \"id\": \"5951848470\"}], \"__CLASS__\": \"Adzuna::API::Response::JobSearchResults\", \"mean\": 39311.84}"
+  },
+  {
+   "method": "GET",
+   "url": "https://api.adzuna.com/v1/api/jobs/us/search/1?app_id=REDACTED&app_key=REDACTED&content-type=application%2Fjson&max_days_old=14&results_per_page=50&what=intern&what_or=google+deepmind+meta+facebook+apple+mistral+tesla+bytedance+tiktok+ibm+netflix+amd+arm+citadel+sigma+goldman+sachs+jpmorgan+morgan+j.p.+g-research+sig+susquehanna+mckinsey+quantumblack+bcg+boston+uber+qualcomm+siemens+grab+sea+shopee+garena+shopify+qdrant+instadeep+groq+sakana+klarna+revolut+booking.com+booking+sap+asml",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json; charset=utf8",
+   "text": "{\"mean\": 64447.83, \"__CLASS__\": \"Adzuna::API::Response::JobSearchResults\", \"count\": 17025, \"results\": [{\"id\": \"5955344253\", \"longitude\": -71.066119, \"__CLASS__\": \"Adzuna::API::Response::Job\", \"redirect_url\": \"https://www.adzuna.com/land/ad/5955344253?se=MkZN-PvZ8RG_saRps_1B5w&utm_medium=api&utm_source=REDACTED&v=759861831541C20BF8F5DD21FEDBE3E84E27BBE1\", \"category\": {\"label\": \"IT Jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"it-jobs\"}, \"salary_min\": 121031.13, \"latitude\": 42.354856, \"salary_is_predicted\": \"1\", \"salary_max\": 121031.13, \"description\": \"Job Description Job Description FieldAI is transforming how robots interact with the real world. Our growing R&D team is based in Boston, where we develop risk-aware, reliable, field-ready AI systems that tackle the hardest problems in robotics and unlock the potential of embodied intelligence. We take a pragmatic approach that goes beyond off-the-shelf, purely data-driven methods or transformer-only architectures, combining cutting-edge research with real-world deployment. Our solutions are al…\", \"company\": {\"display_name\": \"FieldAI\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"created\": \"2026-11-06T02:03:03Z\", \"title\": \"Robotics Research, Humanoid Manipulation Intern (Summer 2027) | PhD\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiTWtaTi1Qdlo4Ukdfc2FScHNfMUI1dyIsImkiOiI1OTU1MzQ0MjUzIn0.hRG5AaG1dRbJmz_v2n71PJPyMlTU7-eS5cMqjr1KbSk\", \"location\": {\"area\": [\"US\", \"Massachusetts\", \"Suffolk County\", \"Boston\"], \"display_name\": \"Boston, Suffolk County\", \"__CLASS__\": \"Adzuna::API::Response::Location\"}}, {\"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"US\", \"Maryland\", \"Baltimore County\", \"Baltimore\"], \"display_name\": \"Baltimore, Baltimore County\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk1MTczNjAxNCIsInMiOiJNa1pOLVB2WjhSR19zYVJwc18xQjV3In0.IolgdFBNuWjgntOQ6VoEj3oO1FwaO1-IZ9NBQ4lWzR4\", \"title\": \"CSR Intern\", \"description\": \"Description: Gordon Feinblatt, a law firm located in the Harbor East neighborhood of Baltimore City, is seeking a sophomore, junior, or senior college student for a paid, part-time, Corporate Social Responsibility (CSR) focused internship for the Spring 2027 semester. A typical day for this in-person position will include assisting with a mix of researching and implementing internal programing benefiting the entire Gordon Feinblatt team, assisting with event organization and management, and col…\", \"redirect_url\": \"https://www.adzuna.com/details/5951736014?utm_medium=api&utm_source=REDACTED\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"contract_time\": \"part_time\", \"company\": {\"display_name\": \"GORDON FEINBLATT LLC\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"created\": \"2026-11-03T08:52:53Z\", \"latitude\": 39.29592, \"salary_is_predicted\": \"0\", \"salary_max\": 31200, \"contract_type\": \"contract\", \"salary_min\": 31200, \"category\": {\"tag\": \"hr-jobs\", \"label\": \"HR & Recruitment Jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}, \"longitude\": -76.62372, \"id\": \"5951736014\"}, {\"company\": {\"display_name\": \"Midland States Bank\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"created\": \"2026-11-01T08:29:47Z\", \"salary_max\": 37440, \"latitude\": 38.53662, \"salary_is_predicted\": \"0\", \"longitude\": -90.40716, \"id\": \"5949324011\", \"contract_type\": \"contract\", \"salary_min\": 37440, \"category\": {\"tag\": \"accounting-finance-jobs\", \"label\": \"Accounting & Finance Jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}, \"description\": \"Intern - Commercial Banking At Midland States Bank, base salary is one component of our Total Rewards program. Exact compensation is determined by factors such as (but not limited to) education, skills, internal equity, and experience. This position offers additional compensation in the form of short-term incentives (i.e. bonus and/or commission) and may include long-term incentives (i.e. stock awards). Benefits for this role include comprehensive healthcare, well-being benefits, paid family le…\", \"location\": {\"area\": [\"US\", \"Missouri\", \"Saint Louis County\", \"Sunset Hills\"], \"display_name\": \"Sunset Hills, Saint Louis County\", \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"title\": \"Intern - Commercial Banking\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiTWtaTi1Qdlo4Ukdfc2FScHNfMUI1dyIsImkiOiI1OTQ5MzI0MDExIn0.OFE5PzagWjgYVHhFeJc_YAscCun7puvvbMcijVpPrAA\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"redirect_url\": \"https://www.adzuna.com/land/ad/5949324011?se=MkZN-PvZ8RG_saRps_1B5w&utm_medium=api&utm_source=REDACTED&v=03A7554F6591E9813BDE5EF85DB042086D00D70F\"}, {\"id\": \"5941331855\", \"longitude\": -122.180633, \"category\": {\"label\": \"Scientific & QA Jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"scientific-qa-jobs\"}, \"salary_min\": 115922.92, \"__CLASS__\": \"Adzuna::API::Response::Job\", \"redirect_url\": \"https://www.adzuna.com/land/ad/5941331855?se=MkZN-PvZ8RG_saRps_1B5w&utm_medium=api&utm_source=REDACTED&v=BA95AF40F0D27EA881E5126AFEF8FD7731034353\", \"salary_max\": 115922.92, \"salary_is_predicted\": \"1\", \"latitude\": 37.454232, \"company\": {\"display_name\": \"Meta\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"created\": \"2026-10-25T07:09:17Z\", \"description\": \"Summary: Meta was built to help people connect and share, and over the last decade our tools have played a critical part in changing how people around the world communicate with one another. With over a billion people using the service and more than fifty offices around the globe, a career at Meta offers countless ways to make an impact in a fast growing organization.Meta is seeking Research Interns to join our research team within Meta Recommendation Systems (MRS). This team brings together a …\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0MTMzMTg1NSIsInMiOiJNa1pOLVB2WjhSR19zYVJwc18xQjV3In0.RQdSaeMyVOSj21_Bclfq10F0XhZwG3cbBqfLmPUtYIE\", \"title\": \"Research Scientist Intern, Meta Recommendation Systems (PhD)\", \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"US\", \"California\", \"San Mateo County\", \"Menlo Park\"], \"display_name\": \"Menlo Park, San Mateo County\"}}]}"
+  },
+  {
+   "method": "GET",
+   "url": "https://api.adzuna.com/v1/api/jobs/ca/search/1?app_id=REDACTED&app_key=REDACTED&content-type=application%2Fjson&max_days_old=14&results_per_page=50&what=intern&what_or=google+deepmind+meta+facebook+apple+mistral+tesla+bytedance+tiktok+ibm+netflix+amd+arm+citadel+sigma+goldman+sachs+jpmorgan+morgan+j.p.+g-research+sig+susquehanna+mckinsey+quantumblack+bcg+boston+uber+qualcomm+siemens+grab+sea+shopee+garena+shopify+qdrant+instadeep+groq+sakana+klarna+revolut+booking.com+booking+sap+asml",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json; charset=utf8",
+   "text": "{\"results\": [{\"__CLASS__\": \"Adzuna::API::Response::Job\", \"description\": \"Job Description Job Description Job Description Position Title: SAP iXp Intern - Change Management Engineering Location: Vancouver, BC Anticipated Start Date: January 2027 Contract Duration: 8 months Work Hours: Full-time; 40 hours per week What you'll bring You're currently studying Computer Science or Engineering — or recently graduated — and you want hands-on experience building and operating cloud services at scale. Current enrollment or recent graduation in Computer Science, Engineering, o…\", \"id\": \"5943424825\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0MzQyNDgyNSIsInMiOiJLT19rLVB2WjhSR0JYZHdTS3Q5R0VBIn0.JrKntBxw1YxvAyNlS6_TGRoRoAuRVMv4xjyZ8E9XksA\", \"title\": \"SAP iXp Intern - Change Management Engineering\", \"redirect_url\": \"https://www.adzuna.ca/land/ad/5943424825?se=KO_k-PvZ8RGBXdwSKt9GEA&utm_medium=api&utm_source=REDACTED&v=8AB9A61EA293C2125A5C0F6671C3009B239495C5\", \"contract_time\": \"full_time\", \"longitude\": -123.108651, \"category\": {\"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"it-jobs\", \"label\": \"IT Jobs\"}, \"salary_is_predicted\": \"0\", \"contract_type\": \"contract\", \"created\": \"2026-10-27T08:44:14Z\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"SAP IT Business Systeme\"}, \"latitude\": 49.252255, \"location\": {\"area\": [\"Canada\", \"British Columbia\", \"Greater Vancouver\", \"Vancouver\"], \"display_name\": \"Vancouver, Greater Vancouver\", \"__CLASS__\": \"Adzuna::API::Response::Location\"}}, {\"longitude\": -79.402726, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0NTk5Nzc0NyIsInMiOiJLT19rLVB2WjhSR0JYZHdTS3Q5R0VBIn0.EkogSlBuOrjoKSGeu07iQ4H1LcDV7pI6w8Skr5dIQjM\", \"redirect_url\": \"https://www.adzuna.ca/details/5945997747?utm_medium=api&utm_source=REDACTED\", \"title\": \"Data Scientist II - QuantumBlack, AI by McKinsey\", \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Toronto, Ontario\", \"area\": [\"Canada\", \"Ontario\", \"Toronto\"]}, \"latitude\": 43.706102, \"created\": \"2026-10-29T13:43:06Z\", \"company\": {\"display_name\": \"McKinsey\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"salary_is_predicted\": \"0\", \"category\": {\"label\": \"Engineering Jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"engineering-jobs\"}, \"__CLASS__\": \"Adzuna::API::Response::Job\", \"id\": \"5945997747\", \"description\": \"Do you want to do work that matters, alongside supportive leaders who will help you grow faster than you ever thought possible? Are you a creative problem-solver who is energized by challenges? You’ve come to the right place. YOUR IMPACT You will collaborate with clients and interdisciplinary teams to understand client needs, develop impactful advanced analytics and AI solutions, optimize code, and solve complex business challenges across industries. You will grow your expertise by contributing…\"}, {\"__CLASS__\": \"Adzuna::API::Response::Job\", \"id\": \"5950536172\", \"description\": \"Job Description Job Description Who We Are: At OPENLANE we make wholesale easy so our customers can be more successful. What We Offer: Competitive pay Medical, dental, and vision benefits with employer HSA contributions (US) and FSA options (US) Immediately vested 401K (US) or RRSP (Canada) with company match Opportunities to expand your skill set and share your knowledge across a publicly traded, global organization Company culture of internal promotions, diverse career paths, and meaningful a…\", \"longitude\": -79.656736, \"title\": \"Mechanical Apprentice\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiS09fay1Qdlo4UkdCWGR3U0t0OUdFQSIsImkiOiI1OTUwNTM2MTcyIn0.5kATZaMjUDaQb0D1mr9tlezCAUfE0_1qygTWC_lUQaM\", \"redirect_url\": \"https://www.adzuna.ca/land/ad/5950536172?se=KO_k-PvZ8RGBXdwSKt9GEA&utm_medium=api&utm_source=REDACTED&v=0F5A8DD00C89E2E2687F56D5E85E3631AB33D326\", \"latitude\": 43.588336, \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Mississauga, Peel region\", \"area\": [\"Canada\", \"Ontario\", \"Peel region\", \"Mississauga\"]}, \"created\": \"2026-11-02T07:18:47Z\", \"company\": {\"display_name\": \"OPENLANE\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"salary_is_predicted\": \"0\", \"category\": {\"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"engineering-jobs\", \"label\": \"Engineering Jobs\"}}, {\"created\": \"2026-11-03T07:49:49Z\", \"contract_type\": \"contract\", \"company\": {\"display_name\": \"Egis Group\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Markham, York region\", \"area\": [\"Canada\", \"Ontario\", \"York region\", \"Markham\"]}, \"latitude\": 43.86652, \"salary_is_predicted\": \"0\", \"category\": {\"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"engineering-jobs\", \"label\": \"Engineering Jobs\"}, \"longitude\": -79.293777, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk1MTY5ODY4MCIsInMiOiJLT19rLVB2WjhSR0JYZHdTS3Q5R0VBIn0.A7o5iZySDkFrQP6npisaSxDtXY0KfVdEJlvUeq01sN4\", \"title\": \"Intern, Highways\", \"redirect_url\": \"https://www.adzuna.ca/land/ad/5951698680?se=KO_k-PvZ8RGBXdwSKt9GEA&utm_medium=api&utm_source=REDACTED&v=0F6FD9C3D37DDF799F84AC8FF00E4F9AE64DD1E0\", \"id\": \"5951698680\", \"description\": \"Job Description Job Description Company Description Ready to take the next step in your career? Join Egis and be part of our exciting growth across Canada. As a member of our global team of 23,500 engineers, architects, scientists and consultants, you'll help deliver some of the country's most impactful infrastructure, transportation, buildings and energy projects while building a career with global opportunities and local impact. Job Description We are seeking a talented and innovative Intern,…\", \"__CLASS__\": \"Adzuna::API::Response::Job\"}], \"__CLASS__\": \"Adzuna::API::Response::JobSearchResults\", \"mean\": 80069.18, \"count\": 2182}"
+  },
+  {
+   "method": "GET",
+   "url": "https://api.adzuna.com/v1/api/jobs/sg/search/1?app_id=REDACTED&app_key=REDACTED&content-type=application%2Fjson&max_days_old=14&results_per_page=50&what=intern&what_or=google+deepmind+meta+facebook+apple+mistral+tesla+bytedance+tiktok+ibm+netflix+amd+arm+citadel+sigma+goldman+sachs+jpmorgan+morgan+j.p.+g-research+sig+susquehanna+mckinsey+quantumblack+bcg+boston+uber+qualcomm+siemens+grab+sea+shopee+garena+shopify+qdrant+instadeep+groq+sakana+klarna+revolut+booking.com+booking+sap+asml",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json; charset=utf8",
+   "text": "{\"results\": [{\"__CLASS__\": \"Adzuna::API::Response::Job\", \"description\": \"WHO WE ARE: As Singapore's longest established bank, we have been dedicated to enabling individuals and businesses to achieve their aspirations since 1932. How? By taking the time to truly understand people. From there, we provide support, services, solutions, and career paths that meet their individual needs and desires. Today, we're on a journey of transformation. Leveraging technology and creativity to become a future-ready learning organisation. But for all that change, our strategic ambiti…\", \"id\": \"5940545035\", \"title\": \"Research Internship - OCBC\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0MDU0NTAzNSIsInMiOiJiT2g1LWZ2WjhSR0JYZHdTS3Q5R0VBIn0.hUnC2T0zbmkUsyy84ZREI-n5-4HavxkXnF1ysYsbZZ0\", \"redirect_url\": \"https://www.adzuna.sg/land/ad/5940545035?se=bOh5-fvZ8RGBXdwSKt9GEA&utm_medium=api&utm_source=REDACTED&v=84E01D6013B39D5CFC120CD782DF28A707D878C4\", \"contract_time\": \"full_time\", \"salary_is_predicted\": \"0\", \"category\": {\"label\": \"Accounting & Finance Jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"accounting-finance-jobs\"}, \"location\": {\"area\": [\"Singapore\"], \"display_name\": \"Singapore\", \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"company\": {\"display_name\": \"OCBC\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"created\": \"2026-10-24T21:52:38Z\", \"contract_type\": \"contract\"}, {\"location\": {\"area\": [\"Singapore\"], \"display_name\": \"Singapore\", \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"created\": \"2026-10-24T21:52:29Z\", \"contract_type\": \"contract\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"OCBC\"}, \"salary_is_predicted\": \"0\", \"category\": {\"tag\": \"accounting-finance-jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"Accounting & Finance Jobs\"}, \"contract_time\": \"full_time\", \"redirect_url\": \"https://www.adzuna.sg/land/ad/5940544953?se=bOh5-fvZ8RGBXdwSKt9GEA&utm_medium=api&utm_source=REDACTED&v=34896AF090658CE952A39D2BAC1D904423AD3FFB\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiYk9oNS1mdlo4UkdCWGR3U0t0OUdFQSIsImkiOiI1OTQwNTQ0OTUzIn0.e7ww5lWV6kYgvv-Td3CuPVjw3Wvlx73_oTYpwRCZZ7k\", \"title\": \"Research Internship - OCBC\", \"id\": \"5940544953\", \"description\": \"WHO WE ARE: As Singapore's longest established bank, we have been dedicated to enabling individuals and businesses to achieve their aspirations since 1932. How? By taking the time to truly understand people. From there, we provide support, services, solutions, and career paths that meet their individual needs and desires. Today, we're on a journey of transformation. Leveraging technology and creativity to become a future-ready learning organisation. But for all that change, our strategic ambiti…\", \"__CLASS__\": \"Adzuna::API::Response::Job\"}, {\"__CLASS__\": \"Adzuna::API::Response::Job\", \"id\": \"5944588353\", \"description\": \"WHO WE ARE: As Singapore's longest established bank, we have been dedicated to enabling individuals and businesses to achieve their aspirations since 1932. How? By taking the time to truly understand people. From there, we provide support, services, solutions, and career paths that meet their individual needs and desires. Today, we're on a journey of transformation. Leveraging technology and creativity to become a future-ready learning organisation. But for all that change, our strategic ambiti…\", \"contract_time\": \"full_time\", \"redirect_url\": \"https://www.adzuna.sg/land/ad/5944588353?se=bOh5-fvZ8RGBXdwSKt9GEA&utm_medium=api&utm_source=REDACTED&v=6FA202D86B418D3B9BF90CC5F56703EE51EC4C99\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiYk9oNS1mdlo4UkdCWGR3U0t0OUdFQSIsImkiOiI1OTQ0NTg4MzUzIn0.ydx1WV2je8NJYtL-3zClcJw8vWM7i9U1eqMtkquPURc\", \"title\": \"Research Internship - OCBC\", \"created\": \"2026-10-28T22:30:53Z\", \"company\": {\"display_name\": \"OCBC\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"contract_type\": \"contract\", \"location\": {\"area\": [\"Singapore\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Singapore\"}, \"salary_is_predicted\": \"0\", \"category\": {\"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"it-jobs\", \"label\": \"IT Jobs\"}}, {\"category\": {\"tag\": \"retail-jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"Retail Jobs\"}, \"salary_is_predicted\": \"0\", \"company\": {\"display_name\": \"Ksisters\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"created\": \"2026-11-05T20:09:28Z\", \"contract_type\": \"contract\", \"location\": {\"area\": [\"Singapore\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Singapore\"}, \"title\": \"Marketplace & Livestream Intern (3 Month Full Time Internship)\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk1NDE0NzY5MiIsInMiOiJiT2g1LWZ2WjhSR0JYZHdTS3Q5R0VBIn0.OFX5vWodlOHuQy_vy4LiodvFof55GY1FYXqHIHwjRD4\", \"redirect_url\": \"https://www.adzuna.sg/details/5954147692?utm_medium=api&utm_source=REDACTED\", \"contract_time\": \"full_time\", \"description\": \"About Ksisters Ksisters is a K-beauty distribution and marketing company operating across Singapore, Malaysia, and the US. We manage a portfolio of in-house and partner beauty brands, working hands-on across the full commerce funnel — content, social, live commerce, retail activation, and brand building with real regional reach for a company our size. About the role This internship is a hands-on introduction to e-commerce. You’ll work directly on our Shopee and TikTok Shop stores and learn how …\", \"id\": \"5954147692\", \"__CLASS__\": \"Adzuna::API::Response::Job\"}], \"__CLASS__\": \"Adzuna::API::Response::JobSearchResults\", \"count\": 388, \"mean\": 3681.05}"
+  },
+  {
+   "method": "GET",
+   "url": "https://api.adzuna.com/v1/api/jobs/de/search/1?app_id=REDACTED&app_key=REDACTED&content-type=application%2Fjson&max_days_old=14&results_per_page=50&what=intern&what_or=google+deepmind+meta+facebook+apple+mistral+tesla+bytedance+tiktok+ibm+netflix+amd+arm+citadel+sigma+goldman+sachs+jpmorgan+morgan+j.p.+g-research+sig+susquehanna+mckinsey+quantumblack+bcg+boston+uber+qualcomm+siemens+grab+sea+shopee+garena+shopify+qdrant+instadeep+groq+sakana+klarna+revolut+booking.com+booking+sap+asml",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json; charset=utf8",
+   "text": "{\"results\": [{\"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0Nzc2MTA4NiIsInMiOiI0TllSLXZ2WjhSR0JYZHdTS3Q5R0VBIn0.VrPU9J81o1qJuw6G4cxNprJWTYPTku2ZQEnrn8UDmMo\", \"redirect_url\": \"https://www.adzuna.de/details/5947761086?utm_medium=api&utm_source=REDACTED\", \"title\": \"SAP Solution Architect (m/w/d)\", \"created\": \"2026-10-31T07:59:30Z\", \"company\": {\"display_name\": \"JUNGHANS microtec GmbH\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"location\": {\"display_name\": \"Deutschland\", \"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"Deutschland\"]}, \"salary_is_predicted\": \"0\", \"category\": {\"label\": \"IT-Stellen\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"it-jobs\"}, \"__CLASS__\": \"Adzuna::API::Response::Job\", \"id\": \"5947761086\", \"description\": \"Digitale Trans­formation. Nach­haltig­keit. Friedens­sicherung. Spannende Aufgaben, an denen auch wir bei Diehl in unseren fünf Teil­konzernen Metall, Controls, Defence, Aviation und Metering und unsere über 16.000 Mit­ar­bei­te­rin­nen und Mit­arbeiter mit Hochdruck arbeiten. Entdecken Sie faszinierende Techno­logien und bewerben Sie sich. In einem von Vertrauen und Mut geprägten Familien­unter­nehmen, das beständig und stabil ist – aus Tradition. Für unseren Standort JUNGHANS Microtec GmbH in…\"}, {\"salary_is_predicted\": \"0\", \"category\": {\"label\": \"Sonstige/Allgemeine Stellen\", \"tag\": \"other-general-jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}, \"location\": {\"area\": [\"Deutschland\", \"Baden-Württemberg\", \"Rhein-Neckar-Kreis\", \"Weinheim\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Weinheim, Rhein-Neckar-Kreis\"}, \"latitude\": 49.55214, \"company\": {\"display_name\": \"aktivComm GmbH\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"created\": \"2026-11-05T17:29:33Z\", \"redirect_url\": \"https://www.adzuna.de/land/ad/5954501632?se=4NYR-vvZ8RGBXdwSKt9GEA&utm_medium=api&utm_source=REDACTED&v=EDB59C04C9BE1951ABE58C9B0EA5D2415E3C8CC3\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiNE5ZUi12dlo4UkdCWGR3U0t0OUdFQSIsImkiOiI1OTU0NTAxNjMyIn0.QBWPzqHnjmilaSgG8ajj7EuVzhaCB2s-jKpPjr_iThk\", \"title\": \"Performance Marketing Manager (m/w/d) Paid Ads\", \"contract_time\": \"full_time\", \"longitude\": 8.66573, \"description\": \"Wer wir sind aktivcomm ist eine Performance-Marketing-Agentur aus Weinheim. Seit 1993 inhabergeführt, Teil der ABT Mediengruppe, Google Partner seit über neun Jahren. Wir sind 9 Leute und betreuen vor allem mittelständische B2B-Unternehmen, die über digitale Kanäle neue Kunden gewinnen wollen. Unser Anspruch: Marketing. Messbar. Machen. Wir arbeiten ohne Vertragsbindung und ohne Provision auf das Werbebudget unserer Kunden. Für uns heißt das: Wir müssen jeden Monat zeigen, dass unsere Arbeit wi…\", \"id\": \"5954501632\", \"__CLASS__\": \"Adzuna::API::Response::Job\"}, {\"category\": {\"label\": \"Stellen aus Buchhaltung & Finanzwesen\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"accounting-finance-jobs\"}, \"salary_is_predicted\": \"0\", \"latitude\": 48.14093, \"location\": {\"area\": [\"Deutschland\", \"Bayern\", \"München (Kreis)\", \"München\", \"Altstadt-Lehel\"], \"display_name\": \"Altstadt-Lehel, München\", \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"FSN Capital Partners\"}, \"created\": \"2026-10-28T19:01:17Z\", \"title\": \"Private Equity Intern, Munich, H2 2027\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0NDgxNzIwOSIsInMiOiI0TllSLXZ2WjhSR0JYZHdTS3Q5R0VBIn0.lz-vj81N_RuOcLOIGjMLOIrdSIEbTMu-sDpQOhYSGGA\", \"redirect_url\": \"https://www.adzuna.de/details/5944817209?utm_medium=api&utm_source=REDACTED\", \"longitude\": 11.56907, \"contract_time\": \"full_time\", \"description\": \"Private Equity Intern Position FSN Capital is offering a 6 month' internship in our Munich office, as of H2 2027 About the opportunity As an intern at FSN Capital Partners you will be an integrated part of the investment team and gain insight into the steps of an investment’s lifecycle: sourcing – due diligence – value creation – divestment. You will play an important role in teams taking on significant responsibility and you should be able to see beyond numbers and think creatively. You will b…\", \"id\": \"5944817209\", \"__CLASS__\": \"Adzuna::API::Response::Job\"}, {\"description\": \"As an SAP S/4HANA Consultant (all genders) at BCG Platinion, you will play a central role in supporting clients with complex ERP transformations, with a particular focus on SAP S/4HANA. With your expertise, you will guide our clients through the entire project lifecycle, from strategy and planning to implementation and go-live, with a strong perspective on business value. You will work together with colleagues from the Boston Consulting Group on (inter)national customer projects and advise up t…\", \"id\": \"5955215124\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_is_predicted\": \"0\", \"category\": {\"label\": \"Unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"unknown\"}, \"company\": {\"display_name\": \"The Boston Consulting Group\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"created\": \"2026-11-06T05:12:01Z\", \"location\": {\"display_name\": \"Deutschland\", \"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"Deutschland\"]}, \"redirect_url\": \"https://www.adzuna.de/details/5955215124?utm_medium=api&utm_source=REDACTED\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk1NTIxNTEyNCIsInMiOiI0TllSLXZ2WjhSR0JYZHdTS3Q5R0VBIn0.dDcnG46gb-3NR1qD-TKFcRkrLDqmauYRHxoA_zTsXw8\", \"title\": \"Consultant Enterprise Solutions – SAP focus (all genders) - BCG Platinion\"}], \"__CLASS__\": \"Adzuna::API::Response::JobSearchResults\", \"mean\": 55256.61, \"count\": 6037}"
+  },
+  {
+   "method": "GET",
+   "url": "https://api.adzuna.com/v1/api/jobs/nl/search/1?app_id=REDACTED&app_key=REDACTED&content-type=application%2Fjson&max_days_old=14&results_per_page=50&what=intern&what_or=google+deepmind+meta+facebook+apple+mistral+tesla+bytedance+tiktok+ibm+netflix+amd+arm+citadel+sigma+goldman+sachs+jpmorgan+morgan+j.p.+g-research+sig+susquehanna+mckinsey+quantumblack+bcg+boston+uber+qualcomm+siemens+grab+sea+shopee+garena+shopify+qdrant+instadeep+groq+sakana+klarna+revolut+booking.com+booking+sap+asml",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json; charset=utf8",
+   "text": "{\"mean\": 51186.75, \"count\": 715, \"results\": [{\"id\": \"5953084150\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"redirect_url\": \"https://www.adzuna.nl/land/ad/5953084150?se=nEyt-vvZ8RG_saRps_1B5w&utm_medium=api&utm_source=REDACTED&v=87D6F232A2B091B8E692ADC992671BA10BE98B27\", \"category\": {\"label\": \"Unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"unknown\"}, \"description\": \"Vacature kenmerken Standplaats Utrecht Contractduur Uren per week - 38 Maandsalaris €3.913,00 - €6.244,00 Salarisniveau Burgerschaal IBBAD 10 - Burgerschaal IBBAD 10 Niveau HBO Bachelor Vakgebied Techniek / productie Vacaturenummer 82633 Dienstverband ​Tijdelijke aanstelling met zicht op vaste aanstelling​ Functiegroep Burger Dit ga je doen Werken bij het ministerie Defensie, maar niet als militair? Als je kiest voor een baan bij Defensie, dan kies je voor maatschappelijk relevant werk. Je draa…\", \"created\": \"2026-11-04T16:19:10Z\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Ministerie van Defensie\"}, \"salary_is_predicted\": \"0\", \"location\": {\"area\": [\"Nederland\"], \"display_name\": \"Nederland\", \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoibkV5dC12dlo4Ukdfc2FScHNfMUI1dyIsImkiOiI1OTUzMDg0MTUwIn0.OPIB5PhED3u5-oHyVJfS7C4Y6KwOv_0dIY0iqd6INc8\", \"title\": \"Meta Data Manager\"}, {\"location\": {\"display_name\": \"Hoofddorp, Haarlemmermeer\", \"area\": [\"Nederland\", \"Noord-Holland\", \"Haarlemmermeer\", \"Hoofddorp\"], \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"title\": \"Marketing Analytics & Campaigns Intern\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoibkV5dC12dlo4Ukdfc2FScHNfMUI1dyIsImkiOiI1OTU0MTE5OTQwIn0.AyRFyjzJnlGvKqA7j1__dybPsRXdMyP2sa9XrPntmIM\", \"description\": \"Jobster is a predictive job advertising platform building recruitment marketing technology. We are looking for an analytical and action-oriented Marketing Analytics & Campaigns Intern to join our international marketing team to bridge the gap between data insights and marketing execution. Responsibilities Analyze & Identify: Dive deep into customer data, Google Analytics, and Looker Studio to monitor campaign performance and proactively spot which clients or sectors need attention. Data-Driven …\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Jobster\"}, \"created\": \"2026-11-05T12:47:40Z\", \"salary_is_predicted\": \"0\", \"latitude\": 52.32188, \"salary_max\": 9000, \"__CLASS__\": \"Adzuna::API::Response::Job\", \"redirect_url\": \"https://www.adzuna.nl/land/ad/5954119940?se=nEyt-vvZ8RG_saRps_1B5w&utm_medium=api&utm_source=REDACTED&v=05A2E9E51E0708F8210B9578DFAF4171B441A6B4\", \"category\": {\"tag\": \"unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"Unknown\"}, \"salary_min\": 5400, \"longitude\": 4.61273, \"id\": \"5954119940\"}, {\"id\": \"5951890660\", \"redirect_url\": \"https://www.adzuna.nl/land/ad/5951890660?se=nEyt-vvZ8RG_saRps_1B5w&utm_medium=api&utm_source=REDACTED&v=C91EC38F5459C4E84DF91161675D600DFBB54930\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"category\": {\"tag\": \"unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"Unknown\"}, \"description\": \"Vacature kenmerken Standplaats Den Helder Contractduur 2 jaar Uren per week - 38 Maandsalaris €3.297,00 - €4.568,00 Salarisniveau Burgerschaal IBBAD 07 - Burgerschaal IBBAD 07 Niveau MBO 4 Vakgebied Opslag / vervoer / logistiek; Orde / vrede / veiligheid Vacaturenummer 82539 Dienstverband ​Tijdelijke aanstelling met zicht op vaste aanstelling​ Functiegroep Burger Dit ga je doen Jij bent ‘subject matter expert’ op het gebied van SAP voor ketenlogistiek en systeemlogistiek binnen de staf van de G…\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Ministerie van Defensie\"}, \"created\": \"2026-11-03T17:07:28Z\", \"salary_is_predicted\": \"0\", \"location\": {\"area\": [\"Nederland\"], \"display_name\": \"Nederland\", \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk1MTg5MDY2MCIsInMiOiJuRXl0LXZ2WjhSR19zYVJwc18xQjV3In0.kHihpQmrmOnfsRBWyzEnS67qHiQ209a6-1V_O9T8nIM\", \"title\": \"Senior Key User SAP\"}, {\"description\": \"Vacature kenmerken Standplaats Heerenveen Contractduur 24 maanden Uren per week 38 - 38 Maandsalaris €3.297,00 - €4.568,00 Salarisniveau Burgerschaal IBBAD 07 - Burgerschaal IBBAD 07 Niveau MBO 4 Vakgebied Opslag / vervoer / logistiek Vacaturenummer 82213 Dienstverband Tijdelijke aanstelling met zicht op vaste aanstelling​​ Functiegroep Burger​ Dit ga je doen Word jij de motor achter een foutloos materieelbeheer bij Defensie? Ben jij iemand die houdt van orde, precisie en een omgeving waar jouw…\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Ministerie van Defensie\"}, \"created\": \"2026-11-01T04:53:43Z\", \"salary_is_predicted\": \"0\", \"location\": {\"display_name\": \"Nederland\", \"area\": [\"Nederland\"], \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0ODYwMjE3NyIsInMiOiJuRXl0LXZ2WjhSR19zYVJwc18xQjV3In0.lBqoq17gRfD_HDc5ttLIILNwTyRO6g7iz-0hrUOGS2E\", \"title\": \"Medewerker intern materieelbeheer\", \"id\": \"5948602177\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"redirect_url\": \"https://www.adzuna.nl/land/ad/5948602177?se=nEyt-vvZ8RG_saRps_1B5w&utm_medium=api&utm_source=REDACTED&v=8DD65BF55BC4A2608A67EE31F483A1A82829C6EA\", \"category\": {\"tag\": \"unknown\", \"label\": \"Unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}}], \"__CLASS__\": \"Adzuna::API::Response::JobSearchResults\"}"
+  },
+  {
+   "method": "GET",
+   "url": "https://api.adzuna.com/v1/api/jobs/ch/search/1?app_id=REDACTED&app_key=REDACTED&content-type=application%2Fjson&max_days_old=14&results_per_page=50&what=intern&what_or=google+deepmind+meta+facebook+apple+mistral+tesla+bytedance+tiktok+ibm+netflix+amd+arm+citadel+sigma+goldman+sachs+jpmorgan+morgan+j.p.+g-research+sig+susquehanna+mckinsey+quantumblack+bcg+boston+uber+qualcomm+siemens+grab+sea+shopee+garena+shopify+qdrant+instadeep+groq+sakana+klarna+revolut+booking.com+booking+sap+asml",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json; charset=utf8",
+   "text": "{\"__CLASS__\": \"Adzuna::API::Response::JobSearchResults\", \"count\": 601, \"results\": [{\"created\": \"2026-10-24T02:57:35Z\", \"salary_is_predicted\": \"0\", \"latitude\": 47.374173, \"description\": \"At Meta, we're building the future of human connection and the technology that enables it. Meta is seeking a Robotics Intern to join Meta Reality Labs Research. Interns in this role are proficient in identified research areas such as artificial intelligence, machine learning, robotics, and embodied AI, particularly including areas such as transfer learning, learning from demonstration, reinforcement learning, action-conditioned world models, perception, representation learning, robot control, m…\", \"company\": {\"display_name\": \"Meta\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"Schweiz\", \"Kanton Zürich\", \"Zürich\", \"Zürich\"], \"display_name\": \"Zürich\"}, \"__CLASS__\": \"Adzuna::API::Response::Job\", \"title\": \"Research Scientist Intern, Robotics - Meta Reality Labs Research (PhD)\", \"category\": {\"label\": \"Unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"unknown\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoidEJGSS1fdlo4UkdIUWMyS3lKQkx4USIsImkiOiI1OTM5Nzc1NjI5In0.3nt2o5RbP7KBkd9kNDVA4cPDE-0USzgJBdow4fTm0Gk\", \"longitude\": 8.523767, \"redirect_url\": \"https://www.adzuna.ch/details/5939775629?utm_medium=api&utm_source=REDACTED\", \"id\": \"5939775629\"}, {\"created\": \"2026-11-01T17:29:55Z\", \"location\": {\"display_name\": \"Zürich\", \"area\": [\"Schweiz\", \"Kanton Zürich\", \"Zürich\", \"Zürich\"], \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"company\": {\"display_name\": \"Job-Room\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"salary_is_predicted\": \"0\", \"latitude\": 47.374173, \"description\": \"*info\\\\\\\\_outline* X Google welcomes people with disabilities. Please complete your application before 14th December 2026. We encourage you to apply as early as possible as we review applications on a rolling basis. This internship is intended for students enrolled in their penultimate/final year of education in an accredited full-time PhD degree program located in the EMEA region. Participation in the internship program requires that you are located in one of the specific country locations ident…\", \"longitude\": 8.523767, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0OTU0MDY1NSIsInMiOiJ0QkZJLV92WjhSR0hRYzJLeUpCTHhRIn0.DJ49mO_oHAkjXIOASM0fTgXkhbyw8_IuxvEV33zR3Y4\", \"category\": {\"label\": \"Unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"unknown\"}, \"__CLASS__\": \"Adzuna::API::Response::Job\", \"title\": \"Research Scientist PhD Intern, 2027 - Google Careers\", \"id\": \"5949540655\", \"redirect_url\": \"https://www.adzuna.ch/details/5949540655?utm_medium=api&utm_source=REDACTED\"}, {\"id\": \"5953539311\", \"redirect_url\": \"https://www.adzuna.ch/details/5953539311?utm_medium=api&utm_source=REDACTED\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk1MzUzOTMxMSIsInMiOiJ0QkZJLV92WjhSR0hRYzJLeUpCTHhRIn0.WfM32re4_zenK6qKRgVGOuoT3OyqDyKFMya3Y2ZvVuQ\", \"category\": {\"tag\": \"unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"Unknown\"}, \"longitude\": 8.523767, \"__CLASS__\": \"Adzuna::API::Response::Job\", \"title\": \"Research Scientist Intern, Human Sensing for Wearables, AR and VR (PhD)\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Meta\"}, \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"Schweiz\", \"Kanton Zürich\", \"Zürich\", \"Zürich\"], \"display_name\": \"Zürich\"}, \"salary_is_predicted\": \"0\", \"description\": \"Reality Labs (RL) teams are looking for exceptional interns to help us create the next generation of human-centric interaction technologies for wearables, virtual and augmented reality. Join a full-stack team working on machine learning, generative modeling, multimodal-models from a high diversity of sensor types. We are accepting applications from those interested in (but not limited to) the following areas: - Tracking of bodies, faces and hands and their interactions through machine learning,…\", \"latitude\": 47.374173, \"created\": \"2026-11-05T02:02:05Z\"}, {\"redirect_url\": \"https://www.adzuna.ch/details/5939775630?utm_medium=api&utm_source=REDACTED\", \"id\": \"5939775630\", \"category\": {\"label\": \"Unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"unknown\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTkzOTc3NTYzMCIsInMiOiJ0QkZJLV92WjhSR0hRYzJLeUpCTHhRIn0.e_fk7DtsvegCBSuXJ-bsPRJLwkYTAAG1HgcPk57qkL0\", \"longitude\": 8.523767, \"__CLASS__\": \"Adzuna::API::Response::Job\", \"title\": \"Research Scientist Intern, Robotics Foundation Models (PhD)\", \"location\": {\"display_name\": \"Zürich\", \"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"Schweiz\", \"Kanton Zürich\", \"Zürich\", \"Zürich\"]}, \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Meta\"}, \"salary_is_predicted\": \"0\", \"latitude\": 47.374173, \"description\": \"At Meta, we're building the future of human connection and the technology that enables it. Meta is seeking a Robotics Intern to join Meta Reality Labs Research. Meta Reality Labs Research is a team of researchers pushing the frontier of AI and robotics. Our team is building the next generation of foundation models for robotic manipulation, including vision-language-action models (VLAs) and world action models (WAMs). We are seeking a Research Scientist Intern to help design and improve the arch…\", \"created\": \"2026-10-24T02:57:35Z\"}], \"mean\": 76674.57}"
+  },
+  {
+   "method": "GET",
+   "url": "https://api.adzuna.com/v1/api/jobs/es/search/1?app_id=REDACTED&app_key=REDACTED&content-type=application%2Fjson&max_days_old=14&results_per_page=50&what=intern&what_or=google+deepmind+meta+facebook+apple+mistral+tesla+bytedance+tiktok+ibm+netflix+amd+arm+citadel+sigma+goldman+sachs+jpmorgan+morgan+j.p.+g-research+sig+susquehanna+mckinsey+quantumblack+bcg+boston+uber+qualcomm+siemens+grab+sea+shopee+garena+shopify+qdrant+instadeep+groq+sakana+klarna+revolut+booking.com+booking+sap+asml",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json; charset=utf8",
+   "text": "{\"count\": 2411, \"__CLASS__\": \"Adzuna::API::Response::JobSearchResults\", \"mean\": 81806.2, \"results\": [{\"redirect_url\": \"https://www.adzuna.es/details/5954149679?utm_medium=api&utm_source=REDACTED\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_is_predicted\": \"0\", \"description\": \"Who You Will Work With Driving lasting impact and building long-term capabilities with our clients is not easy work. You are the kind of person who thrives in a high performance/high reward culture - doing hard things, picking yourself up when you stumble, and having the resilience to try another way forward. In return for your drive, determination, and curiosity, we'll provide the resources, mentorship, and opportunities you need to become a stronger leader faster than you ever thought possibl…\", \"category\": {\"tag\": \"unknown\", \"label\": \"Unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}, \"title\": \"Data Scientist Intern - QuantumBlack, AI by McKinsey\", \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"España\", \"Comunidad de Madrid\", \"Madrid\", \"Madrid\"], \"display_name\": \"Madrid\"}, \"created\": \"2026-11-05T13:09:56Z\", \"id\": \"5954149679\", \"longitude\": -3.724726, \"latitude\": 40.429254, \"company\": {\"display_name\": \"McKinsey & Company España\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiZWhUZS1fdlo4UkduMHAtclZ3ZHJ4ZyIsImkiOiI1OTU0MTQ5Njc5In0.n_QCHAYYHhMXrYNmwkIjmlbvFxFSsNvCADD5Y1ICKC4\"}, {\"location\": {\"display_name\": \"Barcelona\", \"area\": [\"España\", \"Cataluña\", \"Barcelona\", \"Barcelona\"], \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"title\": \"TikTok Content Creator Intern\", \"created\": \"2026-10-27T15:18:36Z\", \"salary_max\": 7200, \"__CLASS__\": \"Adzuna::API::Response::Job\", \"description\": \"DESCRIPTION Are you the person who always knows what's trending on TikTok? Do you find yourself thinking, \\\"I could make a better version of this video\\\" ? Do you love creating content, spotting trends, and coming up with ideas that make people stop scrolling? Then we want you on our team! At Europe Language Jobs, we're looking for a creative, social media-savvy intern to help us grow our Spanish TikTok community. You'll get the opportunity to create content for our official Spanish TikTok accoun…\", \"redirect_url\": \"https://www.adzuna.es/details/5943482066?utm_medium=api&utm_source=REDACTED\", \"salary_is_predicted\": \"0\", \"category\": {\"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"pr-advertising-marketing-jobs\", \"label\": \"Trabajos en marketing, publicidad y relaciones públicas\"}, \"id\": \"5943482066\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"City Job Offers\"}, \"latitude\": 41.380002, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiZWhUZS1fdlo4UkduMHAtclZ3ZHJ4ZyIsImkiOiI1OTQzNDgyMDY2In0.M4gvRaon0u-3tyssKp2nWSt7VXRyPXC1nPsBu_CWbXQ\", \"longitude\": 2.168131, \"salary_min\": 6600}, {\"id\": \"5938524951\", \"latitude\": 40.454529, \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Grupo PROEDUCA\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTkzODUyNDk1MSIsInMiOiJlaFRlLV92WjhSR24wcC1yVndkcnhnIn0.21-Wz4kUAMEs6XACUeiO79eNg9S_f3px8opVqSJi9q0\", \"longitude\": -3.795079, \"title\": \"Técnico/a Soporte TIC Apple\", \"location\": {\"area\": [\"España\", \"Comunidad de Madrid\", \"Madrid\", \"Pozuelo de Alarcón\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Pozuelo de Alarcón, Madrid\"}, \"created\": \"2026-10-23T03:13:54Z\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_is_predicted\": \"0\", \"redirect_url\": \"https://www.adzuna.es/details/5938524951?utm_medium=api&utm_source=REDACTED\", \"description\": \"¿Te apasiona el entorno corporativo Apple y disfrutas ayudando a las personas a resolver retos tecnológicos? En UNIR buscamos incorporar un/a Técnico/a de Soporte Apple para unirse a nuestro equipo de Tecnología.  ¿Cuál será tu misión? Serás una pieza clave para garantizar el correcto funcionamiento de los equipos y servicios tecnológicos de la compañía, ofreciendo un soporte cercano, ágil y de calidad a nuestros usuarios internos.  ¿Qué harás en tu día a día? Configurar, administrar y mantener…\", \"category\": {\"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"Unknown\", \"tag\": \"unknown\"}}, {\"longitude\": 2.168131, \"latitude\": 41.380002, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0Nzk2MDYxNCIsInMiOiJlaFRlLV92WjhSR24wcC1yVndkcnhnIn0.gMAXNrf0eOIFnCQa32BckY9cgUMHGCM-44_IhWLBwKo\", \"company\": {\"display_name\": \"Europe Language Jobs\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"id\": \"5947960614\", \"created\": \"2026-10-31T12:59:38Z\", \"location\": {\"area\": [\"España\", \"Cataluña\", \"Barcelona\", \"Barcelona\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Barcelona\"}, \"title\": \"Dutch Intern - TikTok Content Creator\", \"category\": {\"tag\": \"unknown\", \"label\": \"Unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}, \"description\": \"Description About usThe digital marketing sector is constantly evolving. What you study in books and slides today may be old hat tomorrow.&nbsp; Algorithms change, so the digital marketing strategy always has to adapt.&nbsp;Take your first steps into the digital marketing industry with the Europe Language Jobs team, and learn the secrets of TikTok from our specialist team.&nbsp;Learn transversal skills to jump into the world of social media marketing and have fun in the beautiful setting of Bar…\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"redirect_url\": \"https://www.adzuna.es/details/5947960614?utm_medium=api&utm_source=REDACTED\", \"salary_is_predicted\": \"0\"}]}"
+  },
+  {
+   "method": "GET",
+   "url": "https://api.adzuna.com/v1/api/jobs/it/search/1?app_id=REDACTED&app_key=REDACTED&content-type=application%2Fjson&max_days_old=14&results_per_page=50&what=intern&what_or=google+deepmind+meta+facebook+apple+mistral+tesla+bytedance+tiktok+ibm+netflix+amd+arm+citadel+sigma+goldman+sachs+jpmorgan+morgan+j.p.+g-research+sig+susquehanna+mckinsey+quantumblack+bcg+boston+uber+qualcomm+siemens+grab+sea+shopee+garena+shopify+qdrant+instadeep+groq+sakana+klarna+revolut+booking.com+booking+sap+asml",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json; charset=utf8",
+   "text": "{\"mean\": 27668.25, \"__CLASS__\": \"Adzuna::API::Response::JobSearchResults\", \"results\": [{\"salary_is_predicted\": \"0\", \"latitude\": 45.473082, \"id\": \"5938535347\", \"salary_min\": 14400, \"location\": {\"display_name\": \"Provincia di Milano, Lombardia\", \"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"Italia\", \"Lombardia\", \"Provincia di Milano\"]}, \"title\": \"GOOGLE & META ADS SPECIALIST\", \"longitude\": 9.138379, \"redirect_url\": \"https://www.adzuna.it/details/5938535347?utm_medium=api&utm_source=REDACTED\", \"category\": {\"tag\": \"pr-advertising-marketing-jobs\", \"label\": \"Pubblicità/Marketing/PR\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTkzODUzNTM0NyIsInMiOiJHRzkyX1B2WjhSR0hqUE41RkVPckdBIn0.3-MLP2nIienaLQDj6Y8xSsk3EOAd5TkMIlUnaq5b1t0\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Etjca Group S.p.A.\"}, \"description\": \"Panoramica di Presentazione Il nostro Cliente è una realtà specializzata nello sviluppo di strategie di marketing digitale e CRM, che affianca aziende di diversi settori nella realizzazione di progetti orientati all'innovazione, alla crescita e al miglioramento delle performance. Job Title e finalità di Ruolo: GOOGLE & META ADS SPECIALIST La risorsa si occuperà della gestione operativa end-to-end delle campagne pubblicitarie a pagamento, con focus su Google Ads e Meta Ads: configurazione, monit…\", \"created\": \"2026-10-23T03:26:22Z\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_max\": 19200}, {\"salary_is_predicted\": \"0\", \"latitude\": 45.536908, \"id\": \"5954549405\", \"longitude\": 9.055768, \"redirect_url\": \"https://www.adzuna.it/details/5954549405?utm_medium=api&utm_source=REDACTED\", \"category\": {\"tag\": \"unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"Unknown\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiR0c5Ml9Qdlo4UkdIalBONUZFT3JHQSIsImkiOiI1OTU0NTQ5NDA1In0.qM6ezA987OxsBk2OxuwWHWyIqJK5Q4ic9vcvEqwTi_c\", \"location\": {\"area\": [\"Italia\", \"Lombardia\", \"Provincia di Milano\", \"Rho\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Rho, Provincia di Milano\"}, \"title\": \"Intern Marketing Digital Communication E-commerce Support\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"created\": \"2026-11-05T17:56:28Z\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Kärcher S.p.A.\"}, \"description\": \"Per la sede direzionale a Rho (Milano) di Kärcher Spa ricerchiamo un/una stagiaire che supporterà il Marketing Digital Communication e l' E-commerce. Principali attività e responsabilità: - Gestione back-end del sito italiano e implementazione delle landing di prodotto e delle pagine promozionali; - Creazione di contenuti per i social media aziendali, redazione piano editoriale, posting (Instagram, Facebook, Linkedin); - Interazione con la community Kärcher sui social media; - Creazione e invio…\"}, {\"id\": \"5947152847\", \"salary_is_predicted\": \"0\", \"created\": \"2026-10-30T18:14:48Z\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"contract_time\": \"full_time\", \"company\": {\"display_name\": \"Accenture\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"description\": \"Perché aspettare il cambiamento, quando puoi farne parte? In Accenture, potrai crescere in un ambiente inclusivo e rispettoso della tua unicità e dei tuoi valori , sviluppando le tue abilità con programmi di training continuativi ed esperienziali. Scopri cosa significa lavorare al cuore del cambiamento e accompagna le aziende più importanti nel loro percorso di trasformazione digitale. Entra a far parte del nostro centro di innovazione tecnologica ACIN (Accenture Customer Innovation Network). L…\", \"redirect_url\": \"https://www.adzuna.it/details/5947152847?utm_medium=api&utm_source=REDACTED\", \"category\": {\"label\": \"Unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"unknown\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0NzE1Mjg0NyIsInMiOiJHRzkyX1B2WjhSR0hqUE41RkVPckdBIn0._s16mrzp-q7dHeHeGxoJAy0ufo5-fX8SQj42roVz40s\", \"title\": \"ACIN - Booking&Events - Intern\", \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"Italia\"], \"display_name\": \"Italia\"}}, {\"company\": {\"display_name\": \"Accenture\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"description\": \"Perché aspettare il cambiamento, quando puoi farne parte? In Accenture, potrai crescere in un ambiente inclusivo e rispettoso della tua unicità e dei tuoi valori , sviluppando le tue abilità con programmi di training continui ed esperienziali. Scopri cosa significa lavorare al cuore del cambiamento e accompagna le aziende più importanti nel loro percorso di trasformazione digitale. Entra a far parte del nostro centro di innovazione tecnologica ACIN (Accenture Customer Innovation Network). Lavor…\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"created\": \"2026-10-31T16:55:52Z\", \"title\": \"ACIN - Booking&Events - Intern\", \"location\": {\"display_name\": \"Milano, Provincia di Milano\", \"area\": [\"Italia\", \"Lombardia\", \"Provincia di Milano\", \"Milano\"], \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"category\": {\"label\": \"Unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"unknown\"}, \"longitude\": 9.187087, \"redirect_url\": \"https://www.adzuna.it/details/5948191474?utm_medium=api&utm_source=REDACTED\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0ODE5MTQ3NCIsInMiOiJHRzkyX1B2WjhSR0hqUE41RkVPckdBIn0.U1mdmjLvowWarY9qkn8TP8BsrracMTDmQnBbwONXvb8\", \"id\": \"5948191474\", \"salary_is_predicted\": \"0\", \"latitude\": 45.471322}], \"count\": 2459}"
+  },
+  {
+   "method": "GET",
+   "url": "https://api.adzuna.com/v1/api/jobs/at/search/1?app_id=REDACTED&app_key=REDACTED&content-type=application%2Fjson&max_days_old=14&results_per_page=50&what=intern&what_or=google+deepmind+meta+facebook+apple+mistral+tesla+bytedance+tiktok+ibm+netflix+amd+arm+citadel+sigma+goldman+sachs+jpmorgan+morgan+j.p.+g-research+sig+susquehanna+mckinsey+quantumblack+bcg+boston+uber+qualcomm+siemens+grab+sea+shopee+garena+shopify+qdrant+instadeep+groq+sakana+klarna+revolut+booking.com+booking+sap+asml",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json; charset=utf8",
+   "text": "{\"__CLASS__\": \"Adzuna::API::Response::JobSearchResults\", \"mean\": 59576.63, \"count\": 154, \"results\": [{\"category\": {\"tag\": \"unknown\", \"label\": \"Unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}, \"description\": \"Bei RAUCH setzen wir unsere Vision um, bis 2035 weltweit die erste Wahl für nachhaltig erfolgreiche Getränkelösungen zu sein. Mit einer starken Marktposition gestalten wir die Getränkewelt als Familienunternehmen bereits seit 1919. Seit unserer Gründung ist Rankweil der Stammsitz von RAUCH. Am Anfang eine kleine Mosterei, heute der Arbeitsplatz von rund 600 Mitarbeitenden. Von unserer Unternehmenszentrale werden die Aktivitäten aller internationalen Gesellschaften von RAUCH begleitet. Und natür…\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_is_predicted\": \"0\", \"redirect_url\": \"https://www.adzuna.at/details/5955344881?utm_medium=api&utm_source=REDACTED\", \"created\": \"2026-11-06T08:03:43Z\", \"title\": \"Intern Sustainability (m/w/d)\", \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"Österreich\", \"Vorarlberg\", \"Feldkirch\", \"Rankweil\"], \"display_name\": \"Rankweil, Feldkirch\"}, \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"RAUCH Fruchtsäfte GmbH & Co OG\"}, \"latitude\": 47.276298, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiNEZvTl9mdlo4UkduMHAtclZ3ZHJ4ZyIsImkiOiI1OTU1MzQ0ODgxIn0.Umd-C-vJcqFFJU_VVlcmbxer0YcQnBvt6Z7qmlUF4N8\", \"longitude\": 9.630173, \"id\": \"5955344881\"}, {\"category\": {\"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"Unknown\", \"tag\": \"unknown\"}, \"description\": \"Work Schedule Standard (Mon-Fri) Environmental Conditions Office Job Description When you’re part of the team at Thermo Fisher Scientific, you’ll do important work, like helping customers in finding cures for cancer, protecting the environment or making sure our food is safe. Your work will have real-world impact, and you’ll be supported in achieving your career goals. Our staff members are committed to making a difference in our organization, for our client partners and the patients we serve. …\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_is_predicted\": \"0\", \"redirect_url\": \"https://www.adzuna.at/details/5953152987?utm_medium=api&utm_source=REDACTED\", \"salary_max\": 6613, \"created\": \"2026-11-04T17:20:09Z\", \"title\": \"Intern R&D\", \"location\": {\"area\": [\"Österreich\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Österreich\"}, \"salary_min\": 6613, \"contract_time\": \"full_time\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiNEZvTl9mdlo4UkduMHAtclZ3ZHJ4ZyIsImkiOiI1OTUzMTUyOTg3In0.I-18ju-ir6Mbtnq6KozZrZJmxjxpHuEdeYR7qggIc3U\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Thermo Fisher Scientific\"}, \"id\": \"5953152987\"}, {\"longitude\": 16.354031, \"latitude\": 48.208144, \"company\": {\"display_name\": \"VITREA Österreich\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiNEZvTl9mdlo4UkduMHAtclZ3ZHJ4ZyIsImkiOiI1OTQ0MTQ3ODMyIn0.eKdXpXT3Wl5Pmfjrb9xAliktdSfRkc2_RPOfJV1_1WI\", \"id\": \"5944147832\", \"created\": \"2026-10-28T07:02:40Z\", \"location\": {\"display_name\": \"Wien, Österreich\", \"area\": [\"Österreich\", \"Wien\"], \"__CLASS__\": \"Adzuna::API::Response::Location\"}, \"title\": \"HR Process & Systems Senior Expert (m/w/d) – SAP SF Employee Central\", \"category\": {\"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"consultancy-jobs\", \"label\": \"Beraterstellen\"}, \"salary_is_predicted\": \"0\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"description\": \"Wir sind ein führendes Gesundheitsunternehmen in Deutschland, Österreich und der Schweiz mit rund 14.000 Mitarbeitenden und über 70 Einrichtungen. Unser Ziel: erstklassige Gesundheitsversorgung und Rehabilitation für unsere Patient:innen – getragen von einem starken Teamgeist und einer zukunftsorientierten Unternehmenskultur. Deine Mission Du gestaltest gemeinsam mit den HR-Fachbereichen die Employee Journey und verantwortest die Weiterentwicklung von SAP SuccessFactors Employee Central. Dabei …\", \"redirect_url\": \"https://www.adzuna.at/land/ad/5944147832?se=4FoN_fvZ8RGn0p-rVwdrxg&utm_medium=api&utm_source=REDACTED&v=56B29B01B309B838C21FCE5F6ED6708A5BBFCA94\"}, {\"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk1MTQyMDQxMCIsInMiOiI0Rm9OX2Z2WjhSR24wcC1yVndkcnhnIn0.ECVYCjgpszq7wA1_7tKbGeAAJjrEhiSuu6CaVDCMGDQ\", \"company\": {\"display_name\": \"NETCONOMY GmbH\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"id\": \"5951420410\", \"created\": \"2026-11-03T07:13:01Z\", \"title\": \"Senior Account Executive SAP Public Cloud & Retail (f/m/x)\", \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"Österreich\"], \"display_name\": \"Österreich\"}, \"category\": {\"label\": \"Vertriebsstellen\", \"tag\": \"sales-jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}, \"__CLASS__\": \"Adzuna::API::Response::Job\", \"description\": \"In den letzten 25 Jahren ist NETCONOMY von einem Startup zu einem Team mit über 450 Mitarbeitenden gewachsen, das an zehn Standorten in Europa zusammenarbeitet. Was uns ausmacht? Agiles Arbeiten, interdisziplinäre Teams und viel Raum für neue Ideen. Menschen mit vielfältigen Hintergründen entwickeln bei uns gemeinsam einzigartige digitale Lösungen. In deiner Rolle als Senior Account Executive bist du verantwortlich für die Gewinnung von Neukunden im Retail- und Consumer-Umfeld sowie für den Auf…\", \"salary_is_predicted\": \"0\", \"redirect_url\": \"https://www.adzuna.at/details/5951420410?utm_medium=api&utm_source=REDACTED\"}]}"
+  },
+  {
+   "method": "GET",
+   "url": "https://api.adzuna.com/v1/api/jobs/be/search/1?app_id=REDACTED&app_key=REDACTED&content-type=application%2Fjson&max_days_old=14&results_per_page=50&what=intern&what_or=google+deepmind+meta+facebook+apple+mistral+tesla+bytedance+tiktok+ibm+netflix+amd+arm+citadel+sigma+goldman+sachs+jpmorgan+morgan+j.p.+g-research+sig+susquehanna+mckinsey+quantumblack+bcg+boston+uber+qualcomm+siemens+grab+sea+shopee+garena+shopify+qdrant+instadeep+groq+sakana+klarna+revolut+booking.com+booking+sap+asml",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json; charset=utf8",
+   "text": "{\"results\": [{\"salary_is_predicted\": \"0\", \"category\": {\"label\": \"PR Reclame en Marketing vacatures\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"pr-advertising-marketing-jobs\"}, \"company\": {\"display_name\": \"WWF Belgium\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"created\": \"2026-11-01T16:34:09Z\", \"latitude\": 50.84674, \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Brussel, Brussel Hoofdstad\", \"area\": [\"België\", \"Brussel (Regio)\", \"Brussel Hoofdstad\", \"Brussel\"]}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiOEZxeF9mdlo4UkdCWGR3U0t0OUdFQSIsImkiOiI1OTQ5NDQ0Mjc1In0.xFyJGymsPmsqRJPE5_3g6P05TCS3v0Cme2de97kyn1U\", \"redirect_url\": \"https://www.adzuna.be/details/5949444275?utm_medium=api&utm_source=REDACTED\", \"title\": \"Social Media Intern (TikTok)\", \"longitude\": 4.35249, \"description\": \"Are you ready to be part of something great? TikTok has become an important platform for reaching younger audiences and creating deeper engagement through authentic, story-driven content. WWF-Belgium already produces a significant amount of educational and awareness-raising content for Instagram, particularly through carousel posts. This internship aims to transform part of that existing content into engaging TikTok videos that feel native to the platform while staying aligned with WWF's messag…\", \"id\": \"5949444275\", \"__CLASS__\": \"Adzuna::API::Response::Job\"}, {\"description\": \"Join Tether and Shape the Future of Digital Finance At Tether, we’re not just building products, we’re pioneering a global financial revolution. Our cutting-edge solutions empower businesses—from exchanges and wallets to payment processors and ATMs—to seamlessly integrate reserve-backed tokens across blockchains. By harnessing the power of blockchain technology, Tether enables you to store, send, and receive digital tokens instantly, securely, and globally, all at a fraction of the cost. Transp…\", \"id\": \"5941207917\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_is_predicted\": \"0\", \"category\": {\"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"it-jobs\", \"label\": \"IT ICT vacatures\"}, \"company\": {\"display_name\": \"Tether Operations Limited\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"created\": \"2026-10-25T08:28:46Z\", \"location\": {\"area\": [\"België\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"België\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0MTIwNzkxNyIsInMiOiI4RnF4X2Z2WjhSR0JYZHdTS3Q5R0VBIn0.IOCjjWSKmWj8zclbi19BTK83AOo39t9lXFRrx5rbD8c\", \"title\": \"Research Engineer Intern (Multimodal LLM)\", \"redirect_url\": \"https://www.adzuna.be/details/5941207917?utm_medium=api&utm_source=REDACTED\"}, {\"__CLASS__\": \"Adzuna::API::Response::Job\", \"id\": \"5951661540\", \"description\": \"Cohabs is reimagining urban living by creating thoughtfully designed homes and services that make city life easier, richer and more connected. Today, we operate across nine cities, combining great spaces with a genuine sense of belonging. As a Digital Marketing Intern , you'll join our Marketing team and contribute to the development of Cohabs' digital acquisition strategy. From supporting paid media campaigns to exploring new growth opportunities, you'll help us attract new members, improve ou…\", \"longitude\": 4.37178, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiOEZxeF9mdlo4UkdCWGR3U0t0OUdFQSIsImkiOiI1OTUxNjYxNTQwIn0.wTf0E1KNuwrwMJYRs0Zpnl-8Ju2oQI1vpT_S95XBKsU\", \"redirect_url\": \"https://www.adzuna.be/details/5951661540?utm_medium=api&utm_source=REDACTED\", \"title\": \"Digital Marketing Intern\", \"company\": {\"display_name\": \"Cohabs\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"created\": \"2026-11-03T13:13:00Z\", \"location\": {\"area\": [\"België\", \"Brussel (Regio)\", \"Brussel Hoofdstad\", \"Elsene\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Elsene, Brussel Hoofdstad\"}, \"latitude\": 50.82768, \"category\": {\"label\": \"Unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"unknown\"}, \"salary_is_predicted\": \"0\"}, {\"longitude\": 3.21503, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiOEZxeF9mdlo4UkdCWGR3U0t0OUdFQSIsImkiOiI1OTU0MjUxODA5In0.aKztTCnLQZxAMd06oE5mv-JNqPB1OUALuAyCwcaNqOs\", \"title\": \"Jobstudent intern patiëntenvervoer (weekendwerk, Izegem)\", \"redirect_url\": \"https://www.adzuna.be/details/5954251809?utm_medium=api&utm_source=REDACTED\", \"created\": \"2026-11-05T14:04:06Z\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"az groeninge\"}, \"latitude\": 50.91711, \"location\": {\"area\": [\"België\", \"West-Vlaanderen (Provincie)\", \"Roeselare\", \"Izegem\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Izegem, Roeselare\"}, \"category\": {\"label\": \"Unknown\", \"tag\": \"unknown\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}, \"salary_is_predicted\": \"0\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"id\": \"5954251809\", \"description\": \"Wat ga je doen? Studeer je momenteel en wil je graag een centje bijverdienen tijdens de weekends? Hou je ervan om in beweging te zijn en mensen te helpen? Als jobstudent intern patiëntenvervoer ondersteun je de verschillende afdelingen door patiënten die geen verpleegkundig toezicht vereisen naar onderzoeken of behandelingen te brengen. Het vervoer van patiënten gebeurt op geplande tijdstippen en hoofdzakelijk met een rolstoel of een bed. Je doet dit in opdracht van de verpleegkundige die veran…\"}], \"mean\": 42415.83, \"count\": 150, \"__CLASS__\": \"Adzuna::API::Response::JobSearchResults\"}"
+  },
+  {
+   "method": "GET",
+   "url": "https://api.adzuna.com/v1/api/jobs/pl/search/1?app_id=REDACTED&app_key=REDACTED&content-type=application%2Fjson&max_days_old=14&results_per_page=50&what=intern&what_or=google+deepmind+meta+facebook+apple+mistral+tesla+bytedance+tiktok+ibm+netflix+amd+arm+citadel+sigma+goldman+sachs+jpmorgan+morgan+j.p.+g-research+sig+susquehanna+mckinsey+quantumblack+bcg+boston+uber+qualcomm+siemens+grab+sea+shopee+garena+shopify+qdrant+instadeep+groq+sakana+klarna+revolut+booking.com+booking+sap+asml",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json; charset=utf8",
+   "text": "{\"count\": 96, \"__CLASS__\": \"Adzuna::API::Response::JobSearchResults\", \"mean\": 72000, \"results\": [{\"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_is_predicted\": \"0\", \"description\": \"Additional Locations: N/A Diversity - Innovation - Caring - Global Collaboration - Winning Spirit - High Performance At Boston Scientific, we’ll give you the opportunity to harness all that’s within you by working in teams of diverse and high-performing employees, tackling some of the most important health industry challenges. With access to the latest tools, information and training, we’ll help you in advancing your skills and career. Here, you’ll be supported in progressing – whatever your am…\", \"redirect_url\": \"https://www.adzuna.pl/details/5942889149?utm_medium=api&utm_source=REDACTED\", \"category\": {\"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"unknown\", \"label\": \"Unknown\"}, \"title\": \"Payroll Intern\", \"location\": {\"display_name\": \"Warszawa, mazowieckie\", \"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"Polska\", \"mazowieckie\", \"Warszawa\"]}, \"created\": \"2026-10-27T02:23:22Z\", \"id\": \"5942889149\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Boston Scientific\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0Mjg4OTE0OSIsInMiOiJaczgtX3Z2WjhSR24wcC1yVndkcnhnIn0.gxt6KIMPEKBHxzA9qgvk-_dVasxgzyeO0XkJLHK26wM\"}, {\"company\": {\"display_name\": \"Tether Operations Limited\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0MTAzMTUwNiIsInMiOiJaczgtX3Z2WjhSR24wcC1yVndkcnhnIn0.3OLN-_GwT3SI6eiJNUvxP4NdgLiUn2K38EVSTirAxMw\", \"contract_time\": \"full_time\", \"id\": \"5941031506\", \"category\": {\"label\": \"IT\", \"tag\": \"it-jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}, \"description\": \"Join Tether and Shape the Future of Digital Finance At Tether, we’re not just building products, we’re pioneering a global financial revolution. Our cutting-edge solutions empower businesses—from exchanges and wallets to payment processors and ATMs—to seamlessly integrate reserve-backed tokens across blockchains. By harnessing the power of blockchain technology, Tether enables you to store, send, and receive digital tokens instantly, securely, and globally, all at a fraction of the cost. Transp…\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_is_predicted\": \"0\", \"redirect_url\": \"https://www.adzuna.pl/details/5941031506?utm_medium=api&utm_source=REDACTED\", \"created\": \"2026-10-25T03:44:50Z\", \"title\": \"Research Engineer Intern (Multimodal LLM)\", \"location\": {\"area\": [\"Polska\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Polska\"}}, {\"location\": {\"area\": [\"Polska\", \"mazowieckie\", \"Warszawa\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Warszawa, mazowieckie\"}, \"title\": \"Intern\", \"created\": \"2026-10-28T18:36:41Z\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_is_predicted\": \"0\", \"description\": \"At Fortrea, we believe early talent is the heartbeat of innovation. Our Early Careers program is more than an internship—it’s a launchpad for your future. As an Intern, you’ll join a global team where curiosity, motivation, and fresh ideas are celebrated. You’ll work on meaningful projects, learn from experienced professionals, and see firsthand how clinical research and healthcare innovation change lives. We are looking for a motivated individual with a strong interest in clinical research to …\", \"redirect_url\": \"https://www.adzuna.pl/details/5944786115?utm_medium=api&utm_source=REDACTED\", \"category\": {\"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"unknown\", \"label\": \"Unknown\"}, \"id\": \"5944786115\", \"contract_time\": \"full_time\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0NDc4NjExNSIsInMiOiJaczgtX3Z2WjhSR24wcC1yVndkcnhnIn0.TBU_ShveDnSq0xqw9cViqNXIM5Cvq_7mGl6lYnneSDQ\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Fortrea\"}}, {\"category\": {\"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"unknown\", \"label\": \"Unknown\"}, \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_is_predicted\": \"0\", \"description\": \"At Fortrea, we believe early talent is the heartbeat of innovation. Our Early Careers program is more than an internship—it’s a launchpad for your future. As an Intern, you’ll join a global team where curiosity, motivation, and fresh ideas are celebrated. You’ll work on meaningful projects, learn from experienced professionals, and see firsthand how clinical research and healthcare innovation change lives. We don’t expect you to know it all. What matters most is your potential, your drive to le…\", \"redirect_url\": \"https://www.adzuna.pl/details/5944793721?utm_medium=api&utm_source=REDACTED\", \"created\": \"2026-10-28T18:45:55Z\", \"location\": {\"area\": [\"Polska\", \"mazowieckie\", \"Warszawa\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Warszawa, mazowieckie\"}, \"title\": \"Intern\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0NDc5MzcyMSIsInMiOiJaczgtX3Z2WjhSR24wcC1yVndkcnhnIn0.M59x-Pk4Gi3Ka_uPoYqHmFFd6wny-sgrOMQ-J6HUnxI\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"Fortrea\"}, \"contract_time\": \"full_time\", \"id\": \"5944793721\"}]}"
+  },
+  {
+   "method": "GET",
+   "url": "https://api.adzuna.com/v1/api/jobs/au/search/1?app_id=REDACTED&app_key=REDACTED&content-type=application%2Fjson&max_days_old=14&results_per_page=50&what=intern&what_or=google+deepmind+meta+facebook+apple+mistral+tesla+bytedance+tiktok+ibm+netflix+amd+arm+citadel+sigma+goldman+sachs+jpmorgan+morgan+j.p.+g-research+sig+susquehanna+mckinsey+quantumblack+bcg+boston+uber+qualcomm+siemens+grab+sea+shopee+garena+shopify+qdrant+instadeep+groq+sakana+klarna+revolut+booking.com+booking+sap+asml",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json; charset=utf8",
+   "text": "{\"results\": [{\"location\": {\"area\": [\"Australia\", \"New South Wales\", \"Sydney Region\", \"Sydney\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Sydney, Sydney Region\"}, \"title\": \"Associate Territory Manager\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0NjY4NzM1NCIsInMiOiJ4b3JYX3Z2WjhSR0hqUE41RkVPckdBIn0.mu_WbCZM8LX2nprqY-9Z-Dr43aylMwWnXLh_Ka_tj7I\", \"redirect_url\": \"https://www.adzuna.com.au/land/ad/5946687354?se=xorX_vvZ8RGHjPN5FEOrGA&utm_medium=api&utm_source=REDACTED&v=2B77D466CAA377C0408FBF1FD1EAA634B55FD6A4\", \"category\": {\"tag\": \"sales-jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"Sales Jobs\"}, \"description\": \"Lexington Medical, Inc. is a medical device company developing and manufacturing minimally invasive surgical stapling solutions in the Boston area. With the highest standards in design engineering and smart manufacturing, our team delivers disruptive technology to healthcare providers, improving surgical outcomes for patients in a thriving $6B surgical stapler market. Rooted in a talent-dense culture, we are committed to innovation, foster continuous growth, and achieve great heights together. …\", \"company\": {\"display_name\": \"Lexington Medical, Inc.\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"created\": \"2026-10-30T19:50:52Z\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_is_predicted\": \"0\", \"id\": \"5946687354\"}, {\"contract_type\": \"permanent\", \"title\": \"Digital Marketing Intern\", \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"Australia\", \"New South Wales\", \"Sydney Region\", \"Sydney\"], \"display_name\": \"Sydney, Sydney Region\"}, \"category\": {\"label\": \"PR, Advertising & Marketing Jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"pr-advertising-marketing-jobs\"}, \"redirect_url\": \"https://www.adzuna.com.au/land/ad/5952667203?se=xorX_vvZ8RGHjPN5FEOrGA&utm_medium=api&utm_source=REDACTED&v=D425A7DAAEFFF64854A102D5ACE0B5AD1BF8947E\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoieG9yWF92dlo4UkdIalBONUZFT3JHQSIsImkiOiI1OTUyNjY3MjAzIn0.pceVdPe6dBXLybEZgAsTaRdgGZ5UK9-XAmaFQO36umA\", \"company\": {\"display_name\": \"Study and Work\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"description\": \"03rd November, 2026 ABOUT US STUDY AND WORK helps companies hire emerging talent with the ambition to prove themselves in the workplace. Currently, we have several companies looking to hire Digital Marketing Interns so as to “Try Before You Hire” under our Professional Internship Program. ABOUT OUR CLIENTS As a Digital Marketing Intern, you will be working with the marketing teams of medium to large companies or in marketing agencies under the supervision of highly experienced and qualified mar…\", \"contract_time\": \"part_time\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"created\": \"2026-11-04T17:15:55Z\", \"salary_is_predicted\": \"0\", \"id\": \"5952667203\"}, {\"salary_is_predicted\": \"0\", \"id\": \"5951536875\", \"location\": {\"display_name\": \"Sydney, Sydney Region\", \"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"Australia\", \"New South Wales\", \"Sydney Region\", \"Sydney\"]}, \"contract_type\": \"permanent\", \"title\": \"Global Marketing Intern – Haircare\", \"category\": {\"tag\": \"pr-advertising-marketing-jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\", \"label\": \"PR, Advertising & Marketing Jobs\"}, \"redirect_url\": \"https://www.adzuna.com.au/land/ad/5951536875?se=xorX_vvZ8RGHjPN5FEOrGA&utm_medium=api&utm_source=REDACTED&v=AFAB433936CA3C4908E8FDF41805FFC7B6C93409\", \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoieG9yWF92dlo4UkdIalBONUZFT3JHQSIsImkiOiI1OTUxNTM2ODc1In0.dKm80v0oabCZl1Rs3w883aPJFg76ojbQYorrI0SoTLA\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"ZURU\"}, \"description\": \"As Global Marketing Intern, you'll support the team in executing global brand campaigns and product launches — helping across influencer marketing, PR, content, ecommerce, reporting and operations. You'll help keep global campaigns and launches organised and running to plan, with clear communication across the team. You'll build an understanding of how influencer, content and operational activity is tracked, and help put together reporting the team can use to improve future campaigns. Who We Ar…\", \"contract_time\": \"part_time\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"created\": \"2026-11-03T20:02:22Z\"}, {\"id\": \"5947725605\", \"salary_is_predicted\": \"0\", \"created\": \"2026-10-31T17:06:01Z\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"contract_time\": \"full_time\", \"description\": \"Description Job Overview: The Intern supports the administration group and works closely with their supervisor to follow clearly defined general services procedures. The Intern is a role that allows for the development of new administration-related skills. The Intern is responsible for performing basic administration activities and using existing procedures, to solve straightforward problems. Responsibilities Key Task and Responsibilities: Support day-to-day operations by assisting team members…\", \"company\": {\"display_name\": \"Lutech Resources\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0NzcyNTYwNSIsInMiOiJ4b3JYX3Z2WjhSR0hqUE41RkVPckdBIn0.Fyz-bTKCXAQ3DhAJSyumVTkw3RPeLN-fsfE37mAE7MY\", \"redirect_url\": \"https://www.adzuna.com.au/land/ad/5947725605?se=xorX_vvZ8RGHjPN5FEOrGA&utm_medium=api&utm_source=REDACTED&v=1844F5208EE15D0EDEFBDAA8CE6813DACD4601EE\", \"category\": {\"tag\": \"admin-jobs\", \"label\": \"Admin Jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}, \"contract_type\": \"permanent\", \"title\": \"Intern\", \"location\": {\"display_name\": \"Australia\", \"area\": [\"Australia\"], \"__CLASS__\": \"Adzuna::API::Response::Location\"}}], \"mean\": 93007.58, \"__CLASS__\": \"Adzuna::API::Response::JobSearchResults\", \"count\": 309}"
+  },
+  {
+   "method": "GET",
+   "url": "https://api.adzuna.com/v1/api/jobs/nz/search/1?app_id=REDACTED&app_key=REDACTED&content-type=application%2Fjson&max_days_old=14&results_per_page=50&what=intern&what_or=google+deepmind+meta+facebook+apple+mistral+tesla+bytedance+tiktok+ibm+netflix+amd+arm+citadel+sigma+goldman+sachs+jpmorgan+morgan+j.p.+g-research+sig+susquehanna+mckinsey+quantumblack+bcg+boston+uber+qualcomm+siemens+grab+sea+shopee+garena+shopify+qdrant+instadeep+groq+sakana+klarna+revolut+booking.com+booking+sap+asml",
+   "body": "",
+   "status": 200,
+   "content_type": "application/json; charset=utf8",
+   "text": "{\"__CLASS__\": \"Adzuna::API::Response::JobSearchResults\", \"count\": 17, \"mean\": 67500, \"results\": [{\"category\": {\"tag\": \"pr-advertising-marketing-jobs\", \"label\": \"PR, Advertising & Marketing Jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}, \"salary_is_predicted\": \"0\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"redirect_url\": \"https://www.adzuna.co.nz/details/5951079348?utm_medium=api&utm_source=REDACTED\", \"description\": \"We are seeking curious, sharp and creative Strategy Interns to join the Strategy team at ZURU. There are opportunities across brand strategy for new and existing brands, as well as fast-turnaround work for ZURU Labs, depending on the strengths and interests of each candidate. This internship is an excellent opportunity to gain hands-on experience in a fast-paced, dynamic environment, working on global brands. As a Strategy Intern, you will support the strategy team with the research, analysis a…\", \"created\": \"2026-11-03T15:00:18Z\", \"title\": \"Strategy Intern\", \"location\": {\"area\": [\"New Zealand\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"New Zealand\"}, \"company\": {\"display_name\": \"ZURU\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk1MTA3OTM0OCIsInMiOiJNTFJ3X192WjhSR24wcC1yVndkcnhnIn0.nXayDvWq7by-vhVnpQ36R90Pve5672IQIFhjt5WKyPQ\", \"contract_type\": \"contract\", \"id\": \"5951079348\"}, {\"location\": {\"area\": [\"New Zealand\", \"North Island\", \"Greater Wellington\", \"Wellington\"], \"__CLASS__\": \"Adzuna::API::Response::Location\", \"display_name\": \"Wellington, Greater Wellington\"}, \"title\": \"-Fellow- Jr. Researcher-Internship\", \"created\": \"2026-10-25T00:41:12Z\", \"description\": \"About the opportunity Title: Junior Research Fellowship-Internship Organization: European Institute of Policy Research and Human Rights, AISBL Location: Remote Type: Internship Duration: 8 weeks About The European Institute of Policy Research and Human Rights AISBL invites applications for a remote Junior Research-Internship. This internship is designed for students, graduates, early-career researchers, and professionals interested in policy research, human rights, governance, international rel…\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_is_predicted\": \"0\", \"redirect_url\": \"https://www.adzuna.co.nz/details/5940425020?utm_medium=api&utm_source=REDACTED\", \"category\": {\"label\": \"Scientific & QA Jobs\", \"tag\": \"scientific-qa-jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}, \"id\": \"5940425020\", \"contract_type\": \"contract\", \"company\": {\"display_name\": \"European Institute of Policy Research and Human Rights AISBL\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"latitude\": -41.278339, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk0MDQyNTAyMCIsInMiOiJNTFJ3X192WjhSR24wcC1yVndkcnhnIn0.0fq0h8bd2KxEWiFJHu3DADPR2puvnyKX48RWAFS1RAI\", \"longitude\": 174.777199}, {\"contract_type\": \"contract\", \"id\": \"5953562711\", \"longitude\": 176.252365, \"contract_time\": \"full_time\", \"salary_min\": 65000, \"company\": {\"display_name\": \"Central Kids\", \"__CLASS__\": \"Adzuna::API::Response::Company\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJpIjoiNTk1MzU2MjcxMSIsInMiOiJNTFJ3X192WjhSR24wcC1yVndkcnhnIn0.lpvRu6fpLZlA0WgQp7OGuYMkk7OYyywJsS_BMF0EJS4\", \"latitude\": -38.137534, \"salary_is_predicted\": \"0\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"description\": \"Central Kids Marketing & Communications Coordinator | Permanent | Full-time Ko ngā tamariki te pūtake | children are central to all that we do. Me tiaki, me manaaki i te taiao | Protect and enhance the environment. Manaakitanga | Encourage mana in others through care, generosity, and goodwill. Kotahitanga | Connectedness in collaboration Te arataki ā-tikanga rua | Bicultural leadership Are you always spotting the next great Reel, TikTok or photo opportunity? Do you love creating content that fe…\", \"salary_max\": 70000, \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"New Zealand\", \"North Island\", \"Bay of Plenty\", \"Rotorua\", \"Mangakakahi\"], \"display_name\": \"Mangakakahi, Rotorua\"}, \"redirect_url\": \"https://www.adzuna.co.nz/details/5953562711?utm_medium=api&utm_source=REDACTED\", \"category\": {\"label\": \"PR, Advertising & Marketing Jobs\", \"tag\": \"pr-advertising-marketing-jobs\", \"__CLASS__\": \"Adzuna::API::Response::Category\"}, \"title\": \"Marketing & Communications Coordinator\", \"created\": \"2026-11-05T14:15:16Z\"}, {\"id\": \"5951079181\", \"contract_type\": \"contract\", \"company\": {\"__CLASS__\": \"Adzuna::API::Response::Company\", \"display_name\": \"ZURU\"}, \"adref\": \"eyJhbGciOiJIUzI1NiJ9.eyJzIjoiTUxSd19fdlo4UkduMHAtclZ3ZHJ4ZyIsImkiOiI1OTUxMDc5MTgxIn0.opkImJfGPukZwPLfh8wbAzh3rhef5Kt9wR1ycHWoI40\", \"title\": \"Design Internship\", \"location\": {\"__CLASS__\": \"Adzuna::API::Response::Location\", \"area\": [\"New Zealand\"], \"display_name\": \"New Zealand\"}, \"created\": \"2026-11-03T15:00:11Z\", \"__CLASS__\": \"Adzuna::API::Response::Job\", \"salary_is_predicted\": \"0\", \"redirect_url\": \"https://www.adzuna.co.nz/details/5951079181?utm_medium=api&utm_source=REDACTED\", \"description\": \"We are seeking talented and creative Graphic Design Interns to join the creative team at ZURU Edge. There are opportunities available in our Content Design teams and New Product Development design teams, depending on the strengths and interests of each candidate. This internship provides an excellent opportunity to gain hands-on experience in a fast-paced and dynamic environment working on global brands. As a Graphic Design Intern, you will collaborate with our design team to create visually co…\", \"category\": {\"__CLASS__\": \"Adzuna::API::Response::Category\", \"tag\": \"creative-design-jobs\", \"label\": \"Creative & Design Jobs\"}}]}"
+  }
+ ],
+ "expected": [
+  {
+   "id": "adzuna:5945046814",
+   "company": "Meta",
+   "title": "Research Scientist Intern, AI Research - Speech & Audio (PhD)",
+   "location": "London, UK",
+   "url": "https://www.adzuna.co.uk/jobs/details/5945046814?utm_medium=api&utm_source=REDACTED",
+   "posted_at": "2026-10-29",
+   "description_chars": 500
+  },
+  {
+   "id": "adzuna:5938545674",
+   "company": "Meta",
+   "title": "Research Intern - Self-Improving Agentic Systems and AI Research Agents",
+   "location": "London, UK",
+   "url": "https://www.adzuna.co.uk/jobs/details/5938545674?utm_medium=api&utm_source=REDACTED",
+   "posted_at": "2026-10-23",
+   "description_chars": 500
+  },
+  {
+   "id": "adzuna:5955034224",
+   "company": "Meta",
+   "title": "Research Scientist Intern, Generative AI (PhD) (multiple locations)",
+   "location": "London, UK",
+   "url": "https://www.adzuna.co.uk/jobs/details/5955034224?utm_medium=api&utm_source=REDACTED",
+   "posted_at": "2026-11-06",
+   "description_chars": 500
+  },
+  {
+   "id": "adzuna:5938545667",
+   "company": "Meta",
+   "title": "Research Scientist Intern, Audio, Machine Learning and Computer Vision (PhD)",
+   "location": "Cambridge, Cambridgeshire",
+   "url": "https://www.adzuna.co.uk/jobs/details/5938545667?utm_medium=api&utm_source=REDACTED",
+   "posted_at": "2026-10-23",
+   "description_chars": 500
+  },
+  {
+   "id": "adzuna:5943903256",
+   "company": "Meta",
+   "title": "Research Scientist Intern, AI Core Machine Learning (PhD)",
+   "location": "London, UK",
+   "url": "https://www.adzuna.co.uk/jobs/details/5943903256?utm_medium=api&utm_source=REDACTED",
+   "posted_at": "2026-10-28",
+   "description_chars": 500
+  },
+  {
+   "id": "adzuna:5948412833",
+   "company": "Meta",
+   "title": "Research Scientist Intern, AI Core Machine Learning (PhD)",
+   "location": "London, UK",
+   "url": "https://www.adzuna.co.uk/jobs/details/5948412833?utm_medium=api&utm_source=REDACTED",
+   "posted_at": "2026-11-01",
+   "description_chars": 500
+  },
+  {
+   "id": "adzuna:5938545664",
+   "company": "Meta",
+   "title": "Research Scientist Intern - Robotics, World Models & Embodied AI (PhD)",
+   "location": "London, UK",
+   "url": "https://www.adzuna.co.uk/jobs/details/5938545664?utm_medium=api&utm_source=REDACTED",
+   "posted_at": "2026-10-23",
+   "description_chars": 500
+  },
+  {
+   "id": "adzuna:5948412836",
+   "company": "Meta",
+   "title": "Research Scientist Intern, Muse RL and Agents Team (PhD)",
+   "location": "London, UK",
+   "url": "https://www.adzuna.co.uk/jobs/details/5948412836?utm_medium=api&utm_source=REDACTED",
+   "posted_at": "2026-11-01",
+   "description_chars": 500
+  },
+  {
+   "id": "adzuna:5941331855",
+   "company": "Meta",
+   "title": "Research Scientist Intern, Meta Recommendation Systems (PhD)",
+   "location": "Menlo Park, San Mateo County",
+   "url": "https://www.adzuna.com/land/ad/5941331855?se=MkZN-PvZ8RG_saRps_1B5w&utm_medium=api&utm_source=REDACTED&v=BA95AF40F0D27EA881E5126AFEF8FD7731034353",
+   "posted_at": "2026-10-25",
+   "description_chars": 500
+  },
+  {
+   "id": "adzuna:5943424825",
+   "company": "SAP",
+   "title": "SAP iXp Intern - Change Management Engineering",
+   "location": "Vancouver, Greater Vancouver",
+   "url": "https://www.adzuna.ca/land/ad/5943424825?se=KO_k-PvZ8RGBXdwSKt9GEA&utm_medium=api&utm_source=REDACTED&v=8AB9A61EA293C2125A5C0F6671C3009B239495C5",
+   "posted_at": "2026-10-27",
+   "description_chars": 500
+  },
+  {
+   "id": "adzuna:5939775629",
+   "company": "Meta",
+   "title": "Research Scientist Intern, Robotics - Meta Reality Labs Research (PhD)",
+   "location": "Zürich",
+   "url": "https://www.adzuna.ch/details/5939775629?utm_medium=api&utm_source=REDACTED",
+   "posted_at": "2026-10-24",
+   "description_chars": 500
+  },
+  {
+   "id": "adzuna:5953539311",
+   "company": "Meta",
+   "title": "Research Scientist Intern, Human Sensing for Wearables, AR and VR (PhD)",
+   "location": "Zürich",
+   "url": "https://www.adzuna.ch/details/5953539311?utm_medium=api&utm_source=REDACTED",
+   "posted_at": "2026-11-05",
+   "description_chars": 500
+  },
+  {
+   "id": "adzuna:5939775630",
+   "company": "Meta",
+   "title": "Research Scientist Intern, Robotics Foundation Models (PhD)",
+   "location": "Zürich",
+   "url": "https://www.adzuna.ch/details/5939775630?utm_medium=api&utm_source=REDACTED",
+   "posted_at": "2026-10-24",
+   "description_chars": 500
+  },
+  {
+   "id": "adzuna:5954149679",
+   "company": "McKinsey",
+   "title": "Data Scientist Intern - QuantumBlack, AI by McKinsey",
+   "location": "Madrid",
+   "url": "https://www.adzuna.es/details/5954149679?utm_medium=api&utm_source=REDACTED",
+   "posted_at": "2026-11-05",
+   "description_chars": 500
+  },
+  {
+   "id": "adzuna:5947152847",
+   "company": "Accenture",
+   "title": "ACIN - Booking&Events - Intern",
+   "location": "Italia",
+   "url": "https://www.adzuna.it/details/5947152847?utm_medium=api&utm_source=REDACTED",
+   "posted_at": "2026-10-30",
+   "description_chars": 500
+  },
+  {
+   "id": "adzuna:5948191474",
+   "company": "Accenture",
+   "title": "ACIN - Booking&Events - Intern",
+   "location": "Milano, Provincia di Milano",
+   "url": "https://www.adzuna.it/details/5948191474?utm_medium=api&utm_source=REDACTED",
+   "posted_at": "2026-10-31",
+   "description_chars": 500
+  }
+ ]
+}
