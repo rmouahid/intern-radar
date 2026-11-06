@@ -2,7 +2,7 @@
 
 import logging
 from collections.abc import Callable
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -39,6 +39,9 @@ from intern_radar.letters.delivery import GmailSender
 from intern_radar.letters.inbox import ButtonRequests, TelegramUpdates, run_listener
 from intern_radar.letters.service import LetterService
 from intern_radar.letters.writer import LetterWriter
+from intern_radar.metrics import PARIS
+from intern_radar.metrics import collect as collect_metrics
+from intern_radar.metrics import render_markdown as render_metrics
 from intern_radar.models import Company, Job
 from intern_radar.notifier import ConsoleNotifier, NotifyError, TelegramNotifier
 from intern_radar.pipeline import Pipeline, utcnow
@@ -64,6 +67,7 @@ RESUMES_DIR = Path("data/cvs")
 CONFIG_DIR = typer.Option(Path("config"), "--config-dir", help="Configuration dir.")
 DB_PATH = typer.Option(Path("data/intern-radar.db"), "--db", help="SQLite file.")
 BACKUP_DIR = typer.Option(Path("data/backups"), "--dest", help="Backups directory.")
+METRICS_OUT = typer.Option(None, "--out", help="Markdown file to write.")
 DRY_RUN = typer.Option(False, "--dry-run", help="Print instead of notifying.")
 
 
@@ -345,6 +349,26 @@ def applications(db: Path = DB_PATH) -> None:
             )
     finally:
         store.close()
+
+
+@app.command()
+def metrics(
+    db: Path = DB_PATH,
+    start: str | None = typer.Option(None, help="First day (default: 30 days ago)."),
+    end: str | None = typer.Option(None, help="Last day (default: yesterday)."),
+    out: Path | None = METRICS_OUT,
+) -> None:
+    """Operating metrics per day: postings, rules, LLM tokens, latency."""
+    today = datetime.now(PARIS).date()
+    last = date.fromisoformat(end) if end else today - timedelta(days=1)
+    first = date.fromisoformat(start) if start else last - timedelta(days=29)
+    text = render_metrics(collect_metrics(str(db), first, last))
+    if out is None:
+        typer.echo(text, nl=False)
+        return
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(text, encoding="utf-8")
+    typer.echo(f"Metrics written: {out}")
 
 
 @app.command()

@@ -212,3 +212,21 @@ def test_generate_profile_dry_run_and_missing_dossier(config_dir, monkeypatch):
     result = runner.invoke(cli.app, ["generate-profile", "--dry-run"])
     assert result.exit_code == 0
     assert not (config_dir / "candidate.json").exists()
+
+
+def test_metrics_writes_the_markdown_report(config_dir):
+    (config_dir.parent / "data").mkdir()
+    store = Store("data/intern-radar.db")
+    store.record_run(
+        datetime(2026, 10, 1, 8, tzinfo=UTC), 60.0, {"new": 4, "candidates": 1}, [],
+        {}, None,
+    )  # fmt: skip
+    store.close()
+    result = runner.invoke(
+        cli.app,
+        ["metrics", "--start", "2026-10-01", "--end", "2026-10-01",
+         "--out", "docs/metrics.md"],
+    )  # fmt: skip
+    assert result.exit_code == 0, result.output
+    text = (config_dir.parent / "docs/metrics.md").read_text()
+    assert "| 2026-10-01 | 1 | 4 | 1 | 75 % |" in text
