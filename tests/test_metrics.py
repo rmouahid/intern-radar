@@ -2,7 +2,7 @@ from datetime import UTC, date, datetime, timedelta
 
 import pytest
 
-from intern_radar.metrics import collect, percentile, render_markdown
+from intern_radar.metrics import collect, percentile, render_markdown, render_svg
 from intern_radar.store import Store
 from tests.factories import make_job
 
@@ -70,3 +70,22 @@ def test_markdown_names_the_period_and_the_command(tmp_path):
     assert "intern-radar metrics" in text
     assert "| 2026-10-01 | 2 | 30 | 10 | 67 % |" in text
     assert "scoring" in text and "letter" in text
+
+
+def test_chart_draws_one_bar_pair_per_day_and_the_notified_offers(tmp_path):
+    make_store(tmp_path).close()
+    report = collect(str(tmp_path / "radar.db"), date(2026, 10, 1), date(2026, 10, 2))
+    svg = render_svg(report)
+    assert svg.startswith("<svg") and svg.rstrip().endswith("</svg>")
+    assert "2026-10-01: 10 sent to the LLM" in svg
+    assert "2026-10-01: 20 removed by the rules" in svg
+    assert "2026-10-01: 1 notified" in svg
+    assert "2026-10-02:" not in svg  # no posting that day: no bar
+
+
+def test_chart_of_an_empty_period_is_still_valid_svg(tmp_path):
+    make_store(tmp_path).close()
+    report = collect(str(tmp_path / "radar.db"), date(2026, 9, 1), date(2026, 9, 3))
+    svg = render_svg(report)
+    assert "sent to the LLM</title>" not in svg
+    assert svg.count("<line") == 6  # 0 to 10 in steps of 2

@@ -145,7 +145,7 @@ def render_markdown(report: Report) -> str:
         f" {len(active)} days with at least one run. Regenerate with:",
         "",
         "```bash",
-        "poetry run intern-radar metrics --out docs/metrics.md"
+        "poetry run intern-radar metrics --out docs/metrics.md --chart docs/metrics.svg"
         f" --start {report.start} --end {report.end}",
         "```",
         "",
@@ -206,3 +206,83 @@ def render_markdown(report: Report) -> str:
         for name, (tokens_in, tokens_out, cost) in report.by_purpose.items()
     ]
     return "\n".join(lines) + "\n"
+
+
+def render_svg(report: Report) -> str:
+    """Daily bar chart of new postings, split into removed by the rules and
+    sent to the LLM, with the notified offers on top (docs/metrics.svg).
+    Plain SVG, so the README shows it without any plotting library."""
+    width, height = 820, 300
+    left, right, top, bottom = 48, 16, 40, 44
+    plot_w, plot_h = width - left - right, height - top - bottom
+    days = report.days
+    peak = max((d.new for d in days), default=0)
+    scale_max = max(10, math.ceil(peak / 50) * 50)
+    slot = plot_w / max(len(days), 1)
+    bar = slot * 0.7
+
+    def y(value: float) -> float:
+        return top + plot_h - value / scale_max * plot_h
+
+    out = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {width} {height}"'
+        f' width="{width}" height="{height}" font-family="Helvetica, Arial, sans-serif"'
+        ' font-size="11" role="img" aria-labelledby="t">',
+        f'<title id="t">New internship postings per day, {report.start} to'
+        f" {report.end}</title>",
+        f'<rect width="{width}" height="{height}" fill="#ffffff"/>',
+        f'<text x="{left}" y="22" font-size="14" font-weight="bold" fill="#1f2328">'
+        f"New internship postings per day, {report.start} to {report.end}</text>",
+    ]
+    for tick in range(0, scale_max + 1, scale_max // 5):
+        ty = y(tick)
+        out.append(
+            f'<line x1="{left}" x2="{width - right}" y1="{ty:.1f}" y2="{ty:.1f}"'
+            ' stroke="#d0d7de" stroke-width="1"/>'
+        )
+        out.append(
+            f'<text x="{left - 6}" y="{ty + 4:.1f}" text-anchor="end"'
+            f' fill="#57606a">{tick}</text>'
+        )
+    for i, d in enumerate(days):
+        x = left + i * slot + (slot - bar) / 2
+        removed = d.new - d.to_llm
+        if d.to_llm:
+            out.append(
+                f'<rect x="{x:.1f}" y="{y(d.to_llm):.1f}" width="{bar:.1f}"'
+                f' height="{y(0) - y(d.to_llm):.1f}" fill="#0969da">'
+                f"<title>{d.day}: {d.to_llm} sent to the LLM</title></rect>"
+            )
+        if removed > 0:
+            out.append(
+                f'<rect x="{x:.1f}" y="{y(d.new):.1f}" width="{bar:.1f}"'
+                f' height="{y(d.to_llm) - y(d.new):.1f}" fill="#afb8c1">'
+                f"<title>{d.day}: {removed} removed by the rules</title></rect>"
+            )
+        if d.notified:
+            out.append(
+                f'<circle cx="{x + bar / 2:.1f}" cy="{y(d.new) - 7:.1f}" r="4"'
+                f' fill="#cf222e"><title>{d.day}: {d.notified} notified</title>'
+                "</circle>"
+            )
+        if i % 7 == 0:
+            out.append(
+                f'<text x="{x + bar / 2:.1f}" y="{top + plot_h + 16}"'
+                f' text-anchor="middle" fill="#57606a">{d.day:%d %b}</text>'
+            )
+    legend = [("#afb8c1", "rect", "removed by the rules"),
+              ("#0969da", "rect", "sent to the LLM"),
+              ("#cf222e", "circle", "at least one offer notified")]  # fmt: skip
+    lx = left
+    for color, shape, label in legend:
+        ly = height - 12
+        if shape == "rect":
+            out.append(
+                f'<rect x="{lx}" y="{ly - 9}" width="12" height="10" fill="{color}"/>'
+            )
+        else:
+            out.append(f'<circle cx="{lx + 6}" cy="{ly - 4}" r="4" fill="{color}"/>')
+        out.append(f'<text x="{lx + 17}" y="{ly}" fill="#1f2328">{label}</text>')
+        lx += 30 + 7 * len(label)
+    out.append("</svg>")
+    return "\n".join(out) + "\n"

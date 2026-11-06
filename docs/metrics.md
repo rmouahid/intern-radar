@@ -3,7 +3,7 @@
 Production database, 2026-10-07 to 2026-11-05 (Europe/Paris days), 30 days with at least one run. Regenerate with:
 
 ```bash
-poetry run intern-radar metrics --out docs/metrics.md --start 2026-10-07 --end 2026-11-05
+poetry run intern-radar metrics --out docs/metrics.md --chart docs/metrics.svg --start 2026-10-07 --end 2026-11-05
 ```
 
 ## Summary
