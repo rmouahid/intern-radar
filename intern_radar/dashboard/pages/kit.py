@@ -50,7 +50,7 @@ def _why(ref: int, why: WhyText | None, state: TaskState | None) -> str:
     )
     generate = (
         f'<form class="inline" method="post" action="/offers/{ref}/why">'
-        f'<button class="ghost">{"Régénérer" if why else "✨ Rédiger un brouillon"}'
+        f'<button class="ghost">{"Régénérer" if why else "Rédiger un brouillon"}'
         "</button></form>"
     )
     if why is None:
@@ -96,7 +96,7 @@ def _submissions(submissions: Sequence[Submission]) -> str:
 def submission_body(s: Submission, company: str, title: str, ref: int) -> str:
     files = "".join(
         f'<a class="button ghost" href="/files/submission/{s.id}/{kind}">'
-        f"📄 {DOCUMENT_NAMES[kind].capitalize()} envoyé(e)</a>"
+        f"{DOCUMENT_NAMES[kind].capitalize()} envoyé(e)</a>"
         for kind in ("cv", "letter")
         if kind in s.files
     )
@@ -137,7 +137,7 @@ def kit_html(
         f'<a class="button" href="{e(url)}#{e(fragment or f"radar={ref}")}" '
         'target="_blank" '
         'rel="noopener">'
-        "📝 Ouvrir le formulaire</a>"
+        "Ouvrir le formulaire</a>"
         if url.startswith(("https://", "http://"))
         else ""
     )
@@ -181,7 +181,7 @@ def kit_html(
         f"<h2 style='margin-top:12px'>Avant d'envoyer</h2>{checklist}"
         f'<form method="post" action="/offers/{ref}/submit" class="actions">'
         f'<input type="hidden" name="lang" value="{language}">'
-        "<button>✅ J'ai postulé</button></form>"
+        "<button>J'ai postulé</button></form>"
         "<p class='muted'>Passe la candidature en « Postulé » et archive le CV, la "
         "lettre, les réponses et le « pourquoi nous » tels qu'ils sont maintenant."
         "</p>" + _submissions(submissions) + "</section>"

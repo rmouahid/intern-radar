@@ -1,82 +1,101 @@
 """Applications board: one column per stage, and the upcoming calendar."""
 
+from intern_radar.dashboard.icons import icon
 from intern_radar.dashboard.layout import e
+from intern_radar.dashboard.pages.offers import score_badge
 from intern_radar.dashboard.queries import COLUMNS, BoardCard, Event
 from intern_radar.store import ApplicationDetails
 from intern_radar.tracking import STATUS_TEXT
 
 EVENT_TEXT = {
-    "interview": "🗣 Entretien",
-    "deadline": "⏳ Date limite",
-    "action": "➡️ À faire",
-    "reminder": "🔔 Relance",
+    "interview": ("Entretien", "calendar"),
+    "deadline": ("Date limite", "clock"),
+    "action": ("À faire", "chevron"),
+    "reminder": ("Relance", "bell"),
 }
+# Board order: the pipeline from left to right.
+LANES = ("to_apply", "applied", "interview", "offer", "closed")
 
 
 def _card(card: BoardCard) -> str:
     chips = []
     if card.reminder_due:
-        chips.append('<span class="chip warn">🔔 Relance due</span>')
+        chips.append(f'<span class="tag warn">{icon("bell", 14)}Relance due</span>')
     if card.liked:
-        chips.append('<span class="chip">👍</span>')
+        chips.append(f'<span class="tag blue">{icon("thumb", 14)}Pertinente</span>')
     if card.status in ("rejected", "no_answer"):
-        chips.append(f'<span class="chip">{e(STATUS_TEXT[card.status])}</span>')
+        chips.append(f'<span class="tag">{e(STATUS_TEXT[card.status])}</span>')
     if card.submitted_at:
         chips.append(
-            f'<span class="chip ok">📎 envoyée le {e(card.submitted_at[:10])}</span>'
+            f'<span class="tag ok">{icon("check", 14)}'
+            f"envoyée le {e(card.submitted_at[:10])}</span>"
         )
     if card.deadline:
-        chips.append(f'<span class="chip">⏳ {e(card.deadline)}</span>')
+        chips.append(f'<span class="tag">{icon("clock", 14)}{e(card.deadline)}</span>')
     if card.interviews:
         chips.append(
-            f'<span class="chip">🗣 {e(card.interviews[-1].replace("T", " "))}</span>'
+            f'<span class="tag blue">{icon("calendar", 14)}'
+            f"{e(card.interviews[-1].replace('T', ' '))}</span>"
         )
     action = ""
     if card.next_action:
         when = f" · {card.next_action_date}" if card.next_action_date else ""
-        action = f'<div class="muted">➡️ {e(card.next_action)}{e(when)}</div>'
-    score = f"{card.score:.1f}" if card.score is not None else ""
+        action = (
+            f'<div class="loc">{icon("chevron", 14)}{e(card.next_action)}{e(when)}'
+            "</div>"
+        )
+    score = score_badge(card.score) if card.score is not None else ""
+    tags = f'<div class="tags">{"".join(chips)}</div>' if chips else ""
     return (
-        f'<a class="card" href="/offers/{card.ref}'
-        f'{"#kit" if card.submitted_at else ""}"><div class="top"><div>'
-        f'<div class="muted">{e(card.company)} · depuis le {e(card.since)}</div>'
-        f'<div class="title">{e(card.title)}</div>{action}</div>'
-        f'<div class="score">{score}</div></div>{"".join(chips)}</a>'
+        f'<a class="card bcard" href="/offers/{card.ref}'
+        f'{"#kit" if card.submitted_at else ""}"><div class="job">'
+        '<div class="job-main">'
+        f'<div class="title">{e(card.title)}</div>'
+        f'<div class="company">{e(card.company)}</div>'
+        f'<div class="age">depuis le {e(card.since)}</div>{action}</div>'
+        f"{score}</div>{tags}</a>"
     )
 
 
 def _event(ev: Event) -> str:
     when = ev.when.replace("T", " à ")
     detail = f" · {e(ev.detail)}" if ev.detail else ""
+    label, glyph = EVENT_TEXT[ev.kind]
     return (
-        f"<tr><td>{e(when)}</td><td>{EVENT_TEXT[ev.kind]}{detail}</td>"
+        f'<tr><td><b>{e(when)}</b></td><td><span class="tag">{icon(glyph, 14)}'
+        f"{label}</span>{detail}</td>"
         f'<td><a href="/offers/{ev.ref}">{e(ev.company)}</a></td></tr>'
     )
 
 
 def applications_body(columns: dict[str, list[BoardCard]], events: list[Event]) -> str:
     due = sum(card.reminder_due for cards in columns.values() for card in cards)
-    counts = " · ".join(f"{label} {len(columns[key])}" for key, label in COLUMNS)
+    labels = dict(COLUMNS)
     calendar = (
         f"<table>{''.join(_event(ev) for ev in events)}</table>"
         if events
         else '<p class="muted">Rien de prévu : ajoute des dates depuis la page '
         "d'une offre (section Suivi).</p>"
     )
-    sections = "".join(
-        f"<div><h2>{e(label)} ({len(columns[key])})</h2>"
-        + ("".join(_card(c) for c in columns[key][:60]) or '<p class="muted">—</p>')
+    lanes = "".join(
+        f'<div class="lane"><div class="lane-head"><span>{e(labels[key])}</span>'
+        f'<span class="count">{len(columns[key])}</span></div>'
+        + (
+            "".join(_card(c) for c in columns[key][:60])
+            or '<p class="empty">Aucune candidature</p>'
+        )
         + "</div>"
-        for key, label in COLUMNS
+        for key in LANES
     )
-    alert = f'<div class="notice">🔔 {due} relance(s) à faire.</div>' if due else ""
+    alert = f'<div class="notice">{due} relance(s) à faire.</div>' if due else ""
     return (
-        f"<h1>Candidatures</h1><p class='muted'>{e(counts)}</p>{alert}"
-        '<p><a class="button ghost" href="/applications.csv">⬇️ Exporter (CSV)</a></p>'
+        '<div class="pagehead"><div><h1>Candidatures</h1>'
+        '<p class="muted">À postuler : offres jugées pertinentes ou notifiées depuis '
+        "30 jours, sans suivi.</p></div>"
+        f'<a class="button ghost" href="/applications.csv">{icon("download", 16)}'
+        f"Exporter (CSV)</a></div>{alert}"
+        f'<div class="board">{lanes}</div>'
         f"<section><h2>Agenda</h2>{calendar}</section>"
-        '<p class="muted">À postuler : offres 👍 ou notifiées depuis 30 jours, '
-        "sans suivi.</p>"
-        f'<div class="columns">{sections}</div>'
     )
 
 

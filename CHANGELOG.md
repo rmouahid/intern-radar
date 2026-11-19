@@ -15,8 +15,18 @@ All notable changes to this project are documented here. The format follows
 - **Sort the offers list** by score (default), interview chance, publication
   date, date found or company; offers without the value go last and the
   sort is kept across pages and saved searches (#131).
+- **Split view on the offers page**: on screens 900 px and wider, the list
+  stays on the left and the selected offer's detail loads on the right
+  without leaving the list (`/offers?sel=<ref>` keeps the selection on
+  reload); phones keep the full offer page.
 
 ### Changed
+
+- **Web app redesign**: white theme with a blue header and search band,
+  line icons instead of emoji, company monograms, filter pills, score
+  badges, relative publication dates, score breakdown as bars, a kanban
+  board for applications and a tile grid for the "Plus" page. The dark
+  theme is removed; Telegram messages keep their emoji.
 
 - **Letters and CVs generated from the web app open in a new tab**: the tab
   waits for the generation then shows the PDF, and nothing is sent on

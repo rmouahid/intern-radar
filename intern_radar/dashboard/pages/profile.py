@@ -103,7 +103,7 @@ def profile_body(
     elif can_regenerate:
         action = (
             '<form method="post" action="/profile/regenerate">'
-            "<button>🔄 Régénérer le profil</button></form>"
+            "<button>Régénérer le profil</button></form>"
             '<p class="muted">Un appel LLM (modèle du profil) relit career.md et '
             "réécrit candidate.json ; l'ancien est gardé en candidate.json.bak.</p>"
         )

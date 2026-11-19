@@ -6,7 +6,9 @@ from urllib.parse import quote
 from intern_radar.chance import Chance
 from intern_radar.config import VisaPenalties, Weights
 from intern_radar.conventions import convention_for
-from intern_radar.dashboard.layout import e
+from intern_radar.dashboard.icons import icon
+from intern_radar.dashboard.layout import ICON_EXTERNAL, e, monogram
+from intern_radar.dashboard.pages.offers import score_badge, tier_badge
 from intern_radar.models import ScoredJob
 from intern_radar.notifier import (
     DATES_LABELS,
@@ -76,12 +78,16 @@ def score_rows(
 
 def feedback_form(view: OfferView) -> str:
     vote, reason = view.feedback or (0, "")
-    current = {1: "👍 Tu aimes cette offre", -1: "👎 Tu n'aimes pas cette offre"}
+    current = {
+        1: "Tu trouves cette offre pertinente",
+        -1: "Cette offre n'est pas pour toi",
+    }
 
     def choice(value: str, label: str, checked: bool) -> str:
         mark = " checked" if checked else ""
         return (
-            f'<label style="display:inline-block;margin-right:14px">'
+            f'<label style="display:inline-flex;align-items:center;margin-right:18px;'
+            'font-weight:600">'
             f'<input type="radio" name="vote" value="{value}"{mark} '
             f'style="width:auto"> {label}</label>'
         )
@@ -96,8 +102,8 @@ def feedback_form(view: OfferView) -> str:
     return (
         f"<p><b>{e(current.get(vote, 'Pas encore d’avis'))}</b></p>"
         f'<form method="post" action="/offers/{view.ref}/feedback">'
-        + choice("up", "👍 J'aime", vote == 1)
-        + choice("down", "👎 Pas pour moi", vote == -1)
+        + choice("up", "Pertinente", vote == 1)
+        + choice("down", "Pas pour moi", vote == -1)
         + '<textarea name="reason" maxlength="300" '
         'style="min-height:60px;margin-top:8px" '
         f'placeholder="Pourquoi ? (facultatif, aide la notation)">{e(reason)}'
@@ -120,41 +126,60 @@ def offer_body(
     convention = convention_for(job.location)
     link = (
         f'<a class="button" href="{e(job.url)}" target="_blank" rel="noopener">'
-        "🔗 Voir l'offre</a>"
+        f"Voir l'offre {ICON_EXTERNAL}</a>"
         if job.url.startswith(("https://", "http://"))
         else ""
     )
+    company = f'<a href="/companies/{quote(job.company, safe="")}">{e(job.company)}</a>'
     header = (
-        f'<p class="muted"><a href="/offers">← Offres</a></p>'
-        f'<div class="top" style="display:flex;justify-content:space-between;gap:8px">'
-        f'<div><div class="muted"><a href="/companies/{quote(job.company, safe="")}">'
-        f"{e(job.company)}</a> · {e(tier_label(job.tier))}</div>"
-        f"<h1>{e(job.title)}</h1></div>"
-        f'<div class="score" style="font-size:26px">{lead.score or 0:.1f}</div></div>'
-        f'<div class="actions">{link}</div>{actions}'
+        '<p class="muted back"><a href="/offers">← Offres</a></p>'
+        '<div class="dhead"><div class="dh">'
+        f'{monogram(job.company, "lg")}<div class="dh-main">'
+        f'<div class="company">{company} {tier_badge(job.tier)}</div>'
+        f"<h1>{e(job.title)}</h1>"
+        f'<div class="loc">{icon("pin", 15)}{e(job.location or "Lieu non précisé")}'
+        "</div></div>"
+        f"{score_badge(lead.score or 0, 'xl')}</div>"
+        f'<div class="dh-actions">{link}{actions}</div></div>'
     )
     facts = [
-        ("📍", job.location or "Lieu non précisé"),
-        ("📅", DATES_LABELS.get(a.dates_fit, a.dates_fit)),
-        ("🛂", f"{WORK_AUTHORISATION_LABELS[a.work_authorisation]} · {a.visa_note}"),
-        ("🎓", ELIGIBILITY_TEXT.get(a.eligibility, a.eligibility)),
+        ("calendar", "Dates", DATES_LABELS.get(a.dates_fit, a.dates_fit)),
+        (
+            "passport",
+            "Visa",
+            f"{WORK_AUTHORISATION_LABELS[a.work_authorisation]} · {a.visa_note}",
+        ),
+        ("cap", "Éligibilité", ELIGIBILITY_TEXT.get(a.eligibility, a.eligibility)),
+        ("pin", "Lieu", job.location or "Lieu non précisé"),
     ]
     if job.posted_at:
-        facts.append(("🗓️", f"Publiée le {job.posted_at[:10]}"))
-    facts.append(("🔎", f"Source : {job.source}"))
-    summary = f"<p><i>{e(a.summary)}</i></p>" + "".join(
-        f"<div>{icon} {e(text)}</div>" for icon, text in facts
+        facts.append(("clock", "Publication", f"Publiée le {job.posted_at[:10]}"))
+    facts.append(("globe", "Source", job.source))
+    summary = (
+        f'<p class="lead">{e(a.summary)}</p><dl class="facts">'
+        + "".join(
+            f'<div class="fact">{icon(glyph, 20)}<div><dt>{e(name)}</dt>'
+            f"<dd>{e(text)}</dd></div></div>"
+            for glyph, name, text in facts
+        )
+        + "</dl>"
     )
     rows = score_rows(lead, weights, visa)
-    table = "".join(
-        f"<tr><td>{e(name)}</td><td>{e(detail)}</td>"
-        f"<td class='n'>{points:+.1f}</td></tr>"
+    top = max((abs(points) for _, _, points in rows), default=1) or 1
+    bars = "".join(
+        f'<div class="bar-row"><span class="name">{e(name)}</span>'
+        f'<div class="bar-track"><div class="bar-fill{" neg" if points < 0 else ""}"'
+        f' style="width:{abs(points) / top * 100:.0f}%"></div></div>'
+        f'<span class="pts">{points:+.1f}</span>'
+        f'<span class="detail">{e(detail)}</span></div>'
         for name, detail, points in rows
     )
     breakdown = (
-        f'<table class="breakdown">{table}<tr><th>Score</th><th></th>'
-        f"<th class='n'>{lead.score or 0:.1f}</th></tr></table>"
-        "<p class='muted'>Score plancher à 0, arrondi au dixième.</p>"
+        f'<div class="bars">{bars}</div>'
+        f'<div class="bar-total"><span>Score final</span>'
+        f"<span>{lead.score or 0:.1f} / 10</span></div>"
+        "<p class='muted' style='margin-top:8px'>Score plancher à 0, arrondi au "
+        "dixième.</p>"
     )
     parts = [
         header,
@@ -164,14 +189,19 @@ def offer_body(
     ]
     if view.chance is not None:
         reasons = "".join(
-            f"<div>{'✅' if positive else '⚠️'} {e(text)}</div>"
+            f'<div class="{"pos" if positive else "neg"}">'
+            f"{icon('check' if positive else 'spark', 16)}<span>{e(text)}</span></div>"
             for positive, text in view.chance.reasons
         )
         parts.append(
             _section(
                 "Chance d'entretien",
-                f'<p class="score" style="font-size:22px">{view.chance.percent} %</p>'
-                f"{reasons}",
+                f'<div style="display:flex;align-items:baseline;gap:8px">'
+                f'<b style="font-size:28px;letter-spacing:-.02em">'
+                f"{view.chance.percent} %</b>"
+                '<span class="muted">estimation</span></div>'
+                f'<div class="meter"><span style="width:{view.chance.percent}%">'
+                f'</span></div><div class="reasons">{reasons}</div>',
             )
         )
     if len(view.group) > 1:
@@ -206,16 +236,16 @@ def offer_body(
     if view.has_letter:
         documents.append(
             f'<a class="button ghost" href="/files/letter/{view.ref}" target="_blank">'
-            "✍️ Lettre (PDF)</a>"
+            "Lettre (PDF)</a>"
             f'<a class="button ghost" href="/offers/{view.ref}/letter/edit">'
-            "✏️ Modifier la lettre</a>"
+            "Modifier la lettre</a>"
         )
     if view.has_resume:
         documents.append(
             f'<a class="button ghost" href="/files/cv/{view.ref}" target="_blank">'
-            "📄 CV (PDF)</a>"
+            "CV (PDF)</a>"
             f'<a class="button ghost" href="/offers/{view.ref}/cv/edit">'
-            "✏️ Modifier le CV</a>"
+            "Modifier le CV</a>"
         )
     parts.append(
         _section(
@@ -227,8 +257,10 @@ def offer_body(
     )
     if job.description:
         parts.append(
-            "<section><details><summary><b>Description de l'offre</b></summary>"
-            f'<p style="white-space:pre-wrap">{e(job.description[:20000])}</p>'
+            "<section><details><summary><h2 style='margin:0'>Description de "
+            "l'offre</h2></summary>"
+            '<p style="white-space:pre-wrap;margin-top:12px;color:var(--muted);'
+            f'font-size:14px">{e(job.description[:20000])}</p>'
             "</details></section>"
         )
     return "".join(parts)

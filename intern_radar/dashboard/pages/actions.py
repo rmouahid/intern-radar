@@ -4,7 +4,8 @@ Letters and CVs are generated in a new tab that shows the PDF once ready;
 only the Telegram button sends anything to Telegram.
 """
 
-from intern_radar.dashboard.layout import e
+from intern_radar.dashboard.icons import icon
+from intern_radar.dashboard.layout import e, plain
 from intern_radar.dashboard.worker import FAILED, PENDING, RUNNING, Worker
 from intern_radar.tracking import LABELS, TRANSITIONS
 
@@ -28,15 +29,25 @@ NOTICES = {
 }
 
 
+TASK_ICONS = {"letter": "edit", "cv": "file", "telegram": "send"}
+
+
 def _post(
-    action: str, label: str, name: str = "", value: str = "", ghost=False, tab=False
+    action: str,
+    label: str,
+    name: str = "",
+    value: str = "",
+    ghost=False,
+    tab=False,
+    glyph: str = "",
 ):
     field = f'<input type="hidden" name="{name}" value="{e(value)}">' if name else ""
     css = ' class="ghost"' if ghost else ""
     target = ' target="_blank"' if tab else ""
     return (
         f'<form class="inline" method="post" action="{e(action)}"{target}>{field}'
-        f"<button{css}>{e(label)}</button></form>"
+        f"<button{css}>{icon(glyph, 16) if glyph else ''}{e(plain(label))}</button>"
+        "</form>"
     )
 
 
@@ -56,26 +67,45 @@ def actions_html(
     if worker is not None:
         done = {"letter": has_letter, "cv": has_resume, "telegram": False}
         for kind, (label, short) in TASK_LABELS.items():
+            glyph = TASK_ICONS[kind]
             state = worker.state(kind, ref)
             busy = state is not None and state.state in (PENDING, RUNNING)
             if busy:
-                tasks.append(f"<button disabled>{e(short)} · en cours…</button>")
+                tasks.append(
+                    f'<button class="ghost" disabled>{e(plain(short))} · en cours…'
+                    "</button>"
+                )
             elif kind == "telegram":
-                tasks.append(_post(f"/offers/{ref}/{kind}", label))
+                tasks.append(
+                    _post(f"/offers/{ref}/{kind}", label, ghost=True, glyph=glyph)
+                )
             elif done[kind]:
                 # Letters and CVs open in a new tab, never on Telegram.
                 tasks.append(
-                    f'<a class="button" href="/files/{kind}/{ref}" '
-                    f'target="_blank">{e(short)} · ouvrir</a>'
+                    f'<a class="button ghost" href="/files/{kind}/{ref}" '
+                    f'target="_blank">{icon(glyph, 16)}{e(plain(short))} · ouvrir</a>'
                 )
             else:
-                tasks.append(_post(f"/offers/{ref}/{kind}", label, tab=True))
+                tasks.append(
+                    _post(
+                        f"/offers/{ref}/{kind}",
+                        label,
+                        ghost=True,
+                        tab=True,
+                        glyph=glyph,
+                    )
+                )
             if state is not None:
                 detail = f" : {state.error}" if state.error else ""
                 lines.append(f"{short} {STATE_TEXT[state.state]}{detail}")
     status_html = "".join(f'<div class="muted">{e(line)}</div>' for line in lines)
     return (
-        (f'<div class="actions">{moves}</div>' if moves else "")
-        + (f'<div class="actions">{"".join(tasks)}</div>' if tasks else "")
+        (f'<div class="actions">{"".join(tasks)}</div>' if tasks else "")
+        + (
+            f'<div class="track"><span>Suivi</span><div class="actions">{moves}'
+            "</div></div>"
+            if moves
+            else ""
+        )
         + status_html
     )
