@@ -20,7 +20,7 @@ CACHE_PAGES = 40  # pages kept for offline reading
 
 HEAD = (
     '<link rel="manifest" href="/manifest.webmanifest">'
-    f'<meta name="theme-color" content="{THEME}">'
+    '<meta name="theme-color" content="#ffffff">'
     '<link rel="apple-touch-icon" href="/icon-180.png">'
     '<link rel="icon" type="image/png" href="/icon-192.png">'
     '<meta name="apple-mobile-web-app-capable" content="yes">'

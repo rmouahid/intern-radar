@@ -1,6 +1,6 @@
 """Saved searches: list, open, pause or delete."""
 
-from intern_radar.dashboard.layout import e
+from intern_radar.dashboard.layout import e, plain
 from intern_radar.store import SavedSearch
 
 
@@ -8,7 +8,7 @@ def _post(action: str, label: str, ghost: bool = True) -> str:
     css = ' class="ghost"' if ghost else ""
     return (
         f'<form class="inline" method="post" action="{action}">'
-        f"<button{css}>{e(label)}</button></form>"
+        f"<button{css}>{e(plain(label))}</button></form>"
     )
 
 

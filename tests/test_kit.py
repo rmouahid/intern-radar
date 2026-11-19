@@ -86,14 +86,14 @@ def post(app, path, **form):
 def test_kit_on_the_offer_page(tmp_path):
     app, ref, _, _ = make_site(tmp_path)
     page = get(app, f"/offers/{ref}")
-    assert '<section id="kit">' in page and "📝 Ouvrir le formulaire" in page
+    assert '<section id="kit">' in page and "Ouvrir le formulaire" in page
     assert "Alex Martin" in page and "1 500 € / month" in page
     assert "Yes. I am a French (EU) citizen" in page  # offer-dependent answer
     assert "relocate to Berlin, Germany." in page
     assert 'data-copy="kit-0"' in page and "execCommand('copy')" in page
     assert "généré avant la dernière mise à jour du profil" in page  # stale letter
     assert "CV adapté : pas encore généré" in page
-    assert "✨ Rédiger un brouillon" in page
+    assert "Rédiger un brouillon" in page
     french = get(app, f"/offers/{ref}", lang="fr")
     assert "Êtes-vous autorisé à travailler dans ce pays ?" in french
     assert "Nom complet" in french

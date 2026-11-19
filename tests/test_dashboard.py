@@ -97,7 +97,7 @@ def test_page_renders_every_section_and_escapes(db_path):
         assert title in html
     assert "Entretien obtenu" in html and "en échec depuis" in html
     assert "<x>" not in html and "Co &lt;x&gt;" in html
-    assert "prefers-color-scheme: dark" in html
+    assert "color-scheme:light" in html  # white Indeed-like theme only
     # The only script registers the offline service worker (installable app).
     assert html.count("<script") == 1 and "serviceWorker.register" in html
 
@@ -352,6 +352,40 @@ def test_offers_page_route(tmp_path):
     assert app.handle(Request("GET", "/nope", {})).status == 404
     post = Request("POST", "/run", {}, {}, {"host": "x", "origin": "http://evil"})
     assert app.handle(post).status == 403
+
+
+def test_offers_split_view(tmp_path):
+    import re
+
+    from intern_radar.dashboard.app import Request
+    from intern_radar.dashboard.routes import Context, build_app
+
+    app = build_app(Context(offers_db(tmp_path), clock=lambda: NOW))
+    body = app.handle(Request("GET", "/offers", {})).body.decode()
+    refs = re.findall(r'data-ref="(\d+)"', body)
+    # The first card is selected and its detail fills the right pane.
+    assert '<aside class="pane" id="pane">' in body and len(refs) > 1
+    assert f'class="card sel" data-ref="{refs[0]}"' in body
+    chosen = app.handle(Request("GET", "/offers", {"sel": refs[1]})).body.decode()
+    assert f'class="card sel" data-ref="{refs[1]}"' in chosen
+    # The pane fragment is the detail alone, without the page shell.
+    fragment = app.handle(Request("GET", f"/offers/{refs[1]}", {"pane": "1"}))
+    text = fragment.body.decode()
+    assert fragment.status == 200 and "<h1>" in text and "<html" not in text
+
+
+def test_offers_split_view_without_offers(tmp_path):
+    from intern_radar.dashboard.app import Request
+    from intern_radar.dashboard.routes import Context, build_app
+
+    path = str(tmp_path / "empty.db")
+    Store(path).close()
+    body = (
+        build_app(Context(path, clock=lambda: NOW))
+        .handle(Request("GET", "/offers", {}))
+        .body.decode()
+    )
+    assert "Aucune offre" in body and 'id="pane"' not in body
 
 
 def test_offer_detail_page(tmp_path):

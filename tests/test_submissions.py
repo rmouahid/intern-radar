@@ -91,7 +91,7 @@ def test_board_and_export_show_the_submission(tmp_path):
     (card,) = columns["applied"]
     assert card.submitted_at.startswith("2026-10-02")
     board = app.handle(Request("GET", "/applications", {})).body.decode()
-    assert "📎 envoyée le 2026-10-02" in board and f'href="/offers/{ref}#kit"' in board
+    assert "envoyée le 2026-10-02" in board and f'href="/offers/{ref}#kit"' in board
     export = app.handle(Request("GET", "/applications.csv", {})).body
     header, row = list(csv.reader(io.StringIO(export.decode("utf-8-sig"))))
     by = dict(zip(header, row, strict=True))

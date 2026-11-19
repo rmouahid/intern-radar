@@ -28,14 +28,12 @@ def _row(skill: SkillDemand) -> str:
     )
     width = round(100 * skill.share)
     return (
-        '<div class="card"><div class="top"><div>'
-        f'<div class="title">{e(skill.name)}</div>'
-        f'<div class="muted">{e(skill.category)} · ex. {examples}</div></div>'
-        f'<div style="text-align:right"><div class="score">{skill.share:.0%}</div>'
-        f"{_spark(skill.trend)}</div></div>"
-        f'<div style="background:var(--chip);border-radius:4px;height:6px;'
-        f'margin-top:8px"><div style="width:{width}%;height:6px;border-radius:4px;'
-        'background:var(--warn)"></div></div></div>'
+        '<div class="skill"><div class="skill-name">'
+        f"<b>{e(skill.name)}</b>"
+        f'<span class="muted">{e(skill.category)} · ex. {examples}</span></div>'
+        f'<div class="bar-track"><div class="bar-fill" style="width:{width}%">'
+        f'</div></div><span class="pts">{skill.share:.0%}</span>'
+        f'<span class="spark">{_spark(skill.trend)}</span></div>'
     )
 
 
@@ -43,14 +41,16 @@ def insights_body(
     skills: list[SkillDemand], offers: int, min_relevance: int, source: str
 ) -> str:
     choices = "".join(
-        f'<a class="chip{" ok" if n == min_relevance else ""}" '
-        f'href="/insights?relevance={n}">pertinence ≥ {n}</a>'
+        f'<a class="seg{" on" if n == min_relevance else ""}" '
+        f'href="/insights?relevance={n}">≥ {n}</a>'
         for n in RELEVANCE_CHOICES
     )
     head = (
-        "<h1>Compétences</h1>"
+        '<div class="pagehead"><div><h1>Compétences</h1>'
         f'<p class="muted">{offers} poste(s) pertinent(s) sur 90 jours · '
-        f"profil lu depuis {e(source)} · aucun appel LLM</p><div>{choices}</div>"
+        f"profil lu depuis {e(source)} · aucun appel LLM</p></div>"
+        f'<div class="segs" title="Pertinence minimum">'
+        f'<span class="muted">Pertinence</span>{choices}</div></div>'
     )
     if not skills:
         return head + '<section class="muted">Pas encore assez d\'offres.</section>'
@@ -60,9 +60,12 @@ def insights_body(
         f'<span class="chip ok">{e(s.name)} · {s.share:.0%}</span>' for s in covered
     )
     return (
-        head + "<h2 style='margin-top:16px'>À développer</h2>"
+        head + "<section><h2>À développer</h2>"
         "<p class='muted'>Demandées par les offres, absentes du profil "
         f"(tendance sur {TREND_WEEKS} semaines à droite).</p>"
-        + ("".join(_row(s) for s in missing) or "<p class='muted'>Rien !</p>")
-        + f"<section><h2>Déjà dans ton profil</h2>{have}</section>"
+        + (
+            f'<div class="skills">{"".join(_row(s) for s in missing)}</div>'
+            or "<p class='muted'>Rien !</p>"
+        )
+        + f"</section><section><h2>Déjà dans ton profil</h2>{have}</section>"
     )

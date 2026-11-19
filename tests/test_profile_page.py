@@ -80,7 +80,7 @@ def test_regeneration_runs_in_the_background_and_is_reported(tmp_path):
     assert response.headers == (("Location", "/profile?done=queued"),)
     worker.wait()
     body = app.handle(Request("GET", "/profile", {})).body.decode()
-    assert "+ skill Rust" in body and "🔄 Régénérer le profil" in body
+    assert "+ skill Rust" in body and "Régénérer le profil" in body
 
 
 def test_failed_regeneration_is_reported(tmp_path):

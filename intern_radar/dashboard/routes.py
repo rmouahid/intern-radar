@@ -37,6 +37,7 @@ from intern_radar.dashboard.app import (
     redirect,
     text_response,
 )
+from intern_radar.dashboard.icons import icon
 from intern_radar.dashboard.kit_api import find_ref, kit_payload
 from intern_radar.dashboard.layout import e, page
 from intern_radar.dashboard.pages.actions import NOTICES as ACTION_NOTICES
@@ -428,24 +429,32 @@ def build_app(ctx: Context) -> App:
             return not_found("Icône inconnue.")
         return Response(200, pwa.icon(size), "image/png")
 
-    @app.route("GET", "/offers/<int:ref>")
-    def offer(request: Request, ref: int):
+    def offer_detail(request: Request, ref: int) -> tuple[str, str, bool] | None:
+        """Title, body and busy flag of an offer's detail, or None if unknown."""
         with ctx.store() as store:
             view = load_offer(
                 store, ref, ctx, request.arg("lang") or "en",
                 f"http://{request.headers.get('host', '')}",
             )  # fmt: skip
         if view is None:
-            return not_found("Offre introuvable.")
+            return None
         weights = ctx.profile.weights if ctx.profile else Weights()
         visa = ctx.profile.visa_penalties if ctx.profile else VisaPenalties()
-        title = view.group[0].job.title
         actions = actions_html(
             ref, view.application, view.has_letter, view.has_resume, ctx.worker
         )
-        body = offer_body(view, weights, visa, actions)
-        notice = NOTICES.get(request.arg("done"))
         busy = ctx.worker is not None and ctx.worker.busy(ref)
+        return view.group[0].job.title, offer_body(view, weights, visa, actions), busy
+
+    @app.route("GET", "/offers/<int:ref>")
+    def offer(request: Request, ref: int):
+        detail = offer_detail(request, ref)
+        if detail is None:
+            return not_found("Offre introuvable.")
+        title, body, busy = detail
+        if request.arg("pane") == "1":  # fragment for the offers split view
+            return html_response(body)
+        notice = NOTICES.get(request.arg("done"))
         return html_response(
             page(title, body, "offers", notice, refresh=5 if busy else None)
         )
@@ -990,9 +999,14 @@ def build_app(ctx: Context) -> App:
             rows, total = queries.offers(db, filters, ctx.clock().date())
         finally:
             db.close()
-        return html_response(
-            page("Offres", offers_body(rows, total, filters), "offers")
+        sel = request.arg("sel")
+        selected = int(sel) if sel.isdigit() else (rows[0].ref if rows else None)
+        detail = offer_detail(request, selected) if selected is not None else None
+        pane = detail[1] if detail else None
+        body = offers_body(
+            rows, total, filters, selected if pane else None, pane, ctx.clock().date()
         )
+        return html_response(page("Offres", body, "offers"))
 
     @app.route("GET", "/stats")
     def stats(request: Request):
@@ -1042,14 +1056,33 @@ def build_app(ctx: Context) -> App:
     @app.route("GET", "/more")
     def more(request: Request):
         links = "".join(
-            f'<a class="card" href="{href}"><div class="title">{e(label)}</div>'
-            f'<div class="muted">{e(hint)}</div></a>'
+            f'<a class="card tilelink" href="{href}">'
+            f'<span class="tl-ico">{icon(MORE_ICONS.get(href, "chevron"), 22)}</span>'
+            f'<span><span class="title">{e(label)}</span>'
+            f'<span class="muted">{e(hint)}</span></span>'
+            f"{icon('chevron', 18, 'tl-go')}</a>"
             for href, label, hint in MORE_LINKS
         )
-        return html_response(page("Plus", f"<h1>Plus</h1>{links}", "more"))
+        body = (
+            '<div class="pagehead"><div><h1>Plus</h1><p class="muted">Réglages, '
+            "outils et suivi du pipeline.</p></div></div>"
+            f'<div class="tilegrid">{links}</div>'
+        )
+        return html_response(page("Plus", body, "more"))
 
     return app
 
+
+MORE_ICONS = {
+    "/stats": "chart",
+    "/autofill": "edit",
+    "/answers": "list",
+    "/companies": "building",
+    "/profile": "cap",
+    "/searches": "bell",
+    "/feedback": "thumb",
+    "/eval": "target",
+}
 
 # Pages reachable from the "Plus" tab (extended by later pages).
 MORE_LINKS: list[tuple[str, str, str]] = [
@@ -1059,6 +1092,6 @@ MORE_LINKS: list[tuple[str, str, str]] = [
     ("/companies", "Entreprises", "Offres, candidatures et santé des sources"),
     ("/profile", "Profil", "candidate.json, career.md et régénération"),
     ("/searches", "Recherches", "Alertes Telegram sur des filtres enregistrés"),
-    ("/feedback", "Mes avis", "Les offres notées 👍/👎, prises en compte au scoring"),
+    ("/feedback", "Mes avis", "Les offres notées, prises en compte au scoring"),
     ("/eval", "Évaluation du tri", "Étiqueter l'échantillon de `intern-radar eval`"),
 ]

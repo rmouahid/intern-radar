@@ -84,11 +84,11 @@ def test_votes_from_the_list_and_the_detail_page(tmp_path):
     response = post(app, f"/offers/{ref}/feedback", vote="up", next="/offers?tier=S")
     assert response.headers == (("Location", "/offers?tier=S"),)
     listing = app.handle(Request("GET", "/offers", {})).body.decode()
-    assert 'class="vote on" title="👍"' in listing
+    assert 'class="vote on" title="Pertinente"' in listing
     response = post(app, f"/offers/{ref}/feedback", vote="down", reason="Trop infra")
     assert response.headers == (("Location", f"/offers/{ref}?done=feedback"),)
     detail = app.handle(Request("GET", f"/offers/{ref}", {})).body.decode()
-    assert "Tu n&#x27;aimes pas cette offre" in detail and "Trop infra" in detail
+    assert "Cette offre n&#x27;est pas pour toi" in detail and "Trop infra" in detail
     page = app.handle(Request("GET", "/feedback", {})).body.decode()
     assert "Acme" in page and "« Trop infra »" in page and "0 👍 · 1 👎" in page
     post(app, f"/offers/{ref}/feedback", vote="clear")

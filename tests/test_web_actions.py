@@ -44,7 +44,7 @@ def test_status_changes_follow_the_state_machine(tmp_path):
     path, ref = make_db(tmp_path)
     app = build_app(Context(path, clock=lambda: NOW))
     page = app.handle(Request("GET", f"/offers/{ref}", {})).body.decode()
-    assert "✅ Postulé" in page and "🙈 Pas intéressé" in page
+    assert ">Postulé<" in page and ">Pas intéressé<" in page
     response = post(app, f"/offers/{ref}/status", status="interview")
     assert response.headers == (("Location", f"/offers/{ref}?done=refused"),)
     response = post(app, f"/offers/{ref}/status", status="applied")
@@ -54,8 +54,8 @@ def test_status_changes_follow_the_state_machine(tmp_path):
     store.close()
     page = app.handle(Request("GET", f"/offers/{ref}", {"done": "status"}))
     body = page.body.decode()
-    assert "Statut mis à jour." in body and "🗣 Entretien" in body
-    assert "✅ Postulé" not in body
+    assert "Statut mis à jour." in body and ">Entretien<" in body
+    assert ">Postulé<" not in body
 
 
 def test_dismissed_offers_leave_the_default_list(tmp_path):
@@ -70,11 +70,11 @@ def test_expired_offers_leave_the_default_list(tmp_path):
     path, ref = make_db(tmp_path)
     app = build_app(Context(path, clock=lambda: NOW))
     page = app.handle(Request("GET", f"/offers/{ref}", {})).body.decode()
-    assert "⌛ Expirée" in page
+    assert ">Expirée<" in page
     post(app, f"/offers/{ref}/status", status="expired")
     assert "Acme" not in app.handle(Request("GET", "/offers", {})).body.decode()
     page = app.handle(Request("GET", f"/offers/{ref}", {})).body.decode()
-    assert "Offre expirée" in page and "✅ Postulé" not in page
+    assert "Offre expirée" in page and ">Postulé<" not in page
 
 
 def test_actions_require_same_origin(tmp_path):
@@ -113,7 +113,10 @@ def test_documents_open_in_a_new_tab_without_telegram(tmp_path):
     opened = app.handle(Request("GET", f"/offers/{ref}/letter/open", {}))
     assert opened.headers == (("Location", f"/files/letter/{ref}"),)
     page = app.handle(Request("GET", f"/offers/{ref}", {})).body.decode()
-    assert f'href="/files/letter/{ref}" target="_blank">✍️ Lettre · ouvrir' in page
+    assert (
+        f'href="/files/letter/{ref}" target="_blank">' in page
+        and "Lettre · ouvrir" in page
+    )
     post(app, f"/offers/{ref}/telegram")
     worker.wait()
     assert calls[-1] == ("telegram", ref)
