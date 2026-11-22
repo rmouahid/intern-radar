@@ -1,9 +1,9 @@
 """A tiny web framework on top of http.server: requests, responses, routes.
 
 Routes map a method and a path pattern (`/offers/<int:ref>`) to a handler
-taking the request and the path parameters. POST requests are accepted only
-when their Origin (or Referer) is the server itself; the server is reachable
-on the Tailscale address only, so this is the whole access control.
+taking the request and the path parameters. The HTTP server validates Host
+before dispatch. POST forms also check Origin (or Referer), and API routes
+can check a token instead.
 """
 
 import html

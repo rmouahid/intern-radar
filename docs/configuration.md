@@ -85,11 +85,17 @@ Letters are enabled (button shown, commands usable) when `cv_url` and
 | `resume_effort` | string | `low` | `--effort` for tailored CVs |
 | `dashboard_host` | string | Tailscale IP | address the dashboard listens on |
 | `dashboard_port` | int | `8787` | dashboard port |
+| `dashboard_allowed_hosts` | list of strings | `[]` | additional exact HTTP Host values, including the port when sent by the browser, e.g. `["radar.example.net:8787"]` |
 | `discovery` | bool | `true` | also keep AI internships from employers outside the watch list (Adzuna), in the EU/EEA/Switzerland or a self-sponsored country, shown as *découverte* |
 | `self_sponsored_countries` | list of names | `[]` | countries where you obtain the visa without an employer sponsor (e.g. working holiday); offers there get `self_arranged`; also widens the discovery prefilter |
 | `max_offer_age_days` | int | `60` | offers first published earlier are dropped and never sent; `0` disables |
 | `reminder_days` | int | `14` | days without news before an application reminder |
 | `max_resumes_per_day` | int | `10` | new tailored CVs per 24 h; re-sending a stored one is free |
+
+The dashboard accepts its bind address, `localhost`, `127.0.0.1`, and the local
+node's IP addresses and MagicDNS names reported by Tailscale on the listening
+port. On port 80 it also accepts those names without a port. Requests with a
+missing, repeated, or unlisted Host receive HTTP 421.
 
 ## Candidate profile (career.md → candidate.json)
 

@@ -341,7 +341,12 @@ def dashboard(
         ),
     )
     server = make_server(
-        str(db), address, port or profile.dashboard_port, thresholds, context=context
+        str(db),
+        address,
+        port or profile.dashboard_port,
+        thresholds,
+        context=context,
+        allowed_hosts=profile.dashboard_allowed_hosts,
     )
     typer.echo(f"dashboard on http://{address}:{server.server_address[1]}/")
     try:
