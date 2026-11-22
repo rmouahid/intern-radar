@@ -1,11 +1,14 @@
 import subprocess
 import threading
 from datetime import UTC, datetime, timedelta
+from io import BytesIO
+from types import SimpleNamespace
 
 import httpx
 import pytest
 
 from intern_radar.dashboard import queries
+from intern_radar.dashboard import server as dashboard_server
 from intern_radar.dashboard.server import make_server, render_dashboard, tailscale_ip
 from intern_radar.store import Store
 from tests.factories import make_assessment, make_job
@@ -192,6 +195,76 @@ def serve(db_path, running=False, trigger_ok=True):
     )
     threading.Thread(target=server.serve_forever, daemon=True).start()
     return server, f"127.0.0.1:{server.server_address[1]}", started
+
+
+def test_server_checks_host_before_routing(db_path, monkeypatch):
+    def status(cmd, **kwargs):
+        assert cmd == ["tailscale", "status", "--json"]
+        return subprocess.CompletedProcess(
+            cmd,
+            0,
+            '{"Self": {"DNSName": "radar.example.ts.net.", '
+            '"TailscaleIPs": ["100.1.2.3", "fd7a:115c:a1e0::1"]}}',
+        )
+
+    tailscale_hosts = dashboard_server.tailscale_hosts(status)
+    monkeypatch.setattr(dashboard_server, "tailscale_hosts", lambda: tailscale_hosts)
+    port = 49152
+    started = []
+
+    def bind(address, handler):
+        assert address == ("127.0.0.2", 0)
+        return SimpleNamespace(server_address=("127.0.0.2", port), handler=handler)
+
+    monkeypatch.setattr(dashboard_server, "ThreadingHTTPServer", bind)
+    server = make_server(
+        db_path,
+        "127.0.0.2",
+        0,
+        (5.5, 7.5),
+        trigger=lambda: started.append(True) or True,
+        allowed_hosts=("alias.example:8787",),
+    )
+
+    def request(method, path, *hosts, origin=None):
+        headers = [f"Host: {host}" for host in hosts]
+        if origin:
+            headers.append(f"Origin: {origin}")
+        lines = [f"{method} {path} HTTP/1.1", *headers, "", ""]
+        output = BytesIO()
+
+        class Handler(server.handler):
+            def setup(self):
+                self.rfile = BytesIO("\r\n".join(lines).encode())
+                self.wfile = output
+
+            def finish(self):
+                pass
+
+        Handler(None, ("127.0.0.1", 12345), server)
+        return int(output.getvalue().split(b" ", 2)[1])
+
+    for invalid in (f"unlisted.example:{port}", "localhost", "localhost:0"):
+        assert request("GET", "/radar.user.js", invalid) == 421
+        assert request("POST", "/run", invalid, origin=f"http://{invalid}") == 421
+    assert started == []
+
+    assert request("GET", "/healthz") == 421
+    assert request("GET", "/healthz", f"localhost:{port}", f"localhost:{port}") == 421
+    allowed_hosts = (
+        f"127.0.0.2:{port}",
+        f"127.0.0.1:{port}",
+        f"LOCALHOST:{port}",
+        f"100.1.2.3:{port}",
+        f"[fd7a:115c:a1e0::1]:{port}",
+        f"radar.example.ts.net:{port}",
+        f"radar:{port}",
+        "alias.example:8787",
+    )
+    for allowed in allowed_hosts:
+        assert request("GET", "/healthz", allowed) == 200
+        assert request("POST", "/run", allowed, origin=f"http://{allowed}") == 303
+    assert started == [True] * len(allowed_hosts)
 
 
 def test_run_button_starts_a_run_from_the_page(db_path):

@@ -97,6 +97,7 @@ class Profile:
     max_letters_per_day: int = 10
     contact: Contact | None = None
     extra_excluded_title_words: tuple[str, ...] = ()
+    dashboard_allowed_hosts: tuple[str, ...] = ()
 
 
 REQUIRED_PROFILE_KEYS = (
@@ -192,6 +193,12 @@ def load_profile(path: Path) -> Profile:
     ):
         raise ConfigError(f"{path}: self_sponsored_countries must be a list of names")
     values["self_sponsored_countries"] = tuple(c.strip() for c in countries)
+    hosts = data.get("dashboard_allowed_hosts", [])
+    if not isinstance(hosts, list) or not all(
+        isinstance(host, str) and host.strip() for host in hosts
+    ):
+        raise ConfigError(f"{path}: dashboard_allowed_hosts must be a list of hosts")
+    values["dashboard_allowed_hosts"] = tuple(host.strip() for host in hosts)
     if "contact" in data:
         values["contact"] = _build(Contact, data["contact"], "contact")
     return Profile(**values)

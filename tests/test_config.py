@@ -90,6 +90,13 @@ def test_load_profile_applies_defaults(tmp_path):
     assert profile.extra_excluded_title_words == ()
     assert profile.visa_penalties == VisaPenalties()
     assert profile.self_sponsored_countries == ()
+    assert profile.dashboard_allowed_hosts == ()
+
+
+def test_load_profile_reads_dashboard_allowed_hosts(tmp_path):
+    content = PROFILE + 'dashboard_allowed_hosts: ["radar.example:8787"]\n'
+    profile = load_profile(write(tmp_path, "profile.yaml", content))
+    assert profile.dashboard_allowed_hosts == ("radar.example:8787",)
 
 
 def test_load_profile_reads_extra_excluded_title_words(tmp_path):
@@ -116,6 +123,7 @@ def test_load_profile_overrides_weights_and_thresholds(tmp_path):
         (PROFILE.replace("2027-03-08", "soon"), "date"),
         (PROFILE + "extra_excluded_title_words: event\n", "list of words"),
         (PROFILE + "extra_excluded_title_words: [' ']\n", "list of words"),
+        (PROFILE + "dashboard_allowed_hosts: radar.example\n", "list of hosts"),
     ],
 )
 def test_load_profile_rejects_invalid_content(tmp_path, content, message):
